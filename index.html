@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grand Miramor Hotel - Fiyat Hesaplama Sistemi</title>
+<meta name="description" content="Grand Miramor Hotel Kiriş - Acenta Fiyat Hesaplama Sistemi 2026 Yaz Sezonu">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" onerror="">
+<style>
+:root {
+  --bg-primary: #06090f;
+  --bg-secondary: #0c1220;
+  --bg-tertiary: #111827;
+  --surface: rgba(255,255,255,0.03);
+  --surface-hover: rgba(255,255,255,0.06);
+  --gold-100: #fef3c7;
+  --gold-200: #fde68a;
+  --gold-300: #fcd34d;
+  --gold-400: #d4a843;
+  --gold-500: #c8983a;
+  --gold-gradient: linear-gradient(135deg, #d4a843, #f0d078, #c8983a);
+  --gold-glow: 0 0 20px rgba(212,168,67,0.15);
+  --blue-400: #60a5fa;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --red-400: #f87171;
+  --amber-400: #fbbf24;
+  --purple-400: #c084fc;
+  --text-primary: #e8e6e3;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: rgba(212,168,67,0.12);
+  --border-subtle: rgba(255,255,255,0.06);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-body: 'Inter', 'Segoe UI', Tahoma, Verdana, Arial, sans-serif;
+  --font-display: 'Playfair Display', 'Georgia', 'Cambria', 'Times New Roman', serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: 
+    radial-gradient(ellipse at 20% 0%, rgba(212,168,67,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(59,130,246,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* HEADER */
+.header {
+  position: relative;
+  padding: 28px 24px 22px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(212,168,67,0.05) 0%, transparent 100%);
+  z-index: 1;
+}
+.header-stars { font-size: 13px; letter-spacing: 6px; color: var(--gold-400); margin-bottom: 6px; }
+.header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 5vw, 40px);
+  font-weight: 700;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 3px; letter-spacing: 1px;
+}
+.header-location { font-size: 12px; color: var(--text-muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+.header-badges { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.header-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px; background: rgba(212,168,67,0.08);
+  border: 1px solid var(--border); border-radius: 100px;
+  font-size: 12px; color: var(--gold-300); font-weight: 500;
+}
+.header-badge.action-badge { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.2); color: var(--green-400); }
+
+/* LAYOUT */
+.container { max-width: 1440px; margin: 0 auto; padding: 24px; position: relative; z-index: 1; }
+.main-grid { display: grid; grid-template-columns: 440px 1fr; gap: 24px; align-items: start; }
+@media (max-width: 1000px) { .main-grid { grid-template-columns: 1fr; } }
+
+/* CARDS */
+.card {
+  background: var(--surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg); padding: 22px; backdrop-filter: blur(12px);
+  transition: var(--transition);
+}
+.card:hover { border-color: var(--border); }
+.card + .card { margin-top: 18px; }
+.card-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 600; color: var(--gold-300);
+  margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);
+}
+.card-title .icon {
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+  background: rgba(212,168,67,0.1); border-radius: var(--radius-sm); font-size: 15px;
+}
+
+/* FORM */
+.form-group { margin-bottom: 14px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label {
+  display: block; font-size: 11px; font-weight: 500; color: var(--text-secondary);
+  margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.form-input, .form-select {
+  width: 100%; padding: 9px 12px; background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+  color: var(--text-primary); font-family: var(--font-body); font-size: 13px;
+  transition: var(--transition); outline: none;
+}
+.form-input:focus, .form-select:focus { border-color: var(--gold-400); box-shadow: 0 0 0 3px rgba(212,168,67,0.1); }
+.form-input::placeholder { color: var(--text-muted); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.night-count {
+  display: flex; align-items: center; justify-content: center; padding: 8px;
+  background: rgba(212,168,67,0.08); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-weight: 600; color: var(--gold-300);
+  font-size: 13px; min-height: 38px;
+}
+
+/* GUEST INPUTS */
+.guest-count-control { display: flex; align-items: center; gap: 12px; }
+.guest-count-btn {
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--gold-300); font-size: 18px;
+  cursor: pointer; transition: var(--transition); font-family: var(--font-body);
+}
+.guest-count-btn:hover { background: rgba(212,168,67,0.15); border-color: var(--gold-400); }
+.guest-count-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.guest-count-display { font-size: 20px; font-weight: 700; min-width: 28px; text-align: center; }
+.guest-ages { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.guest-age-row {
+  display: flex; align-items: center; gap: 8px;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.guest-age-row label { font-size: 12px; color: var(--text-secondary); min-width: 62px; }
+.guest-age-row input { flex: 1; max-width: 75px; }
+.age-badge { padding: 2px 9px; border-radius: 100px; font-size: 10px; font-weight: 600; letter-spacing: 0.3px; white-space: nowrap; }
+.age-badge.adult { background: rgba(59,130,246,0.15); color: var(--blue-400); }
+.age-badge.child-small { background: rgba(34,197,94,0.15); color: var(--green-400); }
+.age-badge.child-big { background: rgba(251,191,36,0.15); color: var(--amber-400); }
+.age-badge.infant { background: rgba(192,132,252,0.15); color: var(--purple-400); }
+
+/* AGENCY TOGGLE */
+.agency-toggle { display: flex; gap: 0; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
+.agency-toggle-btn {
+  flex: 1; padding: 10px 12px; background: var(--bg-secondary); border: none;
+  color: var(--text-muted); font-family: var(--font-body); font-size: 12px;
+  font-weight: 600; cursor: pointer; transition: var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  border-right: 1px solid var(--border);
+}
+.agency-toggle-btn:last-child { border-right: none; }
+.agency-toggle-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
+.agency-toggle-btn.active {
+  background: rgba(212,168,67,0.12); color: var(--gold-300);
+  box-shadow: inset 0 0 0 1px var(--gold-400);
+}
+.agency-toggle-btn.active.pegas-active {
+  background: rgba(59,130,246,0.1); color: var(--blue-400);
+  box-shadow: inset 0 0 0 1px var(--blue-400);
+}
+.agency-toggle-btn.active.traveyo-active {
+  background: rgba(34,197,94,0.1); color: var(--green-400);
+  box-shadow: inset 0 0 0 1px var(--green-400);
+}
+.agency-info-note {
+  margin-top: 8px; padding: 6px 10px; border-radius: var(--radius-sm);
+  font-size: 11px; text-align: center;
+}
+.agency-info-note.pegas { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); color: var(--blue-400); }
+.agency-info-note.traveyo { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); color: var(--green-400); }
+.agency-sub-select { margin-top: 10px; animation: slideIn 0.3s ease; }
+
+/* BUTTON */
+.btn-calculate {
+  width: 100%; padding: 13px 24px; background: var(--gold-gradient);
+  border: none; border-radius: var(--radius-md); color: #1a1207;
+  font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  letter-spacing: 0.5px; cursor: pointer; transition: var(--transition);
+  margin-top: 8px; text-transform: uppercase; position: relative; overflow: hidden;
+}
+.btn-calculate:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(212,168,67,0.25); }
+.btn-calculate:active { transform: translateY(0); }
+.btn-calculate::after {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: 0.5s;
+}
+.btn-calculate:hover::after { left: 100%; }
+
+/* RESULTS */
+.results-panel { position: sticky; top: 24px; }
+.results-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 50px 24px; text-align: center; color: var(--text-muted);
+}
+.results-empty .empty-icon { font-size: 44px; margin-bottom: 14px; opacity: 0.4; }
+.results-empty p { font-size: 13px; }
+
+.result-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.result-room-type {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+  background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+  border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; color: var(--blue-400);
+}
+.result-option { font-size: 11px; color: var(--text-muted); padding: 4px 10px; background: var(--surface); border-radius: var(--radius-sm); }
+.result-pricing-note {
+  font-size: 11px; color: var(--amber-400); padding: 4px 10px;
+  background: rgba(251,191,36,0.08); border-radius: var(--radius-sm);
+}
+
+.guest-summary { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle); }
+.guest-chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px;
+  border-radius: 100px; font-size: 11px; font-weight: 500;
+}
+.guest-chip.adult { background: rgba(59,130,246,0.1); color: var(--blue-400); }
+.guest-chip.child-small { background: rgba(34,197,94,0.1); color: var(--green-400); }
+.guest-chip.child-big { background: rgba(251,191,36,0.1); color: var(--amber-400); }
+.guest-chip.infant { background: rgba(192,132,252,0.1); color: var(--purple-400); }
+
+/* NIGHT TABLE */
+.night-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12px; }
+.night-table th {
+  text-align: left; font-size: 10px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px; padding: 7px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.night-table th:last-child { text-align: right; }
+.night-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.02); color: var(--text-secondary); }
+.night-table td:last-child { text-align: right; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.night-table tr:hover td { background: rgba(255,255,255,0.02); }
+.night-table .period-change td { border-top: 1px solid var(--border); padding-top: 8px; }
+.night-table .period-label { font-size: 9px; color: var(--gold-400); font-weight: 600; letter-spacing: 0.3px; }
+.night-table .ilave-badge { font-size: 9px; color: var(--green-400); font-weight: 600; margin-left: 4px; }
+
+/* TOTALS */
+.totals-section { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 6px; }
+.total-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 12px; }
+.total-row .label { color: var(--text-secondary); }
+.total-row .value { font-weight: 600; font-variant-numeric: tabular-nums; }
+.total-row.discount .value { color: var(--green-400); }
+.total-row.surcharge .value { color: var(--red-400); }
+.total-row.grand-total {
+  padding: 12px 0 6px; margin-top: 8px; border-top: 2px solid var(--gold-400); font-size: 17px;
+}
+.total-row.grand-total .label { color: var(--text-primary); font-weight: 700; }
+.total-row.grand-total .value { color: var(--gold-300); font-weight: 800; font-size: 21px; }
+.total-row.per-person { font-size: 11px; padding-top: 3px; }
+.total-row.per-person .label { color: var(--text-muted); }
+.total-row.per-person .value { color: var(--text-secondary); font-weight: 500; }
+
+.info-note {
+  margin-top: 10px; padding: 9px 12px; border-radius: var(--radius-sm); font-size: 11px; line-height: 1.5;
+}
+.info-note.green { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); color: var(--green-400); }
+.info-note.gray { background: rgba(100,116,139,0.08); border: 1px solid rgba(100,116,139,0.15); color: var(--text-muted); }
+.info-note.blue { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); color: var(--blue-400); }
+.info-note.amber { background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.15); color: var(--amber-400); }
+.info-note strong { font-weight: 600; }
+
+.btn-print {
+  display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px;
+  background: transparent; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text-secondary); font-family: var(--font-body); font-size: 11px;
+  cursor: pointer; transition: var(--transition);
+}
+.btn-print:hover { border-color: var(--gold-400); color: var(--gold-300); }
+
+/* COLLAPSIBLE */
+.section-collapsible { margin-top: 20px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); }
+.section-toggle {
+  width: 100%; padding: 14px 22px; background: transparent; border: none;
+  color: var(--text-primary); font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  text-align: left; cursor: pointer; display: flex; align-items: center;
+  justify-content: space-between; transition: var(--transition);
+}
+.section-toggle:hover { background: var(--surface-hover); }
+.section-toggle .toggle-icon { font-size: 11px; transition: transform 0.3s ease; color: var(--text-muted); }
+.section-toggle.active .toggle-icon { transform: rotate(180deg); }
+.section-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.section-content.open { max-height: 4000px; }
+.section-inner { padding: 0 22px 22px; }
+
+/* RATE CARD */
+.rate-card-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.rate-card { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 1100px; }
+.rate-card thead th {
+  padding: 8px 6px; background: rgba(212,168,67,0.06);
+  border-bottom: 2px solid var(--border); font-size: 10px; font-weight: 600;
+  color: var(--gold-300); text-transform: uppercase; letter-spacing: 0.2px;
+  white-space: nowrap; text-align: center;
+}
+.rate-card thead th:first-child { text-align: left; min-width: 240px; }
+.rate-card tbody td {
+  padding: 6px; border-bottom: 1px solid var(--border-subtle);
+  text-align: center; color: var(--text-secondary); font-variant-numeric: tabular-nums;
+}
+.rate-card tbody td:first-child { text-align: left; font-weight: 500; color: var(--text-primary); white-space: nowrap; font-size: 10px; }
+.rate-card tbody tr:hover td { background: rgba(212,168,67,0.03); }
+.rate-card .highlight-period td { background: rgba(212,168,67,0.06); }
+.rate-card .ilave-header { font-size: 8px; color: var(--green-400); display: block; }
+
+/* AGENCY */
+.agency-list { display: flex; flex-direction: column; gap: 8px; }
+.agency-item {
+  display: flex; align-items: center; justify-content: space-between; padding: 12px 14px;
+  background: var(--bg-secondary); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); transition: var(--transition);
+}
+.agency-item:hover { border-color: var(--border); }
+.agency-info { flex: 1; }
+.agency-name { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+.agency-details { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; }
+.agency-detail-badge { padding: 2px 8px; border-radius: 100px; font-size: 10px; font-weight: 500; }
+.agency-detail-badge.discount { background: rgba(34,197,94,0.1); color: var(--green-400); }
+.agency-detail-badge.surcharge { background: rgba(239,68,68,0.1); color: var(--red-400); }
+.agency-detail-badge.child-free { background: rgba(192,132,252,0.1); color: var(--purple-400); }
+.agency-actions { display: flex; gap: 5px; margin-left: 10px; }
+.btn-icon {
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+  color: var(--text-muted); cursor: pointer; font-size: 13px; transition: var(--transition);
+}
+.btn-icon:hover { border-color: var(--border); color: var(--text-primary); }
+.btn-icon.delete:hover { border-color: var(--red-400); color: var(--red-400); }
+.btn-add-agency {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px; background: transparent; border: 1px dashed var(--border);
+  border-radius: var(--radius-md); color: var(--gold-400); font-family: var(--font-body);
+  font-size: 12px; font-weight: 500; cursor: pointer; transition: var(--transition); margin-top: 4px;
+}
+.btn-add-agency:hover { background: rgba(212,168,67,0.05); border-color: var(--gold-400); }
+.agency-io-bar {
+  display: flex; gap: 8px; margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+.btn-io {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 12px; background: var(--bg-secondary); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); color: var(--text-secondary); font-family: var(--font-body);
+  font-size: 11px; font-weight: 500; cursor: pointer; transition: var(--transition);
+}
+.btn-io:hover { border-color: var(--border); color: var(--text-primary); background: var(--surface-hover); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--bg-tertiary); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); padding: 26px; width: 90%; max-width: 460px;
+  transform: translateY(20px) scale(0.95); transition: transform 0.3s ease;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-overlay.active .modal { transform: translateY(0) scale(1); }
+.modal-title { font-size: 17px; font-weight: 700; color: var(--gold-300); margin-bottom: 18px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.btn-modal {
+  padding: 9px 18px; border-radius: var(--radius-sm); font-family: var(--font-body);
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); border: none;
+}
+.btn-modal.primary { background: var(--gold-gradient); color: #1a1207; }
+.btn-modal.primary:hover { box-shadow: 0 4px 16px rgba(212,168,67,0.25); }
+.btn-modal.secondary { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+.btn-modal.secondary:hover { border-color: var(--text-secondary); }
+
+/* CONDITIONS */
+.conditions-banner { margin-top: 20px; padding: 18px 22px; background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+.conditions-banner h3 { font-size: 13px; font-weight: 600; color: var(--gold-300); margin-bottom: 10px; }
+.conditions-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.conditions-list li { font-size: 11px; color: var(--text-secondary); padding-left: 14px; position: relative; }
+.conditions-list li::before { content: '•'; position: absolute; left: 0; color: var(--gold-400); }
+.conditions-list li strong { color: var(--text-primary); }
+
+/* ERROR */
+.error-msg {
+  padding: 12px 16px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-md); color: var(--red-400); font-size: 12px;
+  display: flex; align-items: flex-start; gap: 8px; animation: shake 0.4s ease;
+}
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fadeIn 0.4s ease forwards; }
+
+/* PRINT */
+@media print {
+  body { background: #fff; color: #000; }
+  body::before { display: none; }
+  .header { border-bottom: 2px solid #000; background: none; }
+  .header h1 { -webkit-text-fill-color: #333; background: none; }
+  .header-stars, .header-location, .header-badge { color: #555; }
+  .card { border: 1px solid #ddd; background: #fff; backdrop-filter: none; }
+  .card-title { color: #333; border-bottom-color: #ddd; }
+  .input-column, .section-collapsible, .btn-calculate, .btn-print, .agency-actions, .btn-add-agency { display: none !important; }
+  .main-grid { grid-template-columns: 1fr; }
+  .results-panel { position: static; }
+  .night-table th { color: #555; border-bottom-color: #333; }
+  .night-table td { color: #333; border-bottom-color: #eee; }
+  .total-row .label, .total-row .value { color: #000; }
+  .total-row.discount .value { color: #16a34a; }
+  .total-row.grand-total { border-top-color: #333; }
+  .guest-chip, .result-room-type { border: 1px solid #ccc; background: #f5f5f5; color: #333; }
+  .info-note { border-color: #ccc; background: #f9f9f9; color: #333; }
+  .conditions-banner { border-color: #ddd; background: #fafafa; }
+}
+@media (max-width: 640px) {
+  .container { padding: 14px; }
+  .card { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .header { padding: 20px 14px 18px; }
+  .header h1 { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-stars">★ ★ ★ ★ ★</div>
+  <h1>Grand Miramor Hotel</h1>
+  <div class="header-location">Kiriş • Antalya • 4+</div>
+  <div class="header-badges">
+    <span class="header-badge">☀ 2026 Yaz Sezonu</span>
+    <span class="header-badge">🍽 Ultra All Inclusive</span>
+    <span class="header-badge action-badge">📋 Aksiyon: 06.06.2026</span>
+  </div>
+</header>
+
+<div class="container">
+  <div class="main-grid">
+    <div class="input-column">
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📅</span> Tarih Bilgileri</div>
+        <div class="form-row" style="margin-bottom:10px;">
+          <div class="form-group">
+            <label class="form-label" for="checkIn">Giriş Tarihi</label>
+            <input type="date" id="checkIn" class="form-input" value="2026-06-15">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="nightsInput">Gece Sayısı</label>
+            <input type="number" id="nightsInput" class="form-input" min="1" max="180" value="7">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="checkOut">Çıkış Tarihi</label>
+            <input type="date" id="checkOut" class="form-input" value="2026-06-22">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="saleDate">Satış Tarihi</label>
+            <input type="date" id="saleDate" class="form-input" value="2026-06-10">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">👥</span> Misafir Bilgileri</div>
+        <div class="form-group">
+          <label class="form-label">Kişi Sayısı</label>
+          <div class="guest-count-control">
+            <button type="button" class="guest-count-btn" id="guestMinus" onclick="changeGuestCount(-1)">−</button>
+            <span class="guest-count-display" id="guestCountDisplay">2</span>
+            <button type="button" class="guest-count-btn" id="guestPlus" onclick="changeGuestCount(1)">+</button>
+          </div>
+        </div>
+        <div class="guest-ages" id="guestAges"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🏢</span> Acenta Seçimi</div>
+        <div class="form-group">
+          <label class="form-label">Acenta Tipi</label>
+          <div class="agency-toggle">
+            <button type="button" class="agency-toggle-btn active pegas-active" id="btnPegas" onclick="selectAgencyType('pegas')">✈️ Pegas</button>
+            <button type="button" class="agency-toggle-btn" id="btnTraveyo" onclick="selectAgencyType('traveyo')">🌍 Traveyo</button>
+            <button type="button" class="agency-toggle-btn" id="btnDigerleri" onclick="selectAgencyType('digerleri')">🏢 Diğerleri</button>
+          </div>
+          <div class="agency-info-note pegas" id="pegasNote">Pegas acentasına özel <strong>+%1 ilave indirim</strong> tüm tarihlerde uygulanır.</div>
+          <div class="agency-info-note traveyo" id="traveyoNote" style="display:none;"><strong>Itaka / Cedok</strong> — Sabit 53€ PP | SNG ×1.5 | 0-12 yaş ücretsiz | 13.06 - sezon sonu</div>
+          <div class="agency-sub-select" id="agencySubSelect" style="display:none;">
+            <label class="form-label" for="agencySelect">Acenta Seçin</label>
+            <select id="agencySelect" class="form-select">
+              <option value="__general__">Genel Kontrat (İndirimsiz)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn-calculate" onclick="calculate()">💰 Fiyat Hesapla</button>
+    </div>
+
+    <div class="results-panel">
+      <div class="card" id="resultsCard">
+        <div class="card-title">
+          <span class="icon">📊</span> Hesaplama Sonucu
+          <button class="btn-print" id="btnPrint" style="margin-left:auto; display:none;" onclick="window.print()">🖨️ Yazdır</button>
+        </div>
+        <div id="resultsContent">
+          <div class="results-empty">
+            <div class="empty-icon">🏨</div>
+            <p>Tarih, misafir ve acenta bilgilerini girip<br><strong>"Fiyat Hesapla"</strong> butonuna tıklayın.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RATE CARD -->
+  <div class="section-collapsible">
+    <button class="section-toggle" onclick="toggleSection(this)">
+      <span>📋 Fiyat Tablosu — Aksiyon 06.06.2026</span>
+      <span class="toggle-icon">▼</span>
+    </button>
+    <div class="section-content" id="rateCardSection">
+      <div class="section-inner">
+        <div class="rate-card-wrapper">
+          <table class="rate-card" id="rateCardTable">
+            <thead id="rateCardHead"></thead>
+            <tbody id="rateCardBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENCY MANAGEMENT -->
+  <div class="section-collapsible">
+    <button class="section-toggle" onclick="toggleSection(this)">
+      <span>🏢 Acenta Yönetimi</span>
+      <span class="toggle-icon">▼</span>
+    </button>
+    <div class="section-content" id="agencySection">
+      <div class="section-inner">
+        <div class="agency-list" id="agencyList"></div>
+        <button class="btn-add-agency" onclick="openAgencyModal()">+ Yeni Acenta Ekle</button>
+        <div class="agency-io-bar">
+          <button class="btn-io" onclick="exportAgencies()">📤 Dışa Aktar</button>
+          <button class="btn-io" onclick="document.getElementById('importFile').click()">📥 İçe Aktar</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importAgencies(event)">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONDITIONS -->
+  <div class="conditions-banner">
+    <h3>📜 Kondisyonlar — Aksiyon 06.06.2026</h3>
+    <ul class="conditions-list">
+      <li>Para birimi <strong>Euro (€)</strong>. Konaklama: <strong>Ultra All Inclusive (UAI)</strong>.</li>
+      <li><strong>0 – 2,99 yaş</strong> çocuklar her türlü konaklamada <strong>ücretsizdir</strong>.</li>
+      <li><strong>3 – 6,99 yaş</strong> çocuklar ilgili konfigürasyonlarda <strong>ücretsizdir</strong> (çarpan değişmez).</li>
+      <li><strong>7 – 11,99 yaş</strong> çocuklar ücretli çocuk olarak hesaplanır.</li>
+      <li><strong>İlk 3 dönem (06.06 – 20.06)</strong> fiyatlar <strong>C/IN (check-in) bazlıdır</strong>.</li>
+      <li><strong>21.06 – 31.10 arası</strong> fiyatlar <strong>konaklama bazlıdır</strong> ve tablo fiyatlarına İLAVE <strong>%10 İNDİRİM uygulanır</strong>.</li>
+      <li><strong>11.05 – 30.09.2026</strong> arası SNG oda çarpanı <strong>1,7</strong>'dir (diğer dönemler 1,5).</li>
+      <li>Çocuk yaşları <strong>gün, ay ve yıl</strong> olarak hesaplanır.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- AGENCY MODAL -->
+<div class="modal-overlay" id="agencyModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Yeni Acenta Ekle</div>
+    <input type="hidden" id="editAgencyId" value="">
+    <div class="form-group">
+      <label class="form-label" for="agencyName">Acenta Adı</label>
+      <input type="text" id="agencyName" class="form-input" placeholder="Örn: ABC Turizm">
+    </div>
+    <div class="form-row" style="margin-top:10px;">
+      <div class="form-group">
+        <label class="form-label" for="agencyDiscount">İndirim / Artış (%)</label>
+        <input type="number" id="agencyDiscount" class="form-input" placeholder="10" step="0.5" value="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="childFreeAge">Çocuk Ücretsiz Yaş Limiti</label>
+        <input type="number" id="childFreeAge" class="form-input" placeholder="2.99" step="0.01" value="2.99">
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:10px;">
+      <label class="form-label" for="agencyNotes">Notlar</label>
+      <input type="text" id="agencyNotes" class="form-input" placeholder="Özel koşullar...">
+    </div>
+    <p style="margin-top:10px; font-size:10px; color:var(--text-muted);">
+      💡 Pozitif = indirim, Negatif = artış. Çocuk ücretsiz yaş limiti varsayılan: 2.99.
+    </p>
+    <div class="modal-actions">
+      <button class="btn-modal secondary" onclick="closeAgencyModal()">İptal</button>
+      <button class="btn-modal primary" onclick="saveAgency()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// DATA — AKSİYON 06.06.2026
+// ================================================================
+const PERIODS = [
+  { id:1,  start:'2026-06-06', end:'2026-06-10', pp:34,  option:7,  basis:'cin',  ilave:false },
+  { id:2,  start:'2026-06-11', end:'2026-06-13', pp:42,  option:10, basis:'cin',  ilave:false },
+  { id:3,  start:'2026-06-14', end:'2026-06-20', pp:44,  option:10, basis:'cin',  ilave:false },
+  { id:4,  start:'2026-06-21', end:'2026-07-02', pp:52,  option:10, basis:'stay', ilave:true  },
+  { id:5,  start:'2026-07-03', end:'2026-07-31', pp:60,  option:10, basis:'stay', ilave:true  },
+  { id:6,  start:'2026-08-01', end:'2026-08-24', pp:66,  option:7,  basis:'stay', ilave:true  },
+  { id:7,  start:'2026-08-25', end:'2026-09-04', pp:62,  option:7,  basis:'stay', ilave:true  },
+  { id:8,  start:'2026-09-05', end:'2026-09-20', pp:58,  option:3,  basis:'stay', ilave:true  },
+  { id:9,  start:'2026-09-21', end:'2026-09-30', pp:50,  option:5,  basis:'stay', ilave:true  },
+  { id:10, start:'2026-10-01', end:'2026-10-15', pp:44,  option:3,  basis:'stay', ilave:true  },
+  { id:11, start:'2026-10-16', end:'2026-10-31', pp:35,  option:1,  basis:'stay', ilave:true  },
+];
+
+const SNG_PEAK_START = new Date('2026-05-11');
+const SNG_PEAK_END   = new Date('2026-09-30');
+
+const DEFAULT_FREE_AGE = 2.99;
+const CHILD_SMALL_MAX = 6.99;  // 3-6.99
+const CHILD_BIG_MAX = 11.99;   // 7-11.99
+
+// TRAVEYO (Itaka/Cedok) special contract
+const TRAVEYO_PP = 53;
+const TRAVEYO_SNG_MULT = 1.5;
+const TRAVEYO_FREE_AGE = 12.99; // 0-12 free
+const TRAVEYO_START = '2026-06-13';
+const TRAVEYO_END = '2026-10-31';
+
+// Room configurations with multipliers
+// childSmall = 3-6.99 (free in most configs), childBig = 7-11.99 (paid)
+// Key format: adults_smallChildren_bigChildren
+const ROOM_CONFIGS = {
+  // SINGLE configs
+  'SNG':             { label: 'Single Oda',                   desc: '1 Yetişkin',       mult: 'sng',  formula: 'PP×1.5/1.7' },
+  'SNG_0S_0B':       { label: 'Single Oda',                   desc: '1 Yetişkin',       mult: 'sng',  formula: 'PP×1.5/1.7' },
+  'SNG_1S_0B':       { label: 'Single + 1Ç(3-6.99)',         desc: '1Y + 1Ç',          mult: 'sng',  formula: 'PP×1.5/1.7' },
+  'SNG_0S_1B':       { label: 'Single + 1Ç(7-11.99)',        desc: '1Y + 1Ç',          mult: 2.0,    formula: 'PP×2' },
+  'SNG_1S_1B':       { label: 'Single + 1Ç(3-6.99) + 1Ç(3-11.99)', desc: '1Y + 2Ç',   mult: 2.0,    formula: 'PP×2' },
+  'SNG_0S_2B':       { label: 'Single + 2Ç(7-11.99)',        desc: '1Y + 2Ç',          mult: 2.0,    formula: 'PP×2' },
+
+  // DOUBLE configs
+  'DBL':             { label: 'Double Oda',                   desc: '2 Yetişkin',       mult: 2.0,    formula: 'PP×2' },
+  'DBL_0S_0B':       { label: 'Double Oda',                   desc: '2 Yetişkin',       mult: 2.0,    formula: 'PP×2' },
+  'DBL_1S_0B':       { label: 'Double + 1Ç(3-6.99)',         desc: '2Y + 1Ç',          mult: 2.0,    formula: 'PP×2' },
+  'DBL_0S_1B':       { label: 'Double + 1Ç(7-11.99)',        desc: '2Y + 1Ç',          mult: 2.5,    formula: 'PP×2.5' },
+  'DBL_1S_1B':       { label: 'Double + 1Ç(3-6.99) + 1Ç(3-11.99)', desc: '2Y + 2Ç',   mult: 2.5,    formula: 'PP×2.5' },
+  'DBL_0S_2B':       { label: 'Double + 2Ç(7-11.99)',        desc: '2Y + 2Ç',          mult: 3.0,    formula: 'PP×3' },
+
+  // TRIPLE configs
+  'TRP':             { label: 'Triple Oda',                   desc: '3 Yetişkin',       mult: 2.7,    formula: 'PP×2.7' },
+  'TRP_0S_0B':       { label: 'Triple Oda',                   desc: '3 Yetişkin',       mult: 2.7,    formula: 'PP×2.7' },
+  'TRP_1S_0B':       { label: 'Triple + 1Ç(3-6.99)',         desc: '3Y + 1Ç',          mult: 2.7,    formula: 'PP×2.7' },
+  'TRP_0S_1B':       { label: 'Triple + 1Ç(7-11.99)',        desc: '3Y + 1Ç',          mult: 3.2,    formula: 'PP×3.2' },
+};
+
+// ================================================================
+// STATE
+// ================================================================
+let guestCount = 2;
+let agencies = JSON.parse(localStorage.getItem('gmh_agencies') || '[]');
+let currentAgencyType = 'pegas'; // 'pegas' or 'digerleri'
+
+// ================================================================
+// UTILITIES
+// ================================================================
+function parseDate(str) { const [y,m,d] = str.split('-').map(Number); return new Date(y, m-1, d); }
+function formatDate(d) { return d.getDate().toString().padStart(2,'0') + '.' + (d.getMonth()+1).toString().padStart(2,'0'); }
+function formatDateFull(d) { return formatDate(d) + '.' + d.getFullYear(); }
+function formatEUR(n) { return n.toFixed(2) + ' €'; }
+function daysBetween(a,b) { return Math.round((b - a) / 86400000); }
+function dateToStr(d) {
+  return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
+}
+function escapeHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+// ================================================================
+// PRICING ENGINE
+// ================================================================
+function findPeriod(date) {
+  const s = dateToStr(date);
+  for (const p of PERIODS) { if (s >= p.start && s <= p.end) return p; }
+  return null;
+}
+
+function getSNGMult(date) {
+  return (date >= SNG_PEAK_START && date <= SNG_PEAK_END) ? 1.7 : 1.5;
+}
+
+function getMultiplier(configKey, date) {
+  const cfg = ROOM_CONFIGS[configKey];
+  if (!cfg) return null;
+  if (cfg.mult === 'sng') return getSNGMult(date);
+  return cfg.mult;
+}
+
+function categorizeGuests(ages, freeAgeLimit) {
+  const adults = [], childrenSmall = [], childrenBig = [], infants = [];
+  for (const age of ages) {
+    if (age <= freeAgeLimit) { infants.push(age); }
+    else if (age <= CHILD_SMALL_MAX) { childrenSmall.push(age); }
+    else if (age <= CHILD_BIG_MAX) { childrenBig.push(age); }
+    else { adults.push(age); }
+  }
+  return { adults, childrenSmall, childrenBig, infants };
+}
+
+function determineRoomConfig(adultCount, smallCount, bigCount) {
+  const key = `${adultCount}_${smallCount}S_${bigCount}B`;
+  const roomBase = adultCount === 1 ? 'SNG' : adultCount === 2 ? 'DBL' : adultCount === 3 ? 'TRP' : null;
+  if (!roomBase) return null;
+  const fullKey = `${roomBase}_${smallCount}S_${bigCount}B`;
+  if (ROOM_CONFIGS[fullKey]) return fullKey;
+  return null;
+}
+
+function findPeriodForCIN(checkIn) {
+  return findPeriod(checkIn);
+}
+
+function calculate() {
+  const checkInStr = document.getElementById('checkIn').value;
+  const checkOutStr = document.getElementById('checkOut').value;
+  const agencyId = document.getElementById('agencySelect').value;
+
+  if (!checkInStr || !checkOutStr) { showError('Lütfen giriş ve çıkış tarihlerini giriniz.'); return; }
+
+  const checkIn = parseDate(checkInStr);
+  const checkOut = parseDate(checkOutStr);
+
+  if (checkOut <= checkIn) { showError('Çıkış tarihi, giriş tarihinden sonra olmalıdır.'); return; }
+
+  const nights = daysBetween(checkIn, checkOut);
+  if (nights < 1 || nights > 365) { showError('Geçersiz konaklama süresi.'); return; }
+
+  // Collect ages
+  const ages = [];
+  for (let i = 0; i < guestCount; i++) {
+    const inp = document.getElementById(`age_${i}`);
+    if (!inp || inp.value === '') { showError(`Lütfen ${i+1}. misafirin yaşını giriniz.`); return; }
+    const age = parseFloat(inp.value);
+    if (isNaN(age) || age < 0 || age > 120) { showError(`${i+1}. misafir için geçersiz yaş.`); return; }
+    ages.push(age);
+  }
+
+  // Agency type
+  const isPegas = currentAgencyType === 'pegas';
+  const isTraveyo = currentAgencyType === 'traveyo';
+  let agency = null, freeAgeLimit = DEFAULT_FREE_AGE, agencyDiscountPct = 0;
+
+  if (isTraveyo) {
+    freeAgeLimit = TRAVEYO_FREE_AGE;
+    // Validate Traveyo date range
+    const ciStr = dateToStr(checkIn);
+    if (ciStr < TRAVEYO_START) {
+      showError(`Traveyo (Itaka/Cedok) kontratı 13.06.2026 tarihinden itibaren geçerlidir. Giriş: ${formatDateFull(checkIn)}`);
+      return;
+    }
+  } else if (!isPegas && agencyId !== '__general__') {
+    agency = agencies.find(a => a.id === agencyId);
+    if (agency) {
+      freeAgeLimit = agency.childFreeAge ?? DEFAULT_FREE_AGE;
+      agencyDiscountPct = agency.discount ?? 0;
+    }
+  }
+
+  // Categorize
+  const { adults, childrenSmall, childrenBig, infants } = categorizeGuests(ages, freeAgeLimit);
+  if (adults.length === 0) {
+    const minAdultAge = isTraveyo ? 13 : 12;
+    showError(`En az 1 yetişkin (${minAdultAge}+ yaş) gereklidir.`);
+    return;
+  }
+
+  // Room config
+  const roomConfigKey = determineRoomConfig(adults.length, childrenSmall.length, childrenBig.length);
+  if (!roomConfigKey) {
+    showError(`Bu misafir kombinasyonu desteklenmiyor: ${adults.length}Y + ${childrenSmall.length}Ç(3-6.99) + ${childrenBig.length}Ç(7-11.99). Max: 3Y + 1Ç.`);
+    return;
+  }
+  let roomConfig = ROOM_CONFIGS[roomConfigKey];
+
+  // For Traveyo, override room config formula display if SNG
+  let traveyoRoomConfig = null;
+  if (isTraveyo && roomConfigKey.startsWith('SNG')) {
+    traveyoRoomConfig = { ...roomConfig, formula: 'PP×1.5 (Traveyo)' };
+  }
+
+  // Determine pricing mode
+  let firstPeriod = null;
+  let isCINBased = false;
+  if (!isTraveyo) {
+    firstPeriod = findPeriod(checkIn);
+    if (!firstPeriod) { showError(`${formatDateFull(checkIn)} tarihi kontrat kapsamında değil (06.06 - 31.10.2026).`); return; }
+    isCINBased = firstPeriod.basis === 'cin';
+  }
+
+  const nightlyBreakdown = [];
+  let subtotal = 0;
+  let ilaveSubtotal = 0;
+  let optionDays = new Set();
+  let usedIlave = false;
+  let ilaveNightCount = 0;
+  let totalDiscountAmount = 0;
+  let pegasOnlyNightCount = 0;
+  let pegasOnlyAmount = 0;
+
+  for (let i = 0; i < nights; i++) {
+    const nightDate = new Date(checkIn);
+    nightDate.setDate(nightDate.getDate() + i);
+
+    let period;
+    if (isTraveyo) {
+      // Traveyo: flat rate, no period lookup needed but check date bounds
+      const ndStr = dateToStr(nightDate);
+      if (ndStr > TRAVEYO_END) { showError(`${formatDateFull(nightDate)} Traveyo kontrat kapsamı dışında (sezon sonu: 31.10).`); return; }
+      period = null;
+    } else if (isCINBased) {
+      period = firstPeriod;
+    } else {
+      period = findPeriod(nightDate);
+      if (!period) {
+        showError(`${formatDateFull(nightDate)} tarihi kontrat kapsamında değil.`);
+        return;
+      }
+    }
+
+    let pp, multiplier;
+    if (isTraveyo) {
+      pp = TRAVEYO_PP;
+      const cfg = ROOM_CONFIGS[roomConfigKey];
+      if (cfg.mult === 'sng') { multiplier = TRAVEYO_SNG_MULT; }
+      else { multiplier = cfg.mult; }
+    } else {
+      pp = period.pp;
+      multiplier = getMultiplier(roomConfigKey, nightDate);
+    }
+    if (multiplier === null) { showError('Oda tipi çarpanı bulunamadı.'); return; }
+
+    const nightRate = +(pp * multiplier).toFixed(2);
+
+    // Determine discount % for this night: ilave(10%) + pegas(1%) additive
+    // Traveyo has no ilave discount (flat rate contract)
+    const nightIsIlave = isTraveyo ? false : (period ? period.ilave : false);
+    let nightDiscountPct = 0;
+    if (nightIsIlave) nightDiscountPct += 10;
+    if (isPegas) nightDiscountPct += 1;
+
+    const nightDiscount = +(nightRate * nightDiscountPct / 100).toFixed(2);
+
+    if (nightIsIlave) {
+      usedIlave = true;
+      ilaveNightCount++;
+    }
+    if (nightDiscountPct > 0) {
+      totalDiscountAmount += nightDiscount;
+    }
+    if (isPegas && !nightIsIlave) {
+      pegasOnlyNightCount++;
+      pegasOnlyAmount += nightDiscount;
+    }
+    if (nightIsIlave) {
+      ilaveSubtotal += nightRate;
+    }
+
+    nightlyBreakdown.push({
+      date: nightDate,
+      period: period,
+      pp: pp,
+      multiplier: multiplier,
+      rate: nightRate,
+      ilave: nightIsIlave,
+      discountPct: nightDiscountPct,
+      discountAmount: nightDiscount,
+    });
+
+    subtotal += nightRate;
+    if (period) optionDays.add(period.option);
+  }
+
+  subtotal = +subtotal.toFixed(2);
+  ilaveSubtotal = +ilaveSubtotal.toFixed(2);
+  totalDiscountAmount = +totalDiscountAmount.toFixed(2);
+  pegasOnlyAmount = +pegasOnlyAmount.toFixed(2);
+
+  // Net after combined discount
+  const afterDiscount = +(subtotal - totalDiscountAmount).toFixed(2);
+
+  // Agency discount/surcharge (applied after combined discount)
+  const agencyAmount = +(afterDiscount * Math.abs(agencyDiscountPct) / 100).toFixed(2);
+  const isDiscount = agencyDiscountPct > 0;
+  let grandTotal = afterDiscount;
+  if (isDiscount) grandTotal = +(afterDiscount - agencyAmount).toFixed(2);
+  else if (agencyDiscountPct < 0) grandTotal = +(afterDiscount + agencyAmount).toFixed(2);
+
+  const totalPax = adults.length + childrenSmall.length + childrenBig.length + infants.length;
+  const ppn = +(grandTotal / nights / totalPax).toFixed(2);
+  const maxOption = optionDays.size > 0 ? Math.max(...optionDays) : 0;
+
+  // Compute display values
+  const ilaveDiscountPct = isPegas ? 11 : 10;
+  const pegasDiscountPct = 1;
+  const ilaveDiscountAmount = usedIlave ? +(ilaveSubtotal * ilaveDiscountPct / 100).toFixed(2) : 0;
+
+  renderResults({
+    checkIn, checkOut, nights, ages,
+    adults, childrenSmall, childrenBig, infants,
+    roomConfigKey,
+    nightlyBreakdown, isCINBased,
+    roomConfig: traveyoRoomConfig || roomConfig,
+    subtotal, usedIlave, ilaveNightCount, ilaveSubtotal,
+    ilaveDiscountPct, ilaveDiscountAmount,
+    isPegas, isTraveyo, pegasOnlyNightCount, pegasOnlyAmount,
+    totalDiscountAmount,
+    agency, agencyDiscountPct, agencyAmount, isDiscount,
+    grandTotal, ppn, maxOption, freeAgeLimit,
+  });
+}
+
+// ================================================================
+// RENDER RESULTS
+// ================================================================
+function renderResults(data) {
+  const container = document.getElementById('resultsContent');
+  document.getElementById('btnPrint').style.display = 'inline-flex';
+
+  // Guest summary
+  let guestHTML = '<div class="guest-summary">';
+  data.adults.forEach(a => { guestHTML += `<span class="guest-chip adult">👤 Yetişkin (${a} yaş)</span>`; });
+  data.childrenSmall.forEach(a => { guestHTML += `<span class="guest-chip child-small">🧒 Çocuk (${a} yaş) — 3-6.99 Ücretsiz</span>`; });
+  data.childrenBig.forEach(a => { guestHTML += `<span class="guest-chip child-big">🧒 Çocuk (${a} yaş) — 7-11.99</span>`; });
+  data.infants.forEach(a => { guestHTML += `<span class="guest-chip infant">👶 Bebek (${a} yaş) — Ücretsiz</span>`; });
+  guestHTML += '</div>';
+
+  // Night table
+  let nightHTML = `<table class="night-table"><thead><tr>
+    <th>Tarih</th><th>Dönem</th><th>PP</th><th>Çarpan</th><th>Gecelik</th>
+  </tr></thead><tbody>`;
+
+  let prevPId = null;
+  for (const n of data.nightlyBreakdown) {
+    const curPId = n.period ? n.period.id : 'traveyo';
+    const pChanged = prevPId !== null && curPId !== prevPId;
+    nightHTML += `<tr class="${pChanged ? 'period-change' : ''}">
+      <td>${formatDate(n.date)}</td>
+      <td>${n.period ? '<span class="period-label">' + fmtPeriod(n.period) + '</span>' : '<span class="period-label">Traveyo Sabit</span>'}${n.ilave ? '<span class="ilave-badge">+%10 İND</span>' : ''}</td>
+      <td>${n.pp}€</td>
+      <td>×${n.multiplier.toFixed(1)}</td>
+      <td>${formatEUR(n.rate)}</td>
+    </tr>`;
+    prevPId = curPId;
+  }
+  nightHTML += '</tbody></table>';
+
+  // Totals
+  let totalsHTML = '<div class="totals-section">';
+  totalsHTML += `<div class="total-row"><span class="label">Ara Toplam (${data.nights} gece)</span><span class="value">${formatEUR(data.subtotal)}</span></div>`;
+
+  // Combined discount line(s)
+  if (data.usedIlave && data.isPegas) {
+    // Pegas + ilave: show as %11
+    totalsHTML += `<div class="total-row discount"><span class="label">✈️ İlave %10 + Pegas %1 = <strong>%${data.ilaveDiscountPct} İndirim</strong> (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
+    if (data.pegasOnlyNightCount > 0) {
+      totalsHTML += `<div class="total-row discount"><span class="label">✈️ Pegas %1 İndirim (${data.pegasOnlyNightCount} gece, ilave dışı)</span><span class="value">− ${formatEUR(data.pegasOnlyAmount)}</span></div>`;
+    }
+  } else if (data.usedIlave) {
+    totalsHTML += `<div class="total-row discount"><span class="label">İlave %10 İndirim (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
+  } else if (data.isPegas) {
+    totalsHTML += `<div class="total-row discount"><span class="label">✈️ Pegas %1 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+  }
+
+  if (data.agencyDiscountPct > 0) {
+    totalsHTML += `<div class="total-row discount"><span class="label">Acenta İndirimi (%${data.agencyDiscountPct})</span><span class="value">− ${formatEUR(data.agencyAmount)}</span></div>`;
+  } else if (data.agencyDiscountPct < 0) {
+    totalsHTML += `<div class="total-row surcharge"><span class="label">Acenta Fiyat Artışı (%${Math.abs(data.agencyDiscountPct)})</span><span class="value">+ ${formatEUR(data.agencyAmount)}</span></div>`;
+  }
+
+  totalsHTML += `<div class="total-row grand-total"><span class="label">GENEL TOPLAM</span><span class="value">${formatEUR(data.grandTotal)}</span></div>`;
+  totalsHTML += `<div class="total-row per-person"><span class="label">Kişi başı / gece (ort.)</span><span class="value">${formatEUR(data.ppn)}</span></div>`;
+  totalsHTML += '</div>';
+
+  // Notes
+  let notesHTML = '';
+  if (data.isTraveyo) {
+    notesHTML += `<div class="info-note green">🌍 <strong>Traveyo (Itaka/Cedok) Kontratı:</strong> Sabit ${TRAVEYO_PP}€ PP | SNG ×${TRAVEYO_SNG_MULT} | 0-12 yaş ücretsiz.</div>`;
+  } else if (data.isCINBased) {
+    notesHTML += `<div class="info-note amber">📌 <strong>C/IN Bazlı Fiyatlandırma:</strong> Giriş tarihi dönemi (${fmtPeriod(data.nightlyBreakdown[0].period)}) tüm gecelere uygulanmıştır.</div>`;
+  } else {
+    notesHTML += `<div class="info-note amber">📌 <strong>Konaklama Bazlı Fiyatlandırma:</strong> Her gece kendi dönemine göre fiyatlandırılmıştır.</div>`;
+  }
+  if (data.usedIlave && data.isPegas) {
+    notesHTML += `<div class="info-note green">✅ <strong>İlave %10 + Pegas %1 = %${data.ilaveDiscountPct} toplam indirim</strong> uygulandı (${data.ilaveNightCount} ilave dönem gecesi).</div>`;
+  } else if (data.usedIlave) {
+    notesHTML += `<div class="info-note green">✅ <strong>İlave %10 İndirim</strong> uygulandı (${data.ilaveNightCount} gece).</div>`;
+  }
+  if (data.isPegas) {
+    notesHTML += `<div class="info-note blue">✈️ <strong>Pegas Acentası</strong> — Tüm tarihlerde +%1 indirim (ilave dönemle toplanır: %10→%11).</div>`;
+  }
+  if (data.agency) {
+    let det = `<strong>Acenta:</strong> ${escapeHTML(data.agency.name)}`;
+    if (data.agencyDiscountPct > 0) det += ` | %${data.agencyDiscountPct} indirim`;
+    else if (data.agencyDiscountPct < 0) det += ` | %${Math.abs(data.agencyDiscountPct)} artış`;
+    if (data.freeAgeLimit > DEFAULT_FREE_AGE) det += ` | 0-${data.freeAgeLimit} yaş ücretsiz`;
+    if (data.agency.notes) det += `<br>📝 ${escapeHTML(data.agency.notes)}`;
+    notesHTML += `<div class="info-note blue">${det}</div>`;
+  }
+
+  container.innerHTML = `<div class="animate-in">
+    <div class="result-header">
+      <div class="result-room-type">🛏️ ${data.roomConfig.label} (${data.roomConfig.desc})</div>
+      <div class="result-option">Opsiyon: ${data.maxOption} gün</div>
+      <div class="result-pricing-note">${data.roomConfig.formula}</div>
+    </div>
+    ${guestHTML}${nightHTML}${totalsHTML}${notesHTML}
+  </div>`;
+}
+
+function fmtPeriod(p) {
+  const s = p.start.split('-'), e = p.end.split('-');
+  return `${s[2]}.${s[1]} – ${e[2]}.${e[1]}`;
+}
+
+function showError(msg) {
+  document.getElementById('btnPrint').style.display = 'none';
+  document.getElementById('resultsContent').innerHTML = `<div class="error-msg">⚠️ ${msg}</div>`;
+}
+
+// ================================================================
+// AGENCY TYPE TOGGLE
+// ================================================================
+function selectAgencyType(type) {
+  currentAgencyType = type;
+  const btnP = document.getElementById('btnPegas');
+  const btnT = document.getElementById('btnTraveyo');
+  const btnD = document.getElementById('btnDigerleri');
+  const pegasNote = document.getElementById('pegasNote');
+  const traveyoNote = document.getElementById('traveyoNote');
+  const subSelect = document.getElementById('agencySubSelect');
+
+  // Reset all
+  [btnP, btnT, btnD].forEach(b => b.classList.remove('active', 'pegas-active', 'traveyo-active'));
+  pegasNote.style.display = 'none';
+  traveyoNote.style.display = 'none';
+  subSelect.style.display = 'none';
+
+  if (type === 'pegas') {
+    btnP.classList.add('active', 'pegas-active');
+    pegasNote.style.display = '';
+  } else if (type === 'traveyo') {
+    btnT.classList.add('active', 'traveyo-active');
+    traveyoNote.style.display = '';
+  } else {
+    btnD.classList.add('active');
+    subSelect.style.display = '';
+  }
+  // Refresh age badges
+  for (let i = 0; i < guestCount; i++) updateBadge(i);
+}
+
+// ================================================================
+// GUEST UI
+// ================================================================
+function changeGuestCount(delta) {
+  guestCount = Math.max(1, Math.min(6, guestCount + delta));
+  document.getElementById('guestCountDisplay').textContent = guestCount;
+  document.getElementById('guestMinus').disabled = guestCount <= 1;
+  document.getElementById('guestPlus').disabled = guestCount >= 6;
+  renderGuestAges();
+}
+
+function renderGuestAges() {
+  const container = document.getElementById('guestAges');
+  const existing = [];
+  for (let i = 0; i < 6; i++) { const inp = document.getElementById(`age_${i}`); existing.push(inp ? inp.value : ''); }
+
+  let html = '';
+  for (let i = 0; i < guestCount; i++) {
+    const val = existing[i] || (i < 2 ? '30' : '');
+    html += `<div class="guest-age-row">
+      <label>${i+1}. Misafir</label>
+      <input type="number" id="age_${i}" class="form-input" value="${val}" min="0" max="120" step="0.5" placeholder="Yaş" oninput="updateBadge(${i})">
+      <span id="badge_${i}"></span>
+    </div>`;
+  }
+  container.innerHTML = html;
+  for (let i = 0; i < guestCount; i++) updateBadge(i);
+}
+
+function updateBadge(i) {
+  const inp = document.getElementById(`age_${i}`);
+  const badge = document.getElementById(`badge_${i}`);
+  const v = parseFloat(inp.value);
+  let freeAge = DEFAULT_FREE_AGE;
+
+  // Determine free age based on current agency type
+  if (currentAgencyType === 'traveyo') {
+    freeAge = TRAVEYO_FREE_AGE;
+  } else if (currentAgencyType === 'digerleri') {
+    const agencyId = document.getElementById('agencySelect').value;
+    if (agencyId !== '__general__') {
+      const ag = agencies.find(a => a.id === agencyId);
+      if (ag) freeAge = ag.childFreeAge ?? DEFAULT_FREE_AGE;
+    }
+  }
+
+  if (isNaN(v) || inp.value === '') { badge.innerHTML = ''; return; }
+  if (v <= freeAge) {
+    const label = currentAgencyType === 'traveyo' ? 'Çocuk 0-12 (Ücretsiz)' : 'Bebek (Ücretsiz)';
+    badge.innerHTML = `<span class="age-badge infant">${label}</span>`;
+  }
+  else if (v <= CHILD_SMALL_MAX) badge.innerHTML = '<span class="age-badge child-small">Çocuk 3-6.99 (Ücretsiz)</span>';
+  else if (v <= CHILD_BIG_MAX) badge.innerHTML = '<span class="age-badge child-big">Çocuk 7-11.99</span>';
+  else badge.innerHTML = '<span class="age-badge adult">Yetişkin</span>';
+}
+
+function updateCheckOutFromNights() {
+  const ciStr = document.getElementById('checkIn').value;
+  const nightsVal = parseInt(document.getElementById('nightsInput').value, 10);
+  if (!ciStr || isNaN(nightsVal) || nightsVal <= 0) return;
+  const ci = parseDate(ciStr);
+  const co = new Date(ci.getTime());
+  co.setDate(co.getDate() + nightsVal);
+  document.getElementById('checkOut').value = dateToStr(co);
+}
+
+function updateNightsFromDates() {
+  const ciStr = document.getElementById('checkIn').value;
+  const coStr = document.getElementById('checkOut').value;
+  if (!ciStr || !coStr) return;
+  const ci = parseDate(ciStr);
+  const co = parseDate(coStr);
+  const nights = daysBetween(ci, co);
+  document.getElementById('nightsInput').value = nights > 0 ? nights : 1;
+  if (nights <= 0) {
+    const nextDay = new Date(ci.getTime());
+    nextDay.setDate(nextDay.getDate() + 1);
+    document.getElementById('checkOut').value = dateToStr(nextDay);
+  }
+}
+
+// ================================================================
+// AGENCY MANAGEMENT
+// ================================================================
+function saveAgencies() { localStorage.setItem('gmh_agencies', JSON.stringify(agencies)); }
+
+function renderAgencyList() {
+  const container = document.getElementById('agencyList');
+  const select = document.getElementById('agencySelect');
+  if (agencies.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:12px;padding:6px 0;">Henüz acenta eklenmedi.</p>';
+  } else {
+    let html = '';
+    for (const a of agencies) {
+      let badges = '';
+      if (a.discount > 0) badges += `<span class="agency-detail-badge discount">%${a.discount} İndirim</span>`;
+      else if (a.discount < 0) badges += `<span class="agency-detail-badge surcharge">%${Math.abs(a.discount)} Artış</span>`;
+      if ((a.childFreeAge ?? DEFAULT_FREE_AGE) > DEFAULT_FREE_AGE)
+        badges += `<span class="agency-detail-badge child-free">0-${a.childFreeAge} yaş ücretsiz</span>`;
+      html += `<div class="agency-item"><div class="agency-info">
+        <div class="agency-name">${escapeHTML(a.name)}</div>
+        <div class="agency-details">${badges}${a.notes ? `<span style="color:var(--text-muted);font-size:10px;">${escapeHTML(a.notes)}</span>` : ''}</div>
+      </div><div class="agency-actions">
+        <button class="btn-icon" onclick="openAgencyModal('${a.id}')" title="Düzenle">✏️</button>
+        <button class="btn-icon delete" onclick="deleteAgency('${a.id}')" title="Sil">🗑️</button>
+      </div></div>`;
+    }
+    container.innerHTML = html;
+  }
+  const cv = select.value;
+  select.innerHTML = '<option value="__general__">Genel Kontrat (İndirimsiz)</option>';
+  for (const a of agencies) {
+    const o = document.createElement('option');
+    o.value = a.id;
+    o.textContent = a.name + (a.discount > 0 ? ` (-%${a.discount})` : a.discount < 0 ? ` (+%${Math.abs(a.discount)})` : '');
+    select.appendChild(o);
+  }
+  if (cv) select.value = cv;
+}
+
+function openAgencyModal(editId) {
+  const m = document.getElementById('agencyModal');
+  if (editId) {
+    const a = agencies.find(x => x.id === editId); if (!a) return;
+    document.getElementById('modalTitle').textContent = 'Acenta Düzenle';
+    document.getElementById('editAgencyId').value = editId;
+    document.getElementById('agencyName').value = a.name;
+    document.getElementById('agencyDiscount').value = a.discount || 0;
+    document.getElementById('childFreeAge').value = a.childFreeAge ?? DEFAULT_FREE_AGE;
+    document.getElementById('agencyNotes').value = a.notes || '';
+  } else {
+    document.getElementById('modalTitle').textContent = 'Yeni Acenta Ekle';
+    document.getElementById('editAgencyId').value = '';
+    document.getElementById('agencyName').value = '';
+    document.getElementById('agencyDiscount').value = 0;
+    document.getElementById('childFreeAge').value = DEFAULT_FREE_AGE;
+    document.getElementById('agencyNotes').value = '';
+  }
+  m.classList.add('active');
+}
+function closeAgencyModal() { document.getElementById('agencyModal').classList.remove('active'); }
+
+function saveAgency() {
+  const eId = document.getElementById('editAgencyId').value;
+  const name = document.getElementById('agencyName').value.trim();
+  const discount = parseFloat(document.getElementById('agencyDiscount').value) || 0;
+  const childFreeAge = parseFloat(document.getElementById('childFreeAge').value) || DEFAULT_FREE_AGE;
+  const notes = document.getElementById('agencyNotes').value.trim();
+  if (!name) { alert('Lütfen acenta adını giriniz.'); return; }
+  if (eId) {
+    const idx = agencies.findIndex(a => a.id === eId);
+    if (idx !== -1) agencies[idx] = { ...agencies[idx], name, discount, childFreeAge, notes };
+  } else {
+    agencies.push({ id: 'ag_' + Date.now(), name, discount, childFreeAge, notes });
+  }
+  saveAgencies(); renderAgencyList(); closeAgencyModal();
+  for (let i = 0; i < guestCount; i++) updateBadge(i);
+}
+
+function deleteAgency(id) {
+  if (!confirm('Bu acentayı silmek istediğinize emin misiniz?')) return;
+  agencies = agencies.filter(a => a.id !== id);
+  saveAgencies(); renderAgencyList();
+}
+
+function exportAgencies() {
+  if (agencies.length === 0) { alert('Dışa aktarılacak acenta bulunmuyor.'); return; }
+  const data = JSON.stringify(agencies, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'miramor_acentalar.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importAgencies(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) { alert('Geçersiz dosya formatı.'); return; }
+      let added = 0;
+      for (const ag of imported) {
+        if (!ag.name) continue;
+        const exists = agencies.some(a => a.name.toLowerCase() === ag.name.toLowerCase());
+        if (!exists) {
+          agencies.push({ id: 'ag_' + Date.now() + '_' + added, name: ag.name, discount: ag.discount || 0, childFreeAge: ag.childFreeAge ?? DEFAULT_FREE_AGE, notes: ag.notes || '' });
+          added++;
+        }
+      }
+      saveAgencies(); renderAgencyList();
+      alert(`${added} acenta içe aktarıldı. ${imported.length - added} tanesi zaten mevcut.`);
+    } catch(err) { alert('Dosya okunamadı: ' + err.message); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ================================================================
+// COLLAPSIBLE & RATE CARD
+// ================================================================
+function toggleSection(btn) {
+  btn.classList.toggle('active');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+function renderRateCard() {
+  const head = document.getElementById('rateCardHead');
+  const body = document.getElementById('rateCardBody');
+
+  let hHTML = '<tr><th>Oda Konfigürasyonu</th>';
+  for (const p of PERIODS) {
+    const s = p.start.split('-'), e = p.end.split('-');
+    hHTML += `<th>${s[2]}.${s[1]} –<br>${e[2]}.${e[1]}${p.ilave ? '<span class="ilave-header"><br>İLAVE %10</span>' : ''}</th>`;
+  }
+  hHTML += '<th>Opsiyon</th></tr>';
+  head.innerHTML = hHTML;
+
+  const rows = [
+    { label: 'PP IN DBL', fn: pp => pp },
+    { label: 'Double (PP×2)', fn: pp => pp * 2 },
+    { label: 'Double +1Ç(3-6.99) PP×2', fn: pp => pp * 2 },
+    { label: 'Double +1Ç(7-11.99) PP×2.5', fn: pp => pp * 2.5 },
+    { label: 'Double +1Ç(3-6.99)+1Ç(3-11.99) PP×2.5', fn: pp => pp * 2.5 },
+    { label: 'Double +2Ç(7-11.99) PP×3', fn: pp => pp * 3 },
+    { label: 'Single PP×1.5/1.7', fn: (pp, p) => { const d = parseDate(p.start); return pp * (d >= SNG_PEAK_START && d <= SNG_PEAK_END ? 1.7 : 1.5); } },
+    { label: 'Single +1Ç(3-6.99) PP×1.5/1.7', fn: (pp, p) => { const d = parseDate(p.start); return pp * (d >= SNG_PEAK_START && d <= SNG_PEAK_END ? 1.7 : 1.5); } },
+    { label: 'Single +1Ç(7-11.99) PP×2', fn: pp => pp * 2 },
+    { label: 'Single +1Ç(3-6.99)+1Ç(3-11.99) PP×2', fn: pp => pp * 2 },
+    { label: 'Single +2Ç(7-11.99) PP×2', fn: pp => pp * 2 },
+    { label: 'Triple (PP×2.7)', fn: pp => pp * 2.7 },
+    { label: 'Triple +1Ç(3-6.99) PP×2.7', fn: pp => pp * 2.7 },
+    { label: 'Triple +1Ç(7-11.99) PP×3.2', fn: pp => pp * 3.2 },
+  ];
+
+  let bHTML = '';
+  const today = new Date();
+  for (const row of rows) {
+    bHTML += '<tr>';
+    bHTML += `<td>${row.label}</td>`;
+    for (const p of PERIODS) {
+      const val = row.fn(p.pp, p);
+      bHTML += `<td>${val.toFixed(2)}€</td>`;
+    }
+    // Option only on first meaningful row
+    if (row.label === 'PP IN DBL') {
+      bHTML += `<td></td>`;
+    } else {
+      bHTML += `<td></td>`;
+    }
+    bHTML += '</tr>';
+  }
+  // Option row
+  bHTML += '<tr style="border-top:2px solid var(--border)"><td><strong>Opsiyon (gün)</strong></td>';
+  for (const p of PERIODS) { bHTML += `<td><strong>${p.option}</strong></td>`; }
+  bHTML += '<td></td></tr>';
+
+  body.innerHTML = bHTML;
+}
+
+// ================================================================
+// INIT
+// ================================================================
+function init() {
+  const today = new Date();
+  document.getElementById('saleDate').value = dateToStr(today);
+  renderGuestAges();
+  renderAgencyList();
+  renderRateCard();
+  document.getElementById('checkIn').addEventListener('input', updateCheckOutFromNights);
+  document.getElementById('checkIn').addEventListener('change', updateCheckOutFromNights);
+  document.getElementById('nightsInput').addEventListener('input', updateCheckOutFromNights);
+  document.getElementById('nightsInput').addEventListener('change', updateCheckOutFromNights);
+  document.getElementById('checkOut').addEventListener('input', updateNightsFromDates);
+  document.getElementById('checkOut').addEventListener('change', updateNightsFromDates);
+  updateNightsFromDates();
+  document.getElementById('agencySelect').addEventListener('change', () => { for (let i = 0; i < guestCount; i++) updateBadge(i); });
+  document.getElementById('agencyModal').addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) closeAgencyModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' && !document.getElementById('agencyModal').classList.contains('active')) calculate(); });
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
