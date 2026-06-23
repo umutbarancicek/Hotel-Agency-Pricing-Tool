@@ -450,7 +450,7 @@ body::before {
   <div class="header-badges">
     <span class="header-badge">☀ 2026 Yaz Sezonu</span>
     <span class="header-badge">🍽 Ultra All Inclusive</span>
-    <span class="header-badge action-badge">📋 Aksiyon: 06.06.2026</span>
+    <span class="header-badge action-badge">📋 Aksiyon: 19.06.2026</span>
   </div>
 </header>
 
@@ -463,7 +463,7 @@ body::before {
         <div class="form-row" style="margin-bottom:10px;">
           <div class="form-group">
             <label class="form-label" for="checkIn">Giriş Tarihi</label>
-            <input type="date" id="checkIn" class="form-input" value="2026-06-15">
+            <input type="date" id="checkIn" class="form-input" value="2026-06-20">
           </div>
           <div class="form-group">
             <label class="form-label" for="nightsInput">Gece Sayısı</label>
@@ -473,7 +473,7 @@ body::before {
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="checkOut">Çıkış Tarihi</label>
-            <input type="date" id="checkOut" class="form-input" value="2026-06-22">
+            <input type="date" id="checkOut" class="form-input" value="2026-06-27">
           </div>
           <div class="form-group">
             <label class="form-label" for="saleDate">Satış Tarihi</label>
@@ -625,17 +625,20 @@ body::before {
 // DATA — AKSİYON 06.06.2026
 // ================================================================
 const PERIODS = [
-  { id:1,  start:'2026-06-06', end:'2026-06-10', pp:34,  option:7,  basis:'cin',  ilave:false },
-  { id:2,  start:'2026-06-11', end:'2026-06-13', pp:42,  option:10, basis:'cin',  ilave:false },
-  { id:3,  start:'2026-06-14', end:'2026-06-20', pp:44,  option:10, basis:'cin',  ilave:false },
-  { id:4,  start:'2026-06-21', end:'2026-07-02', pp:52,  option:10, basis:'stay', ilave:true  },
-  { id:5,  start:'2026-07-03', end:'2026-07-31', pp:60,  option:10, basis:'stay', ilave:true  },
-  { id:6,  start:'2026-08-01', end:'2026-08-24', pp:66,  option:7,  basis:'stay', ilave:true  },
-  { id:7,  start:'2026-08-25', end:'2026-09-04', pp:62,  option:7,  basis:'stay', ilave:true  },
-  { id:8,  start:'2026-09-05', end:'2026-09-20', pp:58,  option:3,  basis:'stay', ilave:true  },
-  { id:9,  start:'2026-09-21', end:'2026-09-30', pp:50,  option:5,  basis:'stay', ilave:true  },
-  { id:10, start:'2026-10-01', end:'2026-10-15', pp:44,  option:3,  basis:'stay', ilave:true  },
-  { id:11, start:'2026-10-16', end:'2026-10-31', pp:35,  option:1,  basis:'stay', ilave:true  },
+  { id:1,  start:'2026-06-06', end:'2026-06-10', pp:34,  option:7,  basis:'cin',  ilave:0  },
+  { id:2,  start:'2026-06-11', end:'2026-06-13', pp:42,  option:10, basis:'cin',  ilave:0  },
+  { id:3,  start:'2026-06-14', end:'2026-06-18', pp:44,  option:10, basis:'cin',  ilave:0  },
+  { id:4,  start:'2026-06-19', end:'2026-06-24', pp:40,  option:10, basis:'cin',  ilave:0  },
+  { id:5,  start:'2026-06-25', end:'2026-06-30', pp:42,  option:10, basis:'cin',  ilave:0  },
+  { id:6,  start:'2026-07-01', end:'2026-07-04', pp:45,  option:10, basis:'cin',  ilave:0  },
+  { id:7,  start:'2026-07-05', end:'2026-07-31', pp:60,  option:10, basis:'stay', ilave:15 },
+  { id:8,  start:'2026-08-01', end:'2026-08-24', pp:66,  option:7,  basis:'stay', ilave:15 },
+  { id:9,  start:'2026-08-25', end:'2026-09-04', pp:62,  option:7,  basis:'stay', ilave:15 },
+  { id:10, start:'2026-09-05', end:'2026-09-20', pp:58,  option:3,  basis:'stay', ilave:15 },
+  { id:11, start:'2026-09-21', end:'2026-09-30', pp:50,  option:5,  basis:'stay', ilave:15 },
+  { id:12, start:'2026-10-01', end:'2026-10-15', pp:44,  option:3,  basis:'stay', ilave:15 },
+  { id:13, start:'2026-10-16', end:'2026-10-31', pp:35,  option:1,  basis:'stay', ilave:15 },
+  { id:14, start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
 ];
 
 const SNG_PEAK_START = new Date('2026-05-11');
@@ -826,9 +829,11 @@ function calculate() {
   let optionDays = new Set();
   let usedIlave = false;
   let ilaveNightCount = 0;
+  let ilaveDiscountAmount = 0;
   let totalDiscountAmount = 0;
   let pegasOnlyNightCount = 0;
   let pegasOnlyAmount = 0;
+  const activeIlavePcts = [];
 
   for (let i = 0; i < nights; i++) {
     const nightDate = new Date(checkIn);
@@ -866,26 +871,27 @@ function calculate() {
 
     // Determine discount % for this night: ilave(10%) + pegas(1%) additive
     // Traveyo has no ilave discount (flat rate contract)
-    const nightIsIlave = isTraveyo ? false : (period ? period.ilave : false);
-    let nightDiscountPct = 0;
-    if (nightIsIlave) nightDiscountPct += 10;
+    const nightIlavePct = isTraveyo ? 0 : (period ? (period.ilave || 0) : 0);
+    let nightDiscountPct = nightIlavePct;
     if (isPegas) nightDiscountPct += 1;
 
     const nightDiscount = +(nightRate * nightDiscountPct / 100).toFixed(2);
 
-    if (nightIsIlave) {
+    if (nightIlavePct > 0) {
       usedIlave = true;
       ilaveNightCount++;
+      ilaveSubtotal += nightRate;
+      ilaveDiscountAmount += nightDiscount;
+      if (!activeIlavePcts.includes(nightIlavePct)) {
+        activeIlavePcts.push(nightIlavePct);
+      }
     }
     if (nightDiscountPct > 0) {
       totalDiscountAmount += nightDiscount;
     }
-    if (isPegas && !nightIsIlave) {
+    if (isPegas && nightIlavePct === 0) {
       pegasOnlyNightCount++;
       pegasOnlyAmount += nightDiscount;
-    }
-    if (nightIsIlave) {
-      ilaveSubtotal += nightRate;
     }
 
     nightlyBreakdown.push({
@@ -894,7 +900,7 @@ function calculate() {
       pp: pp,
       multiplier: multiplier,
       rate: nightRate,
-      ilave: nightIsIlave,
+      ilave: nightIlavePct,
       discountPct: nightDiscountPct,
       discountAmount: nightDiscount,
     });
@@ -905,6 +911,7 @@ function calculate() {
 
   subtotal = +subtotal.toFixed(2);
   ilaveSubtotal = +ilaveSubtotal.toFixed(2);
+  ilaveDiscountAmount = +ilaveDiscountAmount.toFixed(2);
   totalDiscountAmount = +totalDiscountAmount.toFixed(2);
   pegasOnlyAmount = +pegasOnlyAmount.toFixed(2);
 
@@ -922,11 +929,6 @@ function calculate() {
   const ppn = +(grandTotal / nights / totalPax).toFixed(2);
   const maxOption = optionDays.size > 0 ? Math.max(...optionDays) : 0;
 
-  // Compute display values
-  const ilaveDiscountPct = isPegas ? 11 : 10;
-  const pegasDiscountPct = 1;
-  const ilaveDiscountAmount = usedIlave ? +(ilaveSubtotal * ilaveDiscountPct / 100).toFixed(2) : 0;
-
   renderResults({
     checkIn, checkOut, nights, ages,
     adults, childrenSmall, childrenBig, infants,
@@ -934,7 +936,7 @@ function calculate() {
     nightlyBreakdown, isCINBased,
     roomConfig: traveyoRoomConfig || roomConfig,
     subtotal, usedIlave, ilaveNightCount, ilaveSubtotal,
-    ilaveDiscountPct, ilaveDiscountAmount,
+    ilaveDiscountAmount, activeIlavePcts,
     isPegas, isTraveyo, pegasOnlyNightCount, pegasOnlyAmount,
     totalDiscountAmount,
     agency, agencyDiscountPct, agencyAmount, isDiscount,
@@ -968,7 +970,7 @@ function renderResults(data) {
     const pChanged = prevPId !== null && curPId !== prevPId;
     nightHTML += `<tr class="${pChanged ? 'period-change' : ''}">
       <td>${formatDate(n.date)}</td>
-      <td>${n.period ? '<span class="period-label">' + fmtPeriod(n.period) + '</span>' : '<span class="period-label">Traveyo Sabit</span>'}${n.ilave ? '<span class="ilave-badge">+%10 İND</span>' : ''}</td>
+      <td>${n.period ? '<span class="period-label">' + fmtPeriod(n.period) + '</span>' : '<span class="period-label">Traveyo Sabit</span>'}${n.ilave ? '<span class="ilave-badge">+' + n.ilave + '% İND</span>' : ''}</td>
       <td>${n.pp}€</td>
       <td>×${n.multiplier.toFixed(1)}</td>
       <td>${formatEUR(n.rate)}</td>
@@ -981,15 +983,29 @@ function renderResults(data) {
   let totalsHTML = '<div class="totals-section">';
   totalsHTML += `<div class="total-row"><span class="label">Ara Toplam (${data.nights} gece)</span><span class="value">${formatEUR(data.subtotal)}</span></div>`;
 
+  // Compute dynamic ilave label
+  let ilaveLabel = '';
+  if (data.activeIlavePcts && data.activeIlavePcts.length === 1) {
+    const pct = data.activeIlavePcts[0];
+    if (data.isPegas) {
+      ilaveLabel = `✈️ İlave %${pct} + Pegas %1 = <strong>%${pct + 1} İndirim</strong>`;
+    } else {
+      ilaveLabel = `İlave %${pct} İndirim`;
+    }
+  } else if (data.activeIlavePcts && data.activeIlavePcts.length > 1) {
+    if (data.isPegas) {
+      ilaveLabel = `✈️ İlave + Pegas İndirimi`;
+    } else {
+      ilaveLabel = `İlave İndirimi`;
+    }
+  }
+
   // Combined discount line(s)
-  if (data.usedIlave && data.isPegas) {
-    // Pegas + ilave: show as %11
-    totalsHTML += `<div class="total-row discount"><span class="label">✈️ İlave %10 + Pegas %1 = <strong>%${data.ilaveDiscountPct} İndirim</strong> (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
-    if (data.pegasOnlyNightCount > 0) {
+  if (data.usedIlave) {
+    totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
+    if (data.isPegas && data.pegasOnlyNightCount > 0) {
       totalsHTML += `<div class="total-row discount"><span class="label">✈️ Pegas %1 İndirim (${data.pegasOnlyNightCount} gece, ilave dışı)</span><span class="value">− ${formatEUR(data.pegasOnlyAmount)}</span></div>`;
     }
-  } else if (data.usedIlave) {
-    totalsHTML += `<div class="total-row discount"><span class="label">İlave %10 İndirim (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
   } else if (data.isPegas) {
     totalsHTML += `<div class="total-row discount"><span class="label">✈️ Pegas %1 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   }
@@ -1013,13 +1029,11 @@ function renderResults(data) {
   } else {
     notesHTML += `<div class="info-note amber">📌 <strong>Konaklama Bazlı Fiyatlandırma:</strong> Her gece kendi dönemine göre fiyatlandırılmıştır.</div>`;
   }
-  if (data.usedIlave && data.isPegas) {
-    notesHTML += `<div class="info-note green">✅ <strong>İlave %10 + Pegas %1 = %${data.ilaveDiscountPct} toplam indirim</strong> uygulandı (${data.ilaveNightCount} ilave dönem gecesi).</div>`;
-  } else if (data.usedIlave) {
-    notesHTML += `<div class="info-note green">✅ <strong>İlave %10 İndirim</strong> uygulandı (${data.ilaveNightCount} gece).</div>`;
+  if (data.usedIlave) {
+    notesHTML += `<div class="info-note green">✅ <strong>${ilaveLabel}</strong> uygulandı (${data.ilaveNightCount} gece).</div>`;
   }
   if (data.isPegas) {
-    notesHTML += `<div class="info-note blue">✈️ <strong>Pegas Acentası</strong> — Tüm tarihlerde +%1 indirim (ilave dönemle toplanır: %10→%11).</div>`;
+    notesHTML += `<div class="info-note blue">✈️ <strong>Pegas Acentası</strong> — Tüm tarihlerde +%1 indirim (ilave dönemle toplanır).</div>`;
   }
   if (data.agency) {
     let det = `<strong>Acenta:</strong> ${escapeHTML(data.agency.name)}`;
@@ -1299,7 +1313,7 @@ function renderRateCard() {
   let hHTML = '<tr><th>Oda Konfigürasyonu</th>';
   for (const p of PERIODS) {
     const s = p.start.split('-'), e = p.end.split('-');
-    hHTML += `<th>${s[2]}.${s[1]} –<br>${e[2]}.${e[1]}${p.ilave ? '<span class="ilave-header"><br>İLAVE %10</span>' : ''}</th>`;
+    hHTML += `<th>${s[2]}.${s[1]} –<br>${e[2]}.${e[1]}${p.ilave ? '<span class="ilave-header"><br>İLAVE %' + p.ilave + '</span>' : ''}</th>`;
   }
   hHTML += '<th>Opsiyon</th></tr>';
   head.innerHTML = hHTML;
