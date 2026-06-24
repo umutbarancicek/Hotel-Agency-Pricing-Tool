@@ -182,6 +182,10 @@ body::before {
   background: rgba(59,130,246,0.1); color: var(--blue-400);
   box-shadow: inset 0 0 0 1px var(--blue-400);
 }
+.agency-toggle-btn.active.fit-active {
+  background: rgba(168,85,247,0.1); color: var(--purple-400);
+  box-shadow: inset 0 0 0 1px var(--purple-400);
+}
 .agency-toggle-btn.active.traveyo-active {
   background: rgba(34,197,94,0.1); color: var(--green-400);
   box-shadow: inset 0 0 0 1px var(--green-400);
@@ -191,6 +195,7 @@ body::before {
   font-size: 11px; text-align: center;
 }
 .agency-info-note.pegas { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); color: var(--blue-400); }
+.agency-info-note.fit { background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.15); color: var(--purple-400); }
 .agency-info-note.traveyo { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); color: var(--green-400); }
 .agency-sub-select { margin-top: 10px; animation: slideIn 0.3s ease; }
 
@@ -272,6 +277,21 @@ body::before {
 .total-row.per-person { font-size: 11px; padding-top: 3px; }
 .total-row.per-person .label { color: var(--text-muted); }
 .total-row.per-person .value { color: var(--text-secondary); font-weight: 500; }
+
+.total-row.period-breakdown {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 1px 0 1px 16px;
+  border-left: 2px solid var(--border);
+  margin-left: 4px;
+}
+.total-row.period-breakdown .label {
+  color: var(--text-muted);
+}
+.total-row.period-breakdown .value {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
 
 .info-note {
   margin-top: 10px; padding: 9px 12px; border-radius: var(--radius-sm); font-size: 11px; line-height: 1.5;
@@ -426,6 +446,8 @@ body::before {
   .night-table th { color: #555; border-bottom-color: #333; }
   .night-table td { color: #333; border-bottom-color: #eee; }
   .total-row .label, .total-row .value { color: #000; }
+  .total-row.period-breakdown { color: #555 !important; border-left-color: #ddd !important; }
+  .total-row.period-breakdown .label, .total-row.period-breakdown .value { color: #555 !important; }
   .total-row.discount .value { color: #16a34a; }
   .total-row.grand-total { border-top-color: #333; }
   .guest-chip, .result-room-type { border: 1px solid #ccc; background: #f5f5f5; color: #333; }
@@ -501,10 +523,12 @@ body::before {
           <label class="form-label">Acenta Tipi</label>
           <div class="agency-toggle">
             <button type="button" class="agency-toggle-btn active pegas-active" id="btnPegas" onclick="selectAgencyType('pegas')">✈️ Pegas</button>
+            <button type="button" class="agency-toggle-btn" id="btnFit" onclick="selectAgencyType('fit')">🏖️ Fit</button>
             <button type="button" class="agency-toggle-btn" id="btnTraveyo" onclick="selectAgencyType('traveyo')">🌍 Traveyo</button>
             <button type="button" class="agency-toggle-btn" id="btnDigerleri" onclick="selectAgencyType('digerleri')">🏢 Diğerleri</button>
           </div>
           <div class="agency-info-note pegas" id="pegasNote">Pegas acentasına özel <strong>+%1 ilave indirim</strong> tüm tarihlerde uygulanır.</div>
+          <div class="agency-info-note fit" id="fitNote" style="display:none;">Fit acentasına özel <strong>%3 indirim</strong> tüm tarihlerde bileşik uygulanır.</div>
           <div class="agency-info-note traveyo" id="traveyoNote" style="display:none;"><strong>Itaka / Cedok</strong> — Sabit 53€ PP | SNG ×1.5 | 0-12 yaş ücretsiz | 13.06 - sezon sonu</div>
           <div class="agency-sub-select" id="agencySubSelect" style="display:none;">
             <label class="form-label" for="agencySelect">Acenta Seçin</label>
@@ -733,12 +757,36 @@ function categorizeGuests(ages, freeAgeLimit) {
   return { adults, childrenSmall, childrenBig, infants };
 }
 
+function formatRoomConfigLabel(adultsCount, smallCount, bigCount) {
+  let roomName = adultsCount === 1 ? 'Single' : adultsCount === 2 ? 'Double' : 'Triple';
+  let label = `${roomName} Oda`;
+  const parts = [];
+  if (smallCount > 0) {
+    parts.push(`${smallCount}Ç(3-6.99)`);
+  }
+  if (bigCount > 0) {
+    parts.push(`${bigCount}Ç(7-11.99)`);
+  }
+  if (parts.length > 0) {
+    label = `${roomName} + ${parts.join(' + ')}`;
+  }
+  const desc = `${adultsCount}Y` + (smallCount + bigCount > 0 ? ` + ${smallCount + bigCount}Ç` : '');
+  return { label, desc };
+}
+
 function determineRoomConfig(adultCount, smallCount, bigCount) {
-  const key = `${adultCount}_${smallCount}S_${bigCount}B`;
   const roomBase = adultCount === 1 ? 'SNG' : adultCount === 2 ? 'DBL' : adultCount === 3 ? 'TRP' : null;
   if (!roomBase) return null;
-  const fullKey = `${roomBase}_${smallCount}S_${bigCount}B`;
-  if (ROOM_CONFIGS[fullKey]) return fullKey;
+  
+  for (let s = smallCount; s >= 0; s--) {
+    let fullKey;
+    if (s === 0 && bigCount === 0) {
+      fullKey = roomBase;
+    } else {
+      fullKey = `${roomBase}_${s}S_${bigCount}B`;
+    }
+    if (ROOM_CONFIGS[fullKey]) return fullKey;
+  }
   return null;
 }
 
@@ -773,6 +821,7 @@ function calculate() {
 
   // Agency type
   const isPegas = currentAgencyType === 'pegas';
+  const isFit = currentAgencyType === 'fit';
   const isTraveyo = currentAgencyType === 'traveyo';
   let agency = null, freeAgeLimit = DEFAULT_FREE_AGE, agencyDiscountPct = 0;
 
@@ -784,7 +833,7 @@ function calculate() {
       showError(`Traveyo (Itaka/Cedok) kontratı 13.06.2026 tarihinden itibaren geçerlidir. Giriş: ${formatDateFull(checkIn)}`);
       return;
     }
-  } else if (!isPegas && agencyId !== '__general__') {
+  } else if (!isPegas && !isFit && agencyId !== '__general__') {
     agency = agencies.find(a => a.id === agencyId);
     if (agency) {
       freeAgeLimit = agency.childFreeAge ?? DEFAULT_FREE_AGE;
@@ -806,7 +855,11 @@ function calculate() {
     showError(`Bu misafir kombinasyonu desteklenmiyor: ${adults.length}Y + ${childrenSmall.length}Ç(3-6.99) + ${childrenBig.length}Ç(7-11.99). Max: 3Y + 1Ç.`);
     return;
   }
-  let roomConfig = ROOM_CONFIGS[roomConfigKey];
+  
+  let roomConfig = { ...ROOM_CONFIGS[roomConfigKey] };
+  const formatted = formatRoomConfigLabel(adults.length, childrenSmall.length, childrenBig.length);
+  roomConfig.label = formatted.label;
+  roomConfig.desc = formatted.desc;
 
   // For Traveyo, override room config formula display if SNG
   let traveyoRoomConfig = null;
@@ -872,8 +925,14 @@ function calculate() {
     // Determine discount % for this night: ilave(10%) + pegas(1%) additive
     // Traveyo has no ilave discount (flat rate contract)
     const nightIlavePct = isTraveyo ? 0 : (period ? (period.ilave || 0) : 0);
-    let nightDiscountPct = nightIlavePct;
-    if (isPegas) nightDiscountPct += 1;
+    let nightDiscountPct = 0;
+    if (isPegas) {
+      nightDiscountPct = nightIlavePct + 1;
+    } else if (isFit) {
+      nightDiscountPct = nightIlavePct + 3 - (0.03 * nightIlavePct);
+    } else {
+      nightDiscountPct = nightIlavePct;
+    }
 
     const nightDiscount = +(nightRate * nightDiscountPct / 100).toFixed(2);
 
@@ -889,7 +948,7 @@ function calculate() {
     if (nightDiscountPct > 0) {
       totalDiscountAmount += nightDiscount;
     }
-    if (isPegas && nightIlavePct === 0) {
+    if ((isPegas || isFit) && nightIlavePct === 0) {
       pegasOnlyNightCount++;
       pegasOnlyAmount += nightDiscount;
     }
@@ -937,7 +996,7 @@ function calculate() {
     roomConfig: traveyoRoomConfig || roomConfig,
     subtotal, usedIlave, ilaveNightCount, ilaveSubtotal,
     ilaveDiscountAmount, activeIlavePcts,
-    isPegas, isTraveyo, pegasOnlyNightCount, pegasOnlyAmount,
+    isPegas, isFit, isTraveyo, pegasOnlyNightCount, pegasOnlyAmount,
     totalDiscountAmount,
     agency, agencyDiscountPct, agencyAmount, isDiscount,
     grandTotal, ppn, maxOption, freeAgeLimit,
@@ -983,18 +1042,51 @@ function renderResults(data) {
   let totalsHTML = '<div class="totals-section">';
   totalsHTML += `<div class="total-row"><span class="label">Ara Toplam (${data.nights} gece)</span><span class="value">${formatEUR(data.subtotal)}</span></div>`;
 
+  // Group breakdown by period and rate
+  const periodGroups = {};
+  for (const n of data.nightlyBreakdown) {
+    const pId = n.period ? n.period.id : 'traveyo';
+    const key = `${pId}_${n.rate}`;
+    if (!periodGroups[key]) {
+      periodGroups[key] = {
+        period: n.period,
+        nights: 0,
+        rate: n.rate,
+        total: 0
+      };
+    }
+    periodGroups[key].nights++;
+    periodGroups[key].total += n.rate;
+  }
+  
+  const groups = Object.values(periodGroups);
+  if (groups.length > 1) {
+    for (const g of groups) {
+      const periodLabel = g.period ? fmtPeriod(g.period) : 'Traveyo Sabit';
+      totalsHTML += `<div class="total-row period-breakdown">
+        <span class="label">• ${g.nights} gece × ${formatEUR(g.rate)} (${periodLabel})</span>
+        <span class="value">${formatEUR(g.total)}</span>
+      </div>`;
+    }
+  }
+
   // Compute dynamic ilave label
   let ilaveLabel = '';
   if (data.activeIlavePcts && data.activeIlavePcts.length === 1) {
     const pct = data.activeIlavePcts[0];
     if (data.isPegas) {
       ilaveLabel = `✈️ İlave %${pct} + Pegas %1 = <strong>%${pct + 1} İndirim</strong>`;
+    } else if (data.isFit) {
+      const totalPct = pct + 3 - (0.03 * pct);
+      ilaveLabel = `🏖️ İlave %${pct} ve %3 Bileşik = <strong>%${totalPct.toFixed(2)} İndirim</strong>`;
     } else {
       ilaveLabel = `İlave %${pct} İndirim`;
     }
   } else if (data.activeIlavePcts && data.activeIlavePcts.length > 1) {
     if (data.isPegas) {
       ilaveLabel = `✈️ İlave + Pegas İndirimi`;
+    } else if (data.isFit) {
+      ilaveLabel = `🏖️ İlave + Fit %3 Bileşik İndirimi`;
     } else {
       ilaveLabel = `İlave İndirimi`;
     }
@@ -1006,8 +1098,13 @@ function renderResults(data) {
     if (data.isPegas && data.pegasOnlyNightCount > 0) {
       totalsHTML += `<div class="total-row discount"><span class="label">✈️ Pegas %1 İndirim (${data.pegasOnlyNightCount} gece, ilave dışı)</span><span class="value">− ${formatEUR(data.pegasOnlyAmount)}</span></div>`;
     }
+    if (data.isFit && data.pegasOnlyNightCount > 0) {
+      totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.pegasOnlyNightCount} gece, ilave dışı)</span><span class="value">− ${formatEUR(data.pegasOnlyAmount)}</span></div>`;
+    }
   } else if (data.isPegas) {
     totalsHTML += `<div class="total-row discount"><span class="label">✈️ Pegas %1 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+  } else if (data.isFit) {
+    totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   }
 
   if (data.agencyDiscountPct > 0) {
@@ -1034,6 +1131,9 @@ function renderResults(data) {
   }
   if (data.isPegas) {
     notesHTML += `<div class="info-note blue">✈️ <strong>Pegas Acentası</strong> — Tüm tarihlerde +%1 indirim (ilave dönemle toplanır).</div>`;
+  }
+  if (data.isFit) {
+    notesHTML += `<div class="info-note purple">🏖️ <strong>Fit Acentası</strong> — Tüm tarihlerde +%3 indirim (ilave dönemle bileşik olarak uygulanır).</div>`;
   }
   if (data.agency) {
     let det = `<strong>Acenta:</strong> ${escapeHTML(data.agency.name)}`;
@@ -1070,21 +1170,27 @@ function showError(msg) {
 function selectAgencyType(type) {
   currentAgencyType = type;
   const btnP = document.getElementById('btnPegas');
+  const btnF = document.getElementById('btnFit');
   const btnT = document.getElementById('btnTraveyo');
   const btnD = document.getElementById('btnDigerleri');
   const pegasNote = document.getElementById('pegasNote');
+  const fitNote = document.getElementById('fitNote');
   const traveyoNote = document.getElementById('traveyoNote');
   const subSelect = document.getElementById('agencySubSelect');
 
   // Reset all
-  [btnP, btnT, btnD].forEach(b => b.classList.remove('active', 'pegas-active', 'traveyo-active'));
+  [btnP, btnF, btnT, btnD].forEach(b => b.classList.remove('active', 'pegas-active', 'fit-active', 'traveyo-active'));
   pegasNote.style.display = 'none';
+  fitNote.style.display = 'none';
   traveyoNote.style.display = 'none';
   subSelect.style.display = 'none';
 
   if (type === 'pegas') {
     btnP.classList.add('active', 'pegas-active');
     pegasNote.style.display = '';
+  } else if (type === 'fit') {
+    btnF.classList.add('active', 'fit-active');
+    fitNote.style.display = '';
   } else if (type === 'traveyo') {
     btnT.classList.add('active', 'traveyo-active');
     traveyoNote.style.display = '';
