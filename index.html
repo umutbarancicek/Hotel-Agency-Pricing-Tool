@@ -929,9 +929,10 @@ function calculate() {
     let nightDiscount = 0;
     let nightIlaveDiscount = 0;
     let nightFitDiscount = 0;
+    let nightDiscountPct = 0;
 
     if (isPegas) {
-      const nightDiscountPct = nightIlavePct + 1;
+      nightDiscountPct = nightIlavePct + 1;
       nightDiscount = +(nightRate * nightDiscountPct / 100).toFixed(2);
       if (nightIlavePct > 0) {
         nightIlaveDiscount = +(nightRate * nightIlavePct / 100).toFixed(2);
@@ -943,8 +944,10 @@ function calculate() {
       const remainingRate = nightRate - nightIlaveDiscount;
       nightFitDiscount = +(remainingRate * 3 / 100).toFixed(2);
       nightDiscount = nightIlaveDiscount + nightFitDiscount;
+      nightDiscountPct = +(nightIlavePct + 3 - (0.03 * nightIlavePct)).toFixed(4);
     } else {
-      nightDiscount = +(nightRate * nightIlavePct / 100).toFixed(2);
+      nightDiscountPct = nightIlavePct;
+      nightDiscount = +(nightRate * nightDiscountPct / 100).toFixed(2);
       if (nightIlavePct > 0) {
         nightIlaveDiscount = nightDiscount;
       }
