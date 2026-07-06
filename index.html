@@ -518,6 +518,17 @@ body::before {
       </div>
 
       <div class="card">
+        <div class="card-title"><span class="icon">📋</span> Aksiyon Listesi Sürümü</div>
+        <div class="form-group">
+          <select id="actionListSelect" class="form-select" onchange="changeActionListVersion()">
+            <option value="03.07.2026">03.07.2026 Aksiyonu (Değişen/Güncel)</option>
+            <option value="01.07.2026">01.07.2026 Aksiyonu (Asıl Güncel)</option>
+            <option value="19.06.2026">19.06.2026 Aksiyonu (Eski)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
         <div class="card-title"><span class="icon">🏢</span> Acenta Seçimi</div>
         <div class="form-group">
           <label class="form-label">Acenta Tipi</label>
@@ -527,7 +538,7 @@ body::before {
             <button type="button" class="agency-toggle-btn" id="btnTraveyo" onclick="selectAgencyType('traveyo')">🌍 Traveyo</button>
             <button type="button" class="agency-toggle-btn" id="btnDigerleri" onclick="selectAgencyType('digerleri')">🏢 Diğerleri</button>
           </div>
-          <div class="agency-info-note pegas" id="pegasNote">Pegas acentasına özel <strong>+%1 ilave indirim</strong> tüm tarihlerde uygulanır.</div>
+          <div class="agency-info-note pegas" id="pegasNote">Pegas acentası için döneme ait ilave aksiyon indirimleri uygulanır.</div>
           <div class="agency-info-note fit" id="fitNote" style="display:none;">Fit acentasına özel <strong>%3 indirim</strong> tüm tarihlerde bileşik uygulanır.</div>
           <div class="agency-info-note traveyo" id="traveyoNote" style="display:none;"><strong>Itaka / Cedok</strong> — Sabit 53€ PP | SNG ×1.5 | 0-12 yaş ücretsiz | 13.06 - sezon sonu</div>
           <div class="agency-sub-select" id="agencySubSelect" style="display:none;">
@@ -648,7 +659,7 @@ body::before {
 // ================================================================
 // DATA — AKSİYON 06.06.2026
 // ================================================================
-const PERIODS = [
+const PERIODS_19_06 = [
   { id:1,  start:'2026-06-06', end:'2026-06-10', pp:34,  option:7,  basis:'cin',  ilave:0  },
   { id:2,  start:'2026-06-11', end:'2026-06-13', pp:42,  option:10, basis:'cin',  ilave:0  },
   { id:3,  start:'2026-06-14', end:'2026-06-18', pp:44,  option:10, basis:'cin',  ilave:0  },
@@ -664,6 +675,43 @@ const PERIODS = [
   { id:13, start:'2026-10-16', end:'2026-10-31', pp:35,  option:1,  basis:'stay', ilave:15 },
   { id:14, start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
 ];
+
+const PERIODS_01_07 = [
+  { id:1,  start:'2026-06-06', end:'2026-06-10', pp:34,  option:7,  basis:'cin',  ilave:0  },
+  { id:2,  start:'2026-06-11', end:'2026-06-13', pp:42,  option:10, basis:'cin',  ilave:0  },
+  { id:3,  start:'2026-06-14', end:'2026-06-18', pp:44,  option:10, basis:'cin',  ilave:0  },
+  { id:4,  start:'2026-06-19', end:'2026-06-24', pp:40,  option:10, basis:'cin',  ilave:0  },
+  { id:5,  start:'2026-06-25', end:'2026-06-30', pp:42,  option:10, basis:'cin',  ilave:0  },
+  { id:6,  start:'2026-07-01', end:'2026-07-04', pp:45,  option:10, basis:'cin',  ilave:0  },
+  { id:7,  start:'2026-07-05', end:'2026-07-23', pp:60,  option:10, basis:'stay', ilave:5  },
+  { id:8,  start:'2026-07-24', end:'2026-07-31', pp:60,  option:10, basis:'stay', ilave:10 },
+  { id:9,  start:'2026-08-01', end:'2026-08-24', pp:66,  option:7,  basis:'stay', ilave:15 },
+  { id:10, start:'2026-08-25', end:'2026-09-04', pp:62,  option:7,  basis:'stay', ilave:15 },
+  { id:11, start:'2026-09-05', end:'2026-09-20', pp:58,  option:3,  basis:'stay', ilave:15 },
+  { id:12, start:'2026-09-21', end:'2026-09-30', pp:50,  option:5,  basis:'stay', ilave:15 },
+  { id:13, start:'2026-10-01', end:'2026-10-15', pp:44,  option:3,  basis:'stay', ilave:15 },
+  { id:14, start:'2026-10-16', end:'2026-10-31', pp:35,  option:1,  basis:'stay', ilave:15 },
+  { id:15, start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
+];
+
+const PERIODS_03_07 = [
+  { id:1,  start:'2026-06-06', end:'2026-06-10', pp:34,  option:7,  basis:'cin',  ilave:0  },
+  { id:2,  start:'2026-06-11', end:'2026-06-13', pp:42,  option:10, basis:'cin',  ilave:0  },
+  { id:3,  start:'2026-06-14', end:'2026-06-18', pp:44,  option:10, basis:'cin',  ilave:0  },
+  { id:4,  start:'2026-06-19', end:'2026-06-24', pp:40,  option:10, basis:'cin',  ilave:0  },
+  { id:5,  start:'2026-06-25', end:'2026-06-30', pp:42,  option:10, basis:'cin',  ilave:0  },
+  { id:6,  start:'2026-07-01', end:'2026-07-04', pp:45,  option:10, basis:'cin',  ilave:0  },
+  { id:7,  start:'2026-07-05', end:'2026-07-31', pp:60,  option:10, basis:'stay', ilave:5  },
+  { id:8,  start:'2026-08-01', end:'2026-08-24', pp:66,  option:7,  basis:'stay', ilave:10 },
+  { id:9,  start:'2026-08-25', end:'2026-09-04', pp:62,  option:7,  basis:'stay', ilave:10 },
+  { id:10, start:'2026-09-05', end:'2026-09-20', pp:58,  option:3,  basis:'stay', ilave:10 },
+  { id:11, start:'2026-09-21', end:'2026-09-30', pp:50,  option:5,  basis:'stay', ilave:10 },
+  { id:12, start:'2026-10-01', end:'2026-10-15', pp:44,  option:3,  basis:'stay', ilave:10 },
+  { id:13, start:'2026-10-16', end:'2026-10-31', pp:35,  option:1,  basis:'stay', ilave:10 },
+  { id:14, start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
+];
+
+let PERIODS = PERIODS_03_07;
 
 const SNG_PEAK_START = new Date('2026-05-11');
 const SNG_PEAK_END   = new Date('2026-09-30');
@@ -834,11 +882,18 @@ function calculate() {
       return;
     }
   } else if (!isPegas && !isFit && agencyId !== '__general__') {
-    agency = agencies.find(a => a.id === agencyId);
-    if (agency) {
-      freeAgeLimit = agency.childFreeAge ?? DEFAULT_FREE_AGE;
-      agencyDiscountPct = agency.discount ?? 0;
+    if (agencyId !== 'rocket_tour') {
+      agency = agencies.find(a => a.id === agencyId);
+      if (agency) {
+        freeAgeLimit = agency.childFreeAge ?? DEFAULT_FREE_AGE;
+        agencyDiscountPct = agency.discount ?? 0;
+      }
     }
+  }
+
+  const isRocket = !isTraveyo && !isPegas && !isFit && (agencyId === 'rocket_tour' || (agency && agency.name.toLowerCase().includes('rocket')));
+  if (isRocket) {
+    agencyDiscountPct = 0;
   }
 
   // Categorize
@@ -932,10 +987,10 @@ function calculate() {
     let nightDiscountPct = 0;
 
     if (isPegas) {
-      nightDiscountPct = nightIlavePct + 1;
+      nightDiscountPct = nightIlavePct;
       nightDiscount = (nightRate * nightDiscountPct / 100);
       if (nightIlavePct > 0) {
-        nightIlaveDiscount = (nightRate * nightIlavePct / 100);
+        nightIlaveDiscount = nightDiscount;
       }
     } else if (isFit) {
       // Step 1: Apply ilave discount (15% or 10%)
@@ -945,6 +1000,13 @@ function calculate() {
       nightFitDiscount = (remainingRate * 3 / 100);
       nightDiscount = nightIlaveDiscount + nightFitDiscount;
       nightDiscountPct = +(nightIlavePct + 3 - (0.03 * nightIlavePct)).toFixed(4);
+    } else if (isRocket) {
+      // Rocket: additive nightIlavePct + 2
+      nightDiscountPct = nightIlavePct + 2;
+      nightDiscount = (nightRate * nightDiscountPct / 100);
+      if (nightIlavePct > 0) {
+        nightIlaveDiscount = (nightRate * nightIlavePct / 100);
+      }
     } else {
       nightDiscountPct = nightIlavePct;
       nightDiscount = (nightRate * nightDiscountPct / 100);
@@ -967,10 +1029,6 @@ function calculate() {
     }
     if (nightDiscount > 0) {
       totalDiscountAmount += nightDiscount;
-    }
-    if (isPegas && nightIlavePct === 0) {
-      pegasOnlyNightCount++;
-      pegasOnlyAmount += nightDiscount;
     }
 
     nightlyBreakdown.push({
@@ -1017,7 +1075,7 @@ function calculate() {
     roomConfig: traveyoRoomConfig || roomConfig,
     subtotal, usedIlave, ilaveNightCount, ilaveSubtotal,
     ilaveDiscountAmount, fitDiscountAmount, activeIlavePcts,
-    isPegas, isFit, isTraveyo, pegasOnlyNightCount, pegasOnlyAmount,
+    isPegas, isFit, isTraveyo, isRocket, pegasOnlyNightCount, pegasOnlyAmount,
     totalDiscountAmount,
     agency, agencyDiscountPct, agencyAmount, isDiscount,
     grandTotal, ppn, maxOption, freeAgeLimit,
@@ -1096,13 +1154,17 @@ function renderResults(data) {
   if (data.activeIlavePcts && data.activeIlavePcts.length === 1) {
     const pct = data.activeIlavePcts[0];
     if (data.isPegas) {
-      ilaveLabel = `✈️ İlave %${pct} + Pegas %1 = <strong>%${pct + 1} İndirim</strong>`;
+      ilaveLabel = `✈️ Pegas İlave %${pct} İndirim`;
+    } else if (data.isRocket) {
+      ilaveLabel = `🚀 Rocket İlave %${pct} + %2 = <strong>%${pct + 2} İndirim</strong>`;
     } else {
       ilaveLabel = `İlave %${pct} İndirim`;
     }
   } else if (data.activeIlavePcts && data.activeIlavePcts.length > 1) {
     if (data.isPegas) {
-      ilaveLabel = `✈️ İlave + Pegas İndirimi`;
+      ilaveLabel = `✈️ Pegas İlave İndirimi`;
+    } else if (data.isRocket) {
+      ilaveLabel = `🚀 Rocket İlave + %2 İndirimi`;
     } else {
       ilaveLabel = `İlave İndirimi`;
     }
@@ -1110,17 +1172,18 @@ function renderResults(data) {
 
   // Combined discount line(s)
   if (data.usedIlave) {
-    totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
-    if (data.isPegas && data.pegasOnlyNightCount > 0) {
-      totalsHTML += `<div class="total-row discount"><span class="label">✈️ Pegas %1 İndirim (${data.pegasOnlyNightCount} gece, ilave dışı)</span><span class="value">− ${formatEUR(data.pegasOnlyAmount)}</span></div>`;
+    if (data.isRocket) {
+      totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+    } else {
+      totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
+      if (data.isFit) {
+        totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.fitDiscountAmount)}</span></div>`;
+      }
     }
-    if (data.isFit) {
-      totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.fitDiscountAmount)}</span></div>`;
-    }
-  } else if (data.isPegas) {
-    totalsHTML += `<div class="total-row discount"><span class="label">✈️ Pegas %1 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   } else if (data.isFit) {
     totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+  } else if (data.isRocket) {
+    totalsHTML += `<div class="total-row discount"><span class="label">🚀 Rocket %2 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   }
 
   if (data.agencyDiscountPct > 0) {
@@ -1146,7 +1209,10 @@ function renderResults(data) {
     notesHTML += `<div class="info-note green">✅ <strong>${ilaveLabel}</strong> uygulandı (${data.ilaveNightCount} gece).</div>`;
   }
   if (data.isPegas) {
-    notesHTML += `<div class="info-note blue">✈️ <strong>Pegas Acentası</strong> — Tüm tarihlerde +%1 indirim (ilave dönemle toplanır).</div>`;
+    notesHTML += `<div class="info-note blue">✈️ <strong>Pegas Acentası</strong> — Döneme ait ilave aksiyon indirimleri uygulanır.</div>`;
+  }
+  if (data.isRocket) {
+    notesHTML += `<div class="info-note blue">🚀 <strong>Rocket Tour</strong> — Tüm tarihlerde +%2 indirim (ilave dönemle toplanır).</div>`;
   }
   if (data.isFit) {
     notesHTML += `<div class="info-note purple">🏖️ <strong>Fit Acentası</strong> — Tüm tarihlerde %3 indirim (ilave dönem indirimi uygulandıktan sonra kalan tutara uygulanır).</div>`;
@@ -1328,7 +1394,8 @@ function renderAgencyList() {
     container.innerHTML = html;
   }
   const cv = select.value;
-  select.innerHTML = '<option value="__general__">Genel Kontrat (İndirimsiz)</option>';
+  select.innerHTML = '<option value="__general__">Genel Kontrat (İndirimsiz)</option>' +
+                     '<option value="rocket_tour">🚀 Rocket Tour (-%2)</option>';
   for (const a of agencies) {
     const o = document.createElement('option');
     o.value = a.id;
@@ -1482,6 +1549,44 @@ function renderRateCard() {
   body.innerHTML = bHTML;
 }
 
+function changeActionListVersion() {
+  const version = document.getElementById('actionListSelect').value;
+  if (version === '03.07.2026') {
+    PERIODS = PERIODS_03_07;
+  } else if (version === '01.07.2026') {
+    PERIODS = PERIODS_01_07;
+  } else {
+    PERIODS = PERIODS_19_06;
+  }
+  updateConditionsBanner(version);
+  renderRateCard();
+  calculate();
+}
+
+function updateConditionsBanner(version) {
+  const condHeader = document.querySelector('.conditions-banner h3');
+  if (condHeader) {
+    condHeader.innerHTML = `📜 Kondisyonlar — Aksiyon ${version}`;
+  }
+  const rateToggle = document.querySelector('.section-toggle span');
+  if (rateToggle) {
+    rateToggle.innerHTML = `📋 Fiyat Tablosu — Aksiyon ${version}`;
+  }
+  const listItems = document.querySelectorAll('.conditions-list li');
+  if (listItems.length >= 6) {
+    if (version === '03.07.2026') {
+      listItems[4].innerHTML = '<strong>İlk 6 dönem (06.06 – 04.07)</strong> fiyatlar <strong>C/IN (check-in) bazlıdır</strong>.';
+      listItems[5].innerHTML = '<strong>05.07 – 15.11 arası</strong> fiyatlar <strong>konaklama bazlıdır</strong> ve tablo fiyatlarına İLAVE <strong>%5 / %10 İNDİRİM uygulanır</strong>.';
+    } else if (version === '01.07.2026') {
+      listItems[4].innerHTML = '<strong>İlk 6 dönem (06.06 – 04.07)</strong> fiyatlar <strong>C/IN (check-in) bazlıdır</strong>.';
+      listItems[5].innerHTML = '<strong>05.07 – 15.11 arası</strong> fiyatlar <strong>konaklama bazlıdır</strong> ve tablo fiyatlarına İLAVE <strong>%5 / %10 / %15 İNDİRİM uygulanır</strong>.';
+    } else {
+      listItems[4].innerHTML = '<strong>İlk 6 dönem (06.06 – 04.07)</strong> fiyatlar <strong>C/IN (check-in) bazlıdır</strong>.';
+      listItems[5].innerHTML = '<strong>05.07 – 15.11 arası</strong> fiyatlar <strong>konaklama bazlıdır</strong> ve tablo fiyatlarına İLAVE <strong>%10 / %15 İNDİRİM uygulanır</strong>.';
+    }
+  }
+}
+
 // ================================================================
 // INIT
 // ================================================================
@@ -1490,6 +1595,7 @@ function init() {
   document.getElementById('saleDate').value = dateToStr(today);
   renderGuestAges();
   renderAgencyList();
+  updateConditionsBanner('03.07.2026');
   renderRateCard();
   document.getElementById('checkIn').addEventListener('input', updateCheckOutFromNights);
   document.getElementById('checkIn').addEventListener('change', updateCheckOutFromNights);
