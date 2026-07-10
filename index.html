@@ -461,9 +461,232 @@ body::before {
   .header { padding: 20px 14px 18px; }
   .header h1 { font-size: 22px; }
 }
+/* ================================================================
+   AUTH & HOTEL SELECT
+   ================================================================ */
+.auth-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg-primary);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.4s ease;
+}
+.auth-screen.hidden { display: none; }
+.auth-bg {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+}
+.auth-bg::before {
+  content: ''; position: absolute;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,168,67,0.08) 0%, transparent 70%);
+  top: -200px; left: -200px; animation: pulse 8s ease-in-out infinite;
+}
+.auth-bg::after {
+  content: ''; position: absolute;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+  bottom: -100px; right: -100px; animation: pulse 10s ease-in-out infinite reverse;
+}
+@keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.15);opacity:0.7;} }
+.auth-card {
+  position: relative; z-index: 1;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 44px 40px;
+  width: 90%; max-width: 420px;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(212,168,67,0.05);
+  animation: fadeIn 0.5s ease;
+}
+.auth-logo { font-size: 44px; margin-bottom: 14px; filter: drop-shadow(0 0 20px rgba(212,168,67,0.3)); }
+.auth-hotel-name {
+  font-family: var(--font-display); font-size: 26px; font-weight: 700;
+  background: var(--gold-gradient); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 4px;
+}
+.auth-subtitle { font-size: 11px; color: var(--text-muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+.auth-divider { border: none; border-top: 1px solid var(--border-subtle); margin: 22px 0; }
+.auth-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 20px; }
+.auth-error {
+  padding: 9px 12px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-sm); color: var(--red-400); font-size: 12px;
+  margin-bottom: 12px; display: none; animation: shake 0.4s ease;
+}
+.auth-error.show { display: block; }
+.btn-auth {
+  width: 100%; padding: 12px; background: var(--gold-gradient);
+  border: none; border-radius: var(--radius-md); color: #1a1207;
+  font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: var(--transition); margin-top: 6px;
+  letter-spacing: 0.3px;
+}
+.btn-auth:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(212,168,67,0.3); }
+.auth-version { font-size: 10px; color: var(--text-muted); margin-top: 18px; opacity: 0.6; }
+
+/* HOTEL SELECT */
+.hotel-select-wrap {
+  position: relative; z-index: 1; width: 90%; max-width: 800px; animation: fadeIn 0.5s ease;
+}
+.hotel-select-header { text-align: center; margin-bottom: 30px; }
+.hotel-select-greeting {
+  font-family: var(--font-display); font-size: 28px; font-weight: 700;
+  background: var(--gold-gradient); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px;
+}
+.hotel-select-sub { font-size: 13px; color: var(--text-muted); }
+.hotel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+.hotel-card {
+  background: var(--bg-secondary); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg); padding: 28px 22px; text-align: center;
+  cursor: pointer; transition: var(--transition); position: relative; overflow: hidden;
+}
+.hotel-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--gold-gradient); opacity: 0; transition: opacity 0.3s ease;
+}
+.hotel-card:hover { border-color: var(--gold-400); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(212,168,67,0.12); }
+.hotel-card:hover::before { opacity: 0.04; }
+.hotel-card-icon { font-size: 40px; margin-bottom: 12px; }
+.hotel-card-name { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.hotel-card-loc { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 10px; }
+.hotel-card-stars { color: var(--gold-400); font-size: 12px; letter-spacing: 4px; }
+.hotel-select-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+.btn-logout {
+  display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+  background: transparent; border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  font-family: var(--font-body); font-size: 12px; cursor: pointer; transition: var(--transition);
+}
+.btn-logout:hover { border-color: var(--red-400); color: var(--red-400); }
+.btn-admin {
+  display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+  background: rgba(212,168,67,0.08); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--gold-300);
+  font-family: var(--font-body); font-size: 12px; cursor: pointer; transition: var(--transition);
+}
+.btn-admin:hover { background: rgba(212,168,67,0.15); }
+
+/* TOP BAR (after login) */
+.top-bar {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 10px 24px; background: transparent;
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative; z-index: 1;
+}
+.top-bar-user {
+  display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted);
+}
+.top-bar-user strong { color: var(--text-secondary); }
+.btn-topbar {
+  display: flex; align-items: center; gap: 5px; padding: 5px 12px;
+  background: transparent; border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  font-family: var(--font-body); font-size: 11px; cursor: pointer; transition: var(--transition);
+}
+.btn-topbar:hover { border-color: var(--border); color: var(--text-primary); }
+.btn-topbar.danger:hover { border-color: var(--red-400); color: var(--red-400); }
+
+/* ADMIN MODAL */
+.admin-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border-subtle); margin-bottom: 18px; }
+.admin-tab {
+  padding: 9px 18px; background: transparent; border: none;
+  color: var(--text-muted); font-family: var(--font-body); font-size: 13px;
+  cursor: pointer; border-bottom: 2px solid transparent; transition: var(--transition);
+}
+.admin-tab.active { color: var(--gold-300); border-bottom-color: var(--gold-400); }
+.user-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 6px;
+}
+.user-item-info { flex: 1; }
+.user-item-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.user-item-role { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.user-badge { padding: 2px 8px; border-radius: 100px; font-size: 10px; font-weight: 600; }
+.user-badge.admin { background: rgba(212,168,67,0.12); color: var(--gold-300); }
+.user-badge.user { background: rgba(100,116,139,0.12); color: var(--text-muted); }
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="auth-screen">
+  <div class="auth-bg"></div>
+  <div class="auth-card">
+    <div class="auth-logo">🏨</div>
+    <div class="auth-hotel-name">Pricing System</div>
+    <div class="auth-subtitle">Hotel Management</div>
+    <hr class="auth-divider">
+    <div class="auth-title">Giriş Yapın</div>
+    <div class="auth-error" id="loginError">Hatalı kullanıcı adı veya şifre.</div>
+    <div class="form-group" style="text-align:left;margin-bottom:12px;">
+      <label class="form-label" for="loginUsername">Kullanıcı Adı</label>
+      <input type="text" id="loginUsername" class="form-input" placeholder="Kullanıcı adınız" autocomplete="username">
+    </div>
+    <div class="form-group" style="text-align:left;margin-bottom:16px;">
+      <label class="form-label" for="loginPassword">Şifre</label>
+      <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-auth" onclick="doLogin()">Giriş Yap</button>
+    <div class="auth-version">Hotel Agency Pricing System v2.0</div>
+  </div>
+</div>
+
+<!-- HOTEL SELECT SCREEN -->
+<div id="hotelSelectScreen" class="auth-screen hidden">
+  <div class="auth-bg"></div>
+  <div class="hotel-select-wrap">
+    <div class="hotel-select-header">
+      <div class="hotel-select-greeting" id="selectGreeting">Hoş Geldiniz!</div>
+      <div class="hotel-select-sub">Devam etmek için bir otel seçin</div>
+    </div>
+    <div class="hotel-grid" id="hotelGrid"></div>
+    <div class="hotel-select-actions">
+      <button class="btn-logout" onclick="doLogout()">🚪 Çıkış Yap</button>
+      <button class="btn-admin" id="adminPanelBtn" onclick="openAdminPanel()" style="display:none;">⚙️ Admin Paneli</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL MODAL -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-title">⚙️ Admin Paneli</div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="switchAdminTab('users', this)">👥 Kullanıcılar</button>
+    </div>
+    <div id="adminTabUsers">
+      <div id="adminUserList" style="margin-bottom:16px;"></div>
+      <hr style="border-color:var(--border-subtle);margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:var(--gold-300);margin-bottom:10px;">+ Yeni Kullanıcı Ekle</div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group">
+          <label class="form-label" for="newUsername">Kullanıcı Adı</label>
+          <input type="text" id="newUsername" class="form-input" placeholder="kullanici_adi">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newPassword">Şifre</label>
+          <input type="password" id="newPassword" class="form-input" placeholder="şifre">
+        </div>
+      </div>
+      <div class="auth-error" id="adminError" style="margin-bottom:8px;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal secondary" onclick="closeAdminPanel()">Kapat</button>
+      <button class="btn-modal primary" onclick="addUser()">Kullanıcı Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+<div class="top-bar" id="topBar">
+  <div class="top-bar-user">👤 <strong id="topBarUsername"></strong></div>
+  <button class="btn-topbar" id="topBarAdmin" onclick="openAdminPanel()" style="display:none;">⚙️ Admin</button>
+  <button class="btn-topbar" onclick="backToHotelSelect()">🏨 Otel Değiştir</button>
+  <button class="btn-topbar danger" onclick="doLogout()">🚪 Çıkış</button>
+</div>
 
 <header class="header">
   <div class="header-stars">★ ★ ★ ★ ★</div>
@@ -622,6 +845,7 @@ body::before {
     </ul>
   </div>
 </div>
+</div><!-- /#mainApp -->
 
 <!-- AGENCY MODAL -->
 <div class="modal-overlay" id="agencyModal">
@@ -657,6 +881,189 @@ body::before {
 </div>
 
 <script>
+// ================================================================
+// AUTH & USERS
+// ================================================================
+const DEFAULT_USERS = [
+  { id: 'admin', username: 'admin', password: '1907', role: 'admin' }
+];
+
+const HOTELS = [
+  { id: 'grand_miramor', name: 'Grand Miramor Hotel', location: 'Kiriş • Antalya', stars: '★★★★★', icon: '🏰' }
+];
+
+function getUsers() {
+  const stored = localStorage.getItem('gmh_users');
+  if (!stored) {
+    localStorage.setItem('gmh_users', JSON.stringify(DEFAULT_USERS));
+    return DEFAULT_USERS;
+  }
+  const users = JSON.parse(stored);
+  // Ensure admin always exists
+  if (!users.find(u => u.id === 'admin')) {
+    users.unshift(DEFAULT_USERS[0]);
+    localStorage.setItem('gmh_users', JSON.stringify(users));
+  }
+  return users;
+}
+
+function saveUsers(users) {
+  localStorage.setItem('gmh_users', JSON.stringify(users));
+}
+
+function getSession() {
+  const s = localStorage.getItem('gmh_session');
+  if (!s) return null;
+  try {
+    const session = JSON.parse(s);
+    if (session.expiresAt < Date.now()) {
+      localStorage.removeItem('gmh_session');
+      return null;
+    }
+    return session;
+  } catch { return null; }
+}
+
+function createSession(user) {
+  const session = {
+    userId: user.id,
+    username: user.username,
+    role: user.role,
+    expiresAt: Date.now() + 12 * 60 * 60 * 1000 // 12 saat
+  };
+  localStorage.setItem('gmh_session', JSON.stringify(session));
+  return session;
+}
+
+function doLogin() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.classList.remove('show');
+  if (!username || !password) { errEl.textContent = 'Kullanıcı adı ve şifre gereklidir.'; errEl.classList.add('show'); return; }
+  const users = getUsers();
+  const user = users.find(u => u.username === username && u.password === password);
+  if (!user) { errEl.textContent = 'Hatalı kullanıcı adı veya şifre.'; errEl.classList.add('show'); return; }
+  const session = createSession(user);
+  showHotelSelect(session);
+}
+
+function doLogout() {
+  localStorage.removeItem('gmh_session');
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('hotelSelectScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginError').classList.remove('show');
+}
+
+function showHotelSelect(session) {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('hotelSelectScreen').classList.remove('hidden');
+  document.getElementById('selectGreeting').textContent = `Hoş Geldiniz, ${session.username}!`;
+  const adminBtn = document.getElementById('adminPanelBtn');
+  if (adminBtn) adminBtn.style.display = session.role === 'admin' ? 'flex' : 'none';
+  renderHotelGrid();
+}
+
+function renderHotelGrid() {
+  const grid = document.getElementById('hotelGrid');
+  grid.innerHTML = HOTELS.map(h => `
+    <div class="hotel-card" onclick="selectHotel('${h.id}')">
+      <div class="hotel-card-icon">${h.icon}</div>
+      <div class="hotel-card-name">${h.name}</div>
+      <div class="hotel-card-loc">${h.location}</div>
+      <div class="hotel-card-stars">${h.stars}</div>
+    </div>
+  `).join('');
+}
+
+function selectHotel(hotelId) {
+  const session = getSession();
+  if (!session) { doLogout(); return; }
+  session.selectedHotel = hotelId;
+  localStorage.setItem('gmh_session', JSON.stringify(session));
+  document.getElementById('hotelSelectScreen').classList.add('hidden');
+  document.getElementById('mainApp').style.display = 'block';
+  document.getElementById('topBarUsername').textContent = session.username;
+  const adminBtn = document.getElementById('topBarAdmin');
+  if (adminBtn) adminBtn.style.display = session.role === 'admin' ? 'flex' : 'none';
+}
+
+function backToHotelSelect() {
+  const session = getSession();
+  if (!session) { doLogout(); return; }
+  document.getElementById('mainApp').style.display = 'none';
+  showHotelSelect(session);
+}
+
+function checkAuth() {
+  const session = getSession();
+  if (!session) {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    return false;
+  }
+  if (session.selectedHotel) {
+    selectHotel(session.selectedHotel);
+  } else {
+    showHotelSelect(session);
+  }
+  return true;
+}
+
+// Admin panel
+function openAdminPanel() {
+  renderAdminUsers();
+  document.getElementById('adminModal').classList.add('active');
+}
+function closeAdminPanel() {
+  document.getElementById('adminModal').classList.remove('active');
+  document.getElementById('newUsername').value = '';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('adminError').classList.remove('show');
+}
+function switchAdminTab(tab, btn) {
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function renderAdminUsers() {
+  const users = getUsers();
+  const list = document.getElementById('adminUserList');
+  list.innerHTML = users.map(u => `
+    <div class="user-item">
+      <div class="user-item-info">
+        <div class="user-item-name">👤 ${escapeHTML(u.username)}</div>
+        <div class="user-item-role">Rol: ${u.role === 'admin' ? 'Yönetici' : 'Kullanıcı'}</div>
+      </div>
+      <span class="user-badge ${u.role}">${u.role === 'admin' ? '👑 Admin' : '🧑 User'}</span>
+      ${u.id !== 'admin' ? `<button class="btn-icon delete" onclick="deleteUser('${u.id}')" style="margin-left:8px;">🗑</button>` : ''}
+    </div>
+  `).join('');
+}
+function addUser() {
+  const username = document.getElementById('newUsername').value.trim();
+  const password = document.getElementById('newPassword').value;
+  const errEl = document.getElementById('adminError');
+  errEl.classList.remove('show');
+  if (!username || !password) { errEl.textContent = 'Kullanıcı adı ve şifre boş olamaz.'; errEl.classList.add('show'); return; }
+  const users = getUsers();
+  if (users.find(u => u.username === username)) { errEl.textContent = 'Bu kullanıcı adı zaten mevcut.'; errEl.classList.add('show'); return; }
+  const newUser = { id: 'u_' + Date.now(), username, password, role: 'user' };
+  users.push(newUser);
+  saveUsers(users);
+  document.getElementById('newUsername').value = '';
+  document.getElementById('newPassword').value = '';
+  renderAdminUsers();
+}
+function deleteUser(userId) {
+  if (!confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) return;
+  const users = getUsers().filter(u => u.id !== userId);
+  saveUsers(users);
+  renderAdminUsers();
+}
+
 // ================================================================
 // DATA — AKSİYON 06.06.2026
 // ================================================================
@@ -1619,9 +2026,40 @@ function init() {
   updateNightsFromDates();
   document.getElementById('agencySelect').addEventListener('change', () => { for (let i = 0; i < guestCount; i++) updateBadge(i); });
   document.getElementById('agencyModal').addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) closeAgencyModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Enter' && !document.getElementById('agencyModal').classList.contains('active')) calculate(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (document.getElementById('agencyModal').classList.contains('active')) return;
+      if (document.getElementById('adminModal').classList.contains('active')) return;
+      if (!document.getElementById('loginScreen').classList.contains('hidden')) { doLogin(); return; }
+      calculate();
+    }
+  });
+  document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 }
-document.addEventListener('DOMContentLoaded', init);
+function init() {
+  const today = new Date();
+  const todayStr = dateToStr(today);
+  document.getElementById('checkIn').value = todayStr;
+  document.getElementById('saleDate').value = todayStr;
+  updateCheckOutFromNights();
+  renderGuestAges();
+  renderAgencyList();
+  updateConditionsBanner('08.07.2026');
+  renderRateCard();
+  document.getElementById('checkIn').addEventListener('input', updateCheckOutFromNights);
+  document.getElementById('checkIn').addEventListener('change', updateCheckOutFromNights);
+  document.getElementById('nightsInput').addEventListener('input', updateCheckOutFromNights);
+  document.getElementById('nightsInput').addEventListener('change', updateCheckOutFromNights);
+  document.getElementById('checkOut').addEventListener('input', updateNightsFromDates);
+  document.getElementById('checkOut').addEventListener('change', updateNightsFromDates);
+  document.getElementById('agencySelect').addEventListener('change', () => { for (let i = 0; i < guestCount; i++) updateBadge(i); });
+  document.getElementById('agencyModal').addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) closeAgencyModal(); });
+  document.getElementById('adminModal').addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) closeAdminPanel(); });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  checkAuth();
+});
 </script>
 </body>
 </html>
