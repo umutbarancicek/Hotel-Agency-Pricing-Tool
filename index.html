@@ -889,7 +889,12 @@ const DEFAULT_USERS = [
 ];
 
 const HOTELS = [
-  { id: 'grand_miramor', name: 'Grand Miramor Hotel', location: 'Kiriş • Antalya', stars: '★★★★★', icon: '🏰' }
+  { id: 'grand_miramor',    name: 'Grand Miramor Hotel',           location: 'Kiriş • Antalya',   stars: '★★★★★', icon: '🏰' },
+  { id: 'miramor_garden',   name: 'Miramor Garden Hotel',          location: 'Kiriş • Antalya',   stars: '★★★★',  icon: '🌿' },
+  { id: 'ambassador_park',  name: 'Ambassador Hotel (Park)',        location: 'Kemer • Antalya',   stars: '★★★★',  icon: '🏛️' },
+  { id: 'ambassador_main',  name: 'Ambassador Hotel (Main)',        location: 'Kemer • Antalya',   stars: '★★★★',  icon: '🏛️' },
+  { id: 'astoria',          name: 'Astoria Hotel',                  location: 'Kemer • Antalya',   stars: '★★★★',  icon: '🌟' },
+  { id: 'stella',           name: 'Stella Hotel',                   location: 'Çamyuva • Antalya', stars: '★★★★',  icon: '⭐' },
 ];
 
 function getUsers() {
@@ -990,6 +995,8 @@ function selectHotel(hotelId) {
   document.getElementById('topBarUsername').textContent = session.username;
   const adminBtn = document.getElementById('topBarAdmin');
   if (adminBtn) adminBtn.style.display = session.role === 'admin' ? 'flex' : 'none';
+  // Otele göre veri yükle
+  loadHotelData(hotelId);
 }
 
 function backToHotelSelect() {
@@ -1124,6 +1131,200 @@ const PERIODS_08_07 = [
 ];
 
 let PERIODS = PERIODS_08_07;
+
+// ================================================================
+// DÖNEM VERİLERİ — DİĞER OTELLER (19.06.2026 Aksiyonu)
+// ================================================================
+
+// MIRAMOR GARDEN — Kiriş 4★ AI
+const PERIODS_MIRAMOR_GARDEN = [
+  { id:1,  start:'2026-06-19', end:'2026-06-24', pp:32, option:10, basis:'cin',  ilave:0  },
+  { id:2,  start:'2026-06-25', end:'2026-06-30', pp:36, option:10, basis:'cin',  ilave:0  },
+  { id:3,  start:'2026-07-01', end:'2026-07-04', pp:40, option:10, basis:'cin',  ilave:0  },
+  { id:4,  start:'2026-07-05', end:'2026-07-31', pp:54, option:7,  basis:'stay', ilave:15 },
+  { id:5,  start:'2026-08-01', end:'2026-08-24', pp:60, option:7,  basis:'stay', ilave:15 },
+  { id:6,  start:'2026-08-25', end:'2026-09-04', pp:56, option:3,  basis:'stay', ilave:15 },
+  { id:7,  start:'2026-09-05', end:'2026-09-20', pp:52, option:5,  basis:'stay', ilave:15 },
+  { id:8,  start:'2026-09-21', end:'2026-09-30', pp:44, option:3,  basis:'stay', ilave:15 },
+  { id:9,  start:'2026-10-01', end:'2026-10-15', pp:38, option:1,  basis:'stay', ilave:15 },
+  { id:10, start:'2026-10-16', end:'2026-10-31', pp:32, option:1,  basis:'stay', ilave:15 },
+];
+
+// AMBASSADOR PARK BUILDING — Kemer 4★ AI
+const PERIODS_AMBASSADOR_PARK = [
+  { id:1,  start:'2026-06-19', end:'2026-06-24', pp:38, option:7,  basis:'cin',  ilave:0  },
+  { id:2,  start:'2026-06-25', end:'2026-06-30', pp:40, option:10, basis:'cin',  ilave:0  },
+  { id:3,  start:'2026-07-01', end:'2026-07-04', pp:43, option:10, basis:'cin',  ilave:0  },
+  { id:4,  start:'2026-07-05', end:'2026-07-31', pp:58, option:10, basis:'stay', ilave:15 },
+  { id:5,  start:'2026-08-01', end:'2026-08-24', pp:64, option:7,  basis:'stay', ilave:15 },
+  { id:6,  start:'2026-08-25', end:'2026-09-04', pp:60, option:7,  basis:'stay', ilave:15 },
+  { id:7,  start:'2026-09-05', end:'2026-09-20', pp:57, option:3,  basis:'stay', ilave:15 },
+  { id:8,  start:'2026-09-21', end:'2026-09-30', pp:48, option:5,  basis:'stay', ilave:15 },
+  { id:9,  start:'2026-10-01', end:'2026-10-15', pp:42, option:3,  basis:'stay', ilave:15 },
+  { id:10, start:'2026-10-16', end:'2026-10-31', pp:35, option:1,  basis:'stay', ilave:15 },
+  { id:11, start:'2026-11-01', end:'2026-11-15', pp:30, option:1,  basis:'stay', ilave:10 },
+];
+
+// AMBASSADOR MAIN BUILDING — Kemer 4★ AI
+const PERIODS_AMBASSADOR_MAIN = [
+  { id:1,  start:'2026-06-19', end:'2026-06-24', pp:43, option:7,  basis:'cin',  ilave:0  },
+  { id:2,  start:'2026-06-25', end:'2026-06-30', pp:45, option:10, basis:'cin',  ilave:0  },
+  { id:3,  start:'2026-07-01', end:'2026-07-04', pp:48, option:10, basis:'cin',  ilave:0  },
+  { id:4,  start:'2026-07-05', end:'2026-07-31', pp:63, option:10, basis:'stay', ilave:15 },
+  { id:5,  start:'2026-08-01', end:'2026-08-24', pp:69, option:7,  basis:'stay', ilave:15 },
+  { id:6,  start:'2026-08-25', end:'2026-09-04', pp:65, option:7,  basis:'stay', ilave:15 },
+  { id:7,  start:'2026-09-05', end:'2026-09-20', pp:62, option:3,  basis:'stay', ilave:15 },
+  { id:8,  start:'2026-09-21', end:'2026-09-30', pp:53, option:5,  basis:'stay', ilave:15 },
+  { id:9,  start:'2026-10-01', end:'2026-10-15', pp:47, option:3,  basis:'stay', ilave:15 },
+  { id:10, start:'2026-10-16', end:'2026-10-31', pp:40, option:1,  basis:'stay', ilave:15 },
+  { id:11, start:'2026-11-01', end:'2026-11-15', pp:35, option:1,  basis:'stay', ilave:10 },
+];
+
+// ASTORIA — Kemer 4★ AI
+const PERIODS_ASTORIA = [
+  { id:1,  start:'2026-06-19', end:'2026-06-24', pp:32, option:10, basis:'cin',  ilave:0  },
+  { id:2,  start:'2026-06-25', end:'2026-06-30', pp:35, option:10, basis:'cin',  ilave:0  },
+  { id:3,  start:'2026-07-01', end:'2026-07-04', pp:40, option:10, basis:'cin',  ilave:0  },
+  { id:4,  start:'2026-07-05', end:'2026-07-31', pp:50, option:7,  basis:'stay', ilave:15 },
+  { id:5,  start:'2026-08-01', end:'2026-08-24', pp:55, option:7,  basis:'stay', ilave:15 },
+  { id:6,  start:'2026-08-25', end:'2026-09-04', pp:50, option:3,  basis:'stay', ilave:15 },
+  { id:7,  start:'2026-09-05', end:'2026-09-20', pp:48, option:5,  basis:'stay', ilave:15 },
+  { id:8,  start:'2026-09-21', end:'2026-09-30', pp:44, option:3,  basis:'stay', ilave:15 },
+  { id:9,  start:'2026-10-01', end:'2026-10-15', pp:38, option:1,  basis:'stay', ilave:15 },
+  { id:10, start:'2026-10-16', end:'2026-10-31', pp:32, option:1,  basis:'stay', ilave:10 },
+];
+
+// STELLA — Çamyuva 4★ AI
+const PERIODS_STELLA = [
+  { id:1,  start:'2026-06-19', end:'2026-06-24', pp:30, option:10, basis:'cin',  ilave:0  },
+  { id:2,  start:'2026-06-25', end:'2026-06-30', pp:34, option:10, basis:'cin',  ilave:0  },
+  { id:3,  start:'2026-07-01', end:'2026-07-04', pp:38, option:10, basis:'cin',  ilave:0  },
+  { id:4,  start:'2026-07-05', end:'2026-07-31', pp:52, option:7,  basis:'stay', ilave:15 },
+  { id:5,  start:'2026-08-01', end:'2026-08-24', pp:58, option:7,  basis:'stay', ilave:15 },
+  { id:6,  start:'2026-08-25', end:'2026-09-04', pp:54, option:3,  basis:'stay', ilave:15 },
+  { id:7,  start:'2026-09-05', end:'2026-09-20', pp:50, option:5,  basis:'stay', ilave:15 },
+  { id:8,  start:'2026-09-21', end:'2026-09-30', pp:42, option:3,  basis:'stay', ilave:15 },
+  { id:9,  start:'2026-10-01', end:'2026-10-15', pp:36, option:1,  basis:'stay', ilave:15 },
+  { id:10, start:'2026-10-16', end:'2026-10-31', pp:32, option:1,  basis:'stay', ilave:15 },
+];
+
+// ================================================================
+// HOTEL YAPILANDIRMALARI
+// ================================================================
+const HOTEL_CONFIGS = {
+  'grand_miramor': {
+    name: 'Grand Miramor Hotel', location: 'Kiriş • Antalya • 4+', concept: 'Ultra All Inclusive',
+    hasPegas: true, hasFit: true, hasTraveyo: true,
+    actionVersions: [
+      { value: '08.07.2026', label: '08.07.2026 Aksiyonu (Güncel)', periods: null /* set after */ },
+      { value: '03.07.2026', label: '03.07.2026 Aksiyonu', periods: null },
+      { value: '01.07.2026', label: '01.07.2026 Aksiyonu', periods: null },
+      { value: '19.06.2026', label: '19.06.2026 Aksiyonu (Eski)', periods: null },
+    ]
+  },
+  'miramor_garden': {
+    name: 'Miramor Garden Hotel', location: 'Kiriş • Antalya', concept: 'All Inclusive',
+    hasPegas: false, hasFit: false, hasTraveyo: false,
+    actionVersions: [
+      { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_MIRAMOR_GARDEN },
+    ]
+  },
+  'ambassador_park': {
+    name: 'Ambassador Hotel (Park)', location: 'Kemer • Antalya', concept: 'All Inclusive',
+    hasPegas: false, hasFit: false, hasTraveyo: false,
+    actionVersions: [
+      { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_AMBASSADOR_PARK },
+    ]
+  },
+  'ambassador_main': {
+    name: 'Ambassador Hotel (Main)', location: 'Kemer • Antalya', concept: 'All Inclusive',
+    hasPegas: false, hasFit: false, hasTraveyo: false,
+    actionVersions: [
+      { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_AMBASSADOR_MAIN },
+    ]
+  },
+  'astoria': {
+    name: 'Astoria Hotel', location: 'Kemer • Antalya', concept: 'All Inclusive',
+    hasPegas: false, hasFit: false, hasTraveyo: false,
+    actionVersions: [
+      { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_ASTORIA },
+    ]
+  },
+  'stella': {
+    name: 'Stella Hotel', location: 'Çamyuva • Antalya', concept: 'All Inclusive',
+    hasPegas: false, hasFit: false, hasTraveyo: false,
+    actionVersions: [
+      { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_STELLA },
+    ]
+  },
+};
+
+function loadHotelData(hotelId) {
+  const cfg = HOTEL_CONFIGS[hotelId];
+  if (!cfg) return;
+
+  // Grand Miramor periods referanslarını burada bağla
+  if (hotelId === 'grand_miramor') {
+    cfg.actionVersions[0].periods = PERIODS_08_07;
+    cfg.actionVersions[1].periods = PERIODS_03_07;
+    cfg.actionVersions[2].periods = PERIODS_01_07;
+    cfg.actionVersions[3].periods = PERIODS_19_06;
+  }
+
+  // Header güncelle
+  const h1 = document.querySelector('.header h1');
+  if (h1) h1.textContent = cfg.name;
+  const loc = document.querySelector('.header-location');
+  if (loc) loc.textContent = cfg.location;
+  const badges = document.querySelectorAll('.header-badge');
+  if (badges[1]) badges[1].textContent = '🍽 ' + cfg.concept;
+
+  // Action list dropdown güncelle
+  const sel = document.getElementById('actionListSelect');
+  if (sel) {
+    sel.innerHTML = cfg.actionVersions.map((v, i) =>
+      `<option value="${v.value}">${v.label}</option>`
+    ).join('');
+  }
+
+  // İlk (en güncel) aksiyon versiyonunu yükle
+  PERIODS = cfg.actionVersions[0].periods;
+  updateConditionsBanner(cfg.actionVersions[0].value);
+
+  // Pegas / Fit / Traveyo butonlarını göster/gizle
+  const btnPegas   = document.getElementById('btnPegas');
+  const btnFit     = document.getElementById('btnFit');
+  const btnTraveyo = document.getElementById('btnTraveyo');
+  const pegasNote  = document.getElementById('pegasNote');
+  const fitNote    = document.getElementById('fitNote');
+  const traveyoNote= document.getElementById('traveyoNote');
+
+  if (cfg.hasPegas) {
+    if (btnPegas) btnPegas.style.display = '';
+    if (pegasNote) pegasNote.style.display = '';
+  } else {
+    if (btnPegas) btnPegas.style.display = 'none';
+    if (pegasNote) pegasNote.style.display = 'none';
+    // Otomatik olarak 'digerleri' seç
+    if (currentAgencyType === 'pegas') { selectAgencyType('digerleri'); }
+  }
+  if (cfg.hasFit) {
+    if (btnFit) btnFit.style.display = '';
+  } else {
+    if (btnFit) btnFit.style.display = 'none';
+    if (fitNote) fitNote.style.display = 'none';
+    if (currentAgencyType === 'fit') { selectAgencyType('digerleri'); }
+  }
+  if (cfg.hasTraveyo) {
+    if (btnTraveyo) btnTraveyo.style.display = '';
+  } else {
+    if (btnTraveyo) btnTraveyo.style.display = 'none';
+    if (traveyoNote) traveyoNote.style.display = 'none';
+    if (currentAgencyType === 'traveyo') { selectAgencyType('digerleri'); }
+  }
+
+  renderRateCard();
+}
 
 const SNG_PEAK_START = new Date('2026-05-11');
 const SNG_PEAK_END   = new Date('2026-09-30');
