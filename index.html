@@ -521,8 +521,9 @@ body::before {
         <div class="card-title"><span class="icon">📋</span> Aksiyon Listesi Sürümü</div>
         <div class="form-group">
           <select id="actionListSelect" class="form-select" onchange="changeActionListVersion()">
-            <option value="03.07.2026">03.07.2026 Aksiyonu (Değişen/Güncel)</option>
-            <option value="01.07.2026">01.07.2026 Aksiyonu (Asıl Güncel)</option>
+            <option value="08.07.2026">08.07.2026 Aksiyonu (Güncel)</option>
+            <option value="03.07.2026">03.07.2026 Aksiyonu</option>
+            <option value="01.07.2026">01.07.2026 Aksiyonu</option>
             <option value="19.06.2026">19.06.2026 Aksiyonu (Eski)</option>
           </select>
         </div>
@@ -706,7 +707,16 @@ const PERIODS_03_07 = [
   { id:8,  start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
 ];
 
-let PERIODS = PERIODS_03_07;
+// 08.07.26 Aksiyonu — 23.07-31.08 birleşik dönem, ilave:%5
+const PERIODS_08_07 = [
+  { id:1,  start:'2026-07-23', end:'2026-08-31', pp:66,  option:7,  basis:'stay', ilave:5  },
+  { id:2,  start:'2026-09-01', end:'2026-09-30', pp:62,  option:7,  basis:'stay', ilave:5  },
+  { id:3,  start:'2026-10-01', end:'2026-10-15', pp:45,  option:3,  basis:'stay', ilave:5  },
+  { id:4,  start:'2026-10-16', end:'2026-10-31', pp:35,  option:1,  basis:'stay', ilave:5  },
+  { id:5,  start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
+];
+
+let PERIODS = PERIODS_08_07;
 
 const SNG_PEAK_START = new Date('2026-05-11');
 const SNG_PEAK_END   = new Date('2026-09-30');
@@ -1546,7 +1556,9 @@ function renderRateCard() {
 
 function changeActionListVersion() {
   const version = document.getElementById('actionListSelect').value;
-  if (version === '03.07.2026') {
+  if (version === '08.07.2026') {
+    PERIODS = PERIODS_08_07;
+  } else if (version === '03.07.2026') {
     PERIODS = PERIODS_03_07;
   } else if (version === '01.07.2026') {
     PERIODS = PERIODS_01_07;
@@ -1569,7 +1581,10 @@ function updateConditionsBanner(version) {
   }
   const listItems = document.querySelectorAll('.conditions-list li');
   if (listItems.length >= 6) {
-    if (version === '03.07.2026') {
+    if (version === '08.07.2026') {
+      listItems[4].innerHTML = '<strong>23.07 – 15.11 arası</strong> tüm fiyatlar <strong>konaklama bazlıdır</strong> (Stop Sale: 01.07-22.07).';
+      listItems[5].innerHTML = '<strong>23.07 – 31.10 arası</strong> İLAVE <strong>%5 İNDİRİM</strong>, <strong>01.11 – 15.11 arası</strong> İLAVE <strong>%10 İNDİRİM</strong> uygulanır.';
+    } else if (version === '03.07.2026') {
       listItems[4].innerHTML = '<strong>İlk 6 dönem (06.06 – 04.07)</strong> fiyatlar <strong>C/IN (check-in) bazlıdır</strong>.';
       listItems[5].innerHTML = '<strong>05.07 – 15.11 arası</strong> fiyatlar <strong>konaklama bazlıdır</strong> ve tablo fiyatlarına İLAVE <strong>%5 / %10 İNDİRİM uygulanır</strong>.';
     } else if (version === '01.07.2026') {
@@ -1593,7 +1608,7 @@ function init() {
   updateCheckOutFromNights();
   renderGuestAges();
   renderAgencyList();
-  updateConditionsBanner('03.07.2026');
+  updateConditionsBanner('08.07.2026');
   renderRateCard();
   document.getElementById('checkIn').addEventListener('input', updateCheckOutFromNights);
   document.getElementById('checkIn').addEventListener('change', updateCheckOutFromNights);
