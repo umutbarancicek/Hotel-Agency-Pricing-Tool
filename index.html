@@ -757,14 +757,12 @@ body::before {
         <div class="form-group">
           <label class="form-label">Acenta Tipi</label>
           <div class="agency-toggle">
-            <button type="button" class="agency-toggle-btn active pegas-active" id="btnPegas" onclick="selectAgencyType('pegas')">✈️ Pegas</button>
+            <button type="button" class="agency-toggle-btn" id="btnAnex" onclick="selectAgencyType('anex')">✈️ Anex</button>
             <button type="button" class="agency-toggle-btn" id="btnFit" onclick="selectAgencyType('fit')">🏖️ Fit</button>
-            <button type="button" class="agency-toggle-btn" id="btnTraveyo" onclick="selectAgencyType('traveyo')">🌍 Traveyo</button>
-            <button type="button" class="agency-toggle-btn" id="btnDigerleri" onclick="selectAgencyType('digerleri')">🏢 Diğerleri</button>
+            <button type="button" class="agency-toggle-btn active" id="btnDigerleri" onclick="selectAgencyType('digerleri')">🏢 Diğerleri</button>
           </div>
-          <div class="agency-info-note pegas" id="pegasNote">Pegas acentası için döneme ait ilave aksiyon indirimleri uygulanır.</div>
+          <div class="agency-info-note pegas" id="anexNote" style="display:none;">Anex acentası: döneme ait ilave indirime <strong>+%5 ek indirim</strong> uygulanır (toplam ilave + 5).</div>
           <div class="agency-info-note fit" id="fitNote" style="display:none;">Fit acentasına özel <strong>%3 indirim</strong> tüm tarihlerde bileşik uygulanır.</div>
-          <div class="agency-info-note traveyo" id="traveyoNote" style="display:none;"><strong>Itaka / Cedok</strong> — Sabit 53€ PP | SNG ×1.5 | 0-12 yaş ücretsiz | 13.06 - sezon sonu</div>
           <div class="agency-sub-select" id="agencySubSelect" style="display:none;">
             <label class="form-label" for="agencySelect">Acenta Seçin</label>
             <select id="agencySelect" class="form-select">
@@ -1214,7 +1212,7 @@ const PERIODS_STELLA = [
 const HOTEL_CONFIGS = {
   'grand_miramor': {
     name: 'Grand Miramor Hotel', location: 'Kiriş • Antalya • 4+', concept: 'Ultra All Inclusive',
-    hasPegas: true, hasFit: true, hasTraveyo: true,
+    hasAnex: true, hasFit: true,
     actionVersions: [
       { value: '08.07.2026', label: '08.07.2026 Aksiyonu (Güncel)', periods: null /* set after */ },
       { value: '03.07.2026', label: '03.07.2026 Aksiyonu', periods: null },
@@ -1224,35 +1222,35 @@ const HOTEL_CONFIGS = {
   },
   'miramor_garden': {
     name: 'Miramor Garden Hotel', location: 'Kiriş • Antalya', concept: 'All Inclusive',
-    hasPegas: false, hasFit: false, hasTraveyo: false,
+    hasAnex: false, hasFit: false,
     actionVersions: [
       { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_MIRAMOR_GARDEN },
     ]
   },
   'ambassador_park': {
     name: 'Ambassador Hotel (Park)', location: 'Kemer • Antalya', concept: 'All Inclusive',
-    hasPegas: false, hasFit: false, hasTraveyo: false,
+    hasAnex: false, hasFit: false,
     actionVersions: [
       { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_AMBASSADOR_PARK },
     ]
   },
   'ambassador_main': {
     name: 'Ambassador Hotel (Main)', location: 'Kemer • Antalya', concept: 'All Inclusive',
-    hasPegas: false, hasFit: false, hasTraveyo: false,
+    hasAnex: false, hasFit: false,
     actionVersions: [
       { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_AMBASSADOR_MAIN },
     ]
   },
   'astoria': {
     name: 'Astoria Hotel', location: 'Kemer • Antalya', concept: 'All Inclusive',
-    hasPegas: false, hasFit: false, hasTraveyo: false,
+    hasAnex: false, hasFit: false,
     actionVersions: [
       { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_ASTORIA },
     ]
   },
   'stella': {
     name: 'Stella Hotel', location: 'Çamyuva • Antalya', concept: 'All Inclusive',
-    hasPegas: false, hasFit: false, hasTraveyo: false,
+    hasAnex: false, hasFit: false,
     actionVersions: [
       { value: '19.06.2026', label: '19.06.2026 Aksiyonu', periods: PERIODS_STELLA },
     ]
@@ -1291,22 +1289,19 @@ function loadHotelData(hotelId) {
   PERIODS = cfg.actionVersions[0].periods;
   updateConditionsBanner(cfg.actionVersions[0].value);
 
-  // Pegas / Fit / Traveyo butonlarını göster/gizle
-  const btnPegas   = document.getElementById('btnPegas');
+  // Anex / Fit butonlarını göster/gizle
+  const btnAnex    = document.getElementById('btnAnex');
   const btnFit     = document.getElementById('btnFit');
-  const btnTraveyo = document.getElementById('btnTraveyo');
-  const pegasNote  = document.getElementById('pegasNote');
+  const anexNote   = document.getElementById('anexNote');
   const fitNote    = document.getElementById('fitNote');
-  const traveyoNote= document.getElementById('traveyoNote');
 
-  if (cfg.hasPegas) {
-    if (btnPegas) btnPegas.style.display = '';
-    if (pegasNote) pegasNote.style.display = '';
+  if (cfg.hasAnex) {
+    if (btnAnex) btnAnex.style.display = '';
+    if (anexNote) anexNote.style.display = '';
   } else {
-    if (btnPegas) btnPegas.style.display = 'none';
-    if (pegasNote) pegasNote.style.display = 'none';
-    // Otomatik olarak 'digerleri' seç
-    if (currentAgencyType === 'pegas') { selectAgencyType('digerleri'); }
+    if (btnAnex) btnAnex.style.display = 'none';
+    if (anexNote) anexNote.style.display = 'none';
+    if (currentAgencyType === 'anex') { selectAgencyType('digerleri'); }
   }
   if (cfg.hasFit) {
     if (btnFit) btnFit.style.display = '';
@@ -1314,13 +1309,6 @@ function loadHotelData(hotelId) {
     if (btnFit) btnFit.style.display = 'none';
     if (fitNote) fitNote.style.display = 'none';
     if (currentAgencyType === 'fit') { selectAgencyType('digerleri'); }
-  }
-  if (cfg.hasTraveyo) {
-    if (btnTraveyo) btnTraveyo.style.display = '';
-  } else {
-    if (btnTraveyo) btnTraveyo.style.display = 'none';
-    if (traveyoNote) traveyoNote.style.display = 'none';
-    if (currentAgencyType === 'traveyo') { selectAgencyType('digerleri'); }
   }
 
   renderRateCard();
@@ -1481,20 +1469,11 @@ function calculate() {
   }
 
   // Agency type
-  const isPegas = currentAgencyType === 'pegas';
+  const isAnex = currentAgencyType === 'anex';
   const isFit = currentAgencyType === 'fit';
-  const isTraveyo = currentAgencyType === 'traveyo';
   let agency = null, freeAgeLimit = DEFAULT_FREE_AGE, agencyDiscountPct = 0;
 
-  if (isTraveyo) {
-    freeAgeLimit = TRAVEYO_FREE_AGE;
-    // Validate Traveyo date range
-    const ciStr = dateToStr(checkIn);
-    if (ciStr < TRAVEYO_START) {
-      showError(`Traveyo (Itaka/Cedok) kontratı 13.06.2026 tarihinden itibaren geçerlidir. Giriş: ${formatDateFull(checkIn)}`);
-      return;
-    }
-  } else if (!isPegas && !isFit && agencyId !== '__general__') {
+  if (!isAnex && !isFit && agencyId !== '__general__') {
     if (agencyId !== 'rocket_tour') {
       agency = agencies.find(a => a.id === agencyId);
       if (agency) {
@@ -1504,7 +1483,7 @@ function calculate() {
     }
   }
 
-  const isRocket = !isTraveyo && !isPegas && !isFit && (agencyId === 'rocket_tour' || (agency && agency.name.toLowerCase().includes('rocket')));
+  const isRocket = !isAnex && !isFit && (agencyId === 'rocket_tour' || (agency && agency.name && agency.name.toLowerCase().includes('rocket')));
   if (isRocket) {
     agencyDiscountPct = 0;
   }
@@ -1512,7 +1491,7 @@ function calculate() {
   // Categorize
   const { adults, childrenSmall, childrenBig, infants } = categorizeGuests(ages, freeAgeLimit);
   if (adults.length === 0) {
-    const minAdultAge = isTraveyo ? 13 : 12;
+    const minAdultAge = 12;
     showError(`En az 1 yetişkin (${minAdultAge}+ yaş) gereklidir.`);
     return;
   }
@@ -1529,32 +1508,19 @@ function calculate() {
   roomConfig.label = formatted.label;
   roomConfig.desc = formatted.desc;
 
-  // For Traveyo, override room config formula display if SNG
-  let traveyoRoomConfig = null;
-  if (isTraveyo && roomConfigKey.startsWith('SNG')) {
-    traveyoRoomConfig = { ...roomConfig, formula: 'PP×1.5 (Traveyo)' };
-  }
-
   // Determine pricing mode
-  let firstPeriod = null;
-  let isCINBased = false;
-  if (!isTraveyo) {
-    firstPeriod = findPeriod(checkIn);
-    if (!firstPeriod) { showError(`${formatDateFull(checkIn)} tarihi kontrat kapsamında değil (06.06 - 31.10.2026).`); return; }
-    isCINBased = firstPeriod.basis === 'cin';
-  }
+  let firstPeriod = findPeriod(checkIn);
+  if (!firstPeriod) { showError(`${formatDateFull(checkIn)} tarihi kontrat kapsamında değil.`); return; }
+  let isCINBased = firstPeriod.basis === 'cin';
 
   const nightlyBreakdown = [];
   let subtotal = 0;
   let ilaveSubtotal = 0;
   let optionDays = new Set();
-  let usedIlave = false;
   let ilaveNightCount = 0;
   let ilaveDiscountAmount = 0;
   let fitDiscountAmount = 0;
   let totalDiscountAmount = 0;
-  let pegasOnlyNightCount = 0;
-  let pegasOnlyAmount = 0;
   const activeIlavePcts = [];
 
   for (let i = 0; i < nights; i++) {
@@ -1562,12 +1528,7 @@ function calculate() {
     nightDate.setDate(nightDate.getDate() + i);
 
     let period;
-    if (isTraveyo) {
-      // Traveyo: flat rate, no period lookup needed but check date bounds
-      const ndStr = dateToStr(nightDate);
-      if (ndStr > TRAVEYO_END) { showError(`${formatDateFull(nightDate)} Traveyo kontrat kapsamı dışında (sezon sonu: 31.10).`); return; }
-      period = null;
-    } else if (isCINBased) {
+    if (isCINBased) {
       period = firstPeriod;
     } else {
       period = findPeriod(nightDate);
@@ -1577,34 +1538,23 @@ function calculate() {
       }
     }
 
-    let pp, multiplier;
-    if (isTraveyo) {
-      pp = TRAVEYO_PP;
-      const cfg = ROOM_CONFIGS[roomConfigKey];
-      if (cfg.mult === 'sng') { multiplier = TRAVEYO_SNG_MULT; }
-      else { multiplier = cfg.mult; }
-    } else {
-      pp = period.pp;
-      multiplier = getMultiplier(roomConfigKey, nightDate);
-    }
+    let pp = period.pp;
+    let multiplier = getMultiplier(roomConfigKey, nightDate);
     if (multiplier === null) { showError('Oda tipi çarpanı bulunamadı.'); return; }
 
     const nightRate = +(pp * multiplier).toFixed(2);
 
-    // Determine discount % for this night: ilave(10%) + pegas(1%) additive
-    // Traveyo has no ilave discount (flat rate contract)
-    const nightIlavePct = isTraveyo ? 0 : (period ? (period.ilave || 0) : 0);
+    const nightIlavePct = period ? (period.ilave || 0) : 0;
     let nightDiscount = 0;
     let nightIlaveDiscount = 0;
     let nightFitDiscount = 0;
     let nightDiscountPct = 0;
 
-    if (isPegas) {
-      nightDiscountPct = nightIlavePct;
+    if (isAnex) {
+      // Anex: ilave + 5 toplam (toplamlı)
+      nightDiscountPct = nightIlavePct + 5;
       nightDiscount = (nightRate * nightDiscountPct / 100);
-      if (nightIlavePct > 0) {
-        nightIlaveDiscount = nightDiscount;
-      }
+      nightIlaveDiscount = (nightRate * nightIlavePct / 100);
     } else if (isFit) {
       // Step 1: Apply ilave discount (15% or 10%)
       nightIlaveDiscount = (nightRate * nightIlavePct / 100);
@@ -1629,7 +1579,6 @@ function calculate() {
     }
 
     if (nightIlavePct > 0) {
-      usedIlave = true;
       ilaveNightCount++;
       ilaveSubtotal += nightRate;
       ilaveDiscountAmount += nightIlaveDiscount;
@@ -1664,7 +1613,6 @@ function calculate() {
   ilaveDiscountAmount = +ilaveDiscountAmount.toFixed(2);
   fitDiscountAmount = +fitDiscountAmount.toFixed(2);
   totalDiscountAmount = +totalDiscountAmount.toFixed(2);
-  pegasOnlyAmount = +pegasOnlyAmount.toFixed(2);
 
   // Net after combined discount
   const afterDiscount = +(subtotal - totalDiscountAmount).toFixed(2);
@@ -1685,10 +1633,11 @@ function calculate() {
     adults, childrenSmall, childrenBig, infants,
     roomConfigKey,
     nightlyBreakdown, isCINBased,
-    roomConfig: traveyoRoomConfig || roomConfig,
-    subtotal, usedIlave, ilaveNightCount, ilaveSubtotal,
+    roomConfig: roomConfig,
+    subtotal, ilaveNightCount, ilaveSubtotal,
     ilaveDiscountAmount, fitDiscountAmount, activeIlavePcts,
-    isPegas, isFit, isTraveyo, isRocket, pegasOnlyNightCount, pegasOnlyAmount,
+    usedIlave: ilaveNightCount > 0,
+    isFit, isAnex, isRocket,
     totalDiscountAmount,
     agency, agencyDiscountPct, agencyAmount, isDiscount,
     grandTotal, ppn, maxOption, freeAgeLimit,
@@ -1766,16 +1715,16 @@ function renderResults(data) {
   let ilaveLabel = '';
   if (data.activeIlavePcts && data.activeIlavePcts.length === 1) {
     const pct = data.activeIlavePcts[0];
-    if (data.isPegas) {
-      ilaveLabel = `✈️ Pegas İlave %${pct} İndirim`;
+    if (data.isAnex) {
+      ilaveLabel = `✈️ Anex İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
     } else if (data.isRocket) {
       ilaveLabel = `🚀 Rocket İlave %${pct} + %2 = <strong>%${pct + 2} İndirim</strong>`;
     } else {
       ilaveLabel = `İlave %${pct} İndirim`;
     }
   } else if (data.activeIlavePcts && data.activeIlavePcts.length > 1) {
-    if (data.isPegas) {
-      ilaveLabel = `✈️ Pegas İlave İndirimi`;
+    if (data.isAnex) {
+      ilaveLabel = `✈️ Anex İlave İndirimi (+%5)`;
     } else if (data.isRocket) {
       ilaveLabel = `🚀 Rocket İlave + %2 İndirimi`;
     } else {
@@ -1785,7 +1734,9 @@ function renderResults(data) {
 
   // Combined discount line(s)
   if (data.usedIlave) {
-    if (data.isRocket) {
+    if (data.isAnex) {
+      totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+    } else if (data.isRocket) {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
     } else {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
@@ -1811,18 +1762,8 @@ function renderResults(data) {
 
   // Notes
   let notesHTML = '';
-  if (data.isTraveyo) {
-    notesHTML += `<div class="info-note green">🌍 <strong>Traveyo (Itaka/Cedok) Kontratı:</strong> Sabit ${TRAVEYO_PP}€ PP | SNG ×${TRAVEYO_SNG_MULT} | 0-12 yaş ücretsiz.</div>`;
-  } else if (data.isCINBased) {
-    notesHTML += `<div class="info-note amber">📌 <strong>C/IN Bazlı Fiyatlandırma:</strong> Giriş tarihi dönemi (${fmtPeriod(data.nightlyBreakdown[0].period)}) tüm gecelere uygulanmıştır.</div>`;
-  } else {
-    notesHTML += `<div class="info-note amber">📌 <strong>Konaklama Bazlı Fiyatlandırma:</strong> Her gece kendi dönemine göre fiyatlandırılmıştır.</div>`;
-  }
-  if (data.usedIlave) {
-    notesHTML += `<div class="info-note green">✅ <strong>${ilaveLabel}</strong> uygulandı (${data.ilaveNightCount} gece).</div>`;
-  }
-  if (data.isPegas) {
-    notesHTML += `<div class="info-note blue">✈️ <strong>Pegas Acentası</strong> — Döneme ait ilave aksiyon indirimleri uygulanır.</div>`;
+  if (data.isAnex) {
+    notesHTML += `<div class="info-note blue">✈️ <strong>Anex Acentası</strong> — Döneme ait ilave indirimine +%5 ek indirim uygulanır (toplam: ilave + 5).</div>`;
   }
   if (data.isRocket) {
     notesHTML += `<div class="info-note blue">🚀 <strong>Rocket Tour</strong> — Tüm tarihlerde +%2 indirim (ilave dönemle toplanır).</div>`;
@@ -1864,33 +1805,27 @@ function showError(msg) {
 // ================================================================
 function selectAgencyType(type) {
   currentAgencyType = type;
-  const btnP = document.getElementById('btnPegas');
+  const btnA = document.getElementById('btnAnex');
   const btnF = document.getElementById('btnFit');
-  const btnT = document.getElementById('btnTraveyo');
   const btnD = document.getElementById('btnDigerleri');
-  const pegasNote = document.getElementById('pegasNote');
+  const anexNote = document.getElementById('anexNote');
   const fitNote = document.getElementById('fitNote');
-  const traveyoNote = document.getElementById('traveyoNote');
   const subSelect = document.getElementById('agencySubSelect');
 
   // Reset all
-  [btnP, btnF, btnT, btnD].forEach(b => b.classList.remove('active', 'pegas-active', 'fit-active', 'traveyo-active'));
-  pegasNote.style.display = 'none';
-  fitNote.style.display = 'none';
-  traveyoNote.style.display = 'none';
+  [btnA, btnF, btnD].filter(Boolean).forEach(b => b.classList.remove('active', 'pegas-active', 'fit-active', 'traveyo-active'));
+  if (anexNote) anexNote.style.display = 'none';
+  if (fitNote) fitNote.style.display = 'none';
   subSelect.style.display = 'none';
 
-  if (type === 'pegas') {
-    btnP.classList.add('active', 'pegas-active');
-    pegasNote.style.display = '';
+  if (type === 'anex') {
+    if (btnA) { btnA.classList.add('active', 'pegas-active'); }
+    if (anexNote) anexNote.style.display = '';
   } else if (type === 'fit') {
-    btnF.classList.add('active', 'fit-active');
-    fitNote.style.display = '';
-  } else if (type === 'traveyo') {
-    btnT.classList.add('active', 'traveyo-active');
-    traveyoNote.style.display = '';
+    if (btnF) { btnF.classList.add('active', 'fit-active'); }
+    if (fitNote) fitNote.style.display = '';
   } else {
-    btnD.classList.add('active');
+    if (btnD) { btnD.classList.add('active'); }
     subSelect.style.display = '';
   }
   // Refresh age badges
