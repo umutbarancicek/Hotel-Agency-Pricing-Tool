@@ -1378,7 +1378,7 @@ let currentAgencyType = 'pegas'; // 'pegas' or 'digerleri'
 function parseDate(str) { const [y,m,d] = str.split('-').map(Number); return new Date(y, m-1, d); }
 function formatDate(d) { return d.getDate().toString().padStart(2,'0') + '.' + (d.getMonth()+1).toString().padStart(2,'0'); }
 function formatDateFull(d) { return formatDate(d) + '.' + d.getFullYear(); }
-function formatEUR(n) { return n.toFixed(2) + ' €'; }
+function formatEUR(n) { return (Math.floor(n * 100) / 100).toFixed(2) + ' €'; }
 function daysBetween(a,b) { return Math.round((b - a) / 86400000); }
 function dateToStr(d) {
   return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
