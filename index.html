@@ -355,33 +355,39 @@ body::before {
 .btn-book-action.close:hover { background: rgba(239,68,68,0.08); }
 .book-filters {
   display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: flex-end;
-  background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+  background: #0d1117; border: 1px solid #1e2433; border-radius: 10px;
   padding: 16px;
 }
 .book-filter-group { display: flex; flex-direction: column; gap: 5px; }
-.book-filter-group label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
+.book-filter-group label { font-size: 11px; color: #8899aa; font-weight: 600; text-transform: uppercase; }
 .book-filter-group input, .book-filter-group select {
-  background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--text-primary); padding: 7px 10px; font-size: 12px; font-family: var(--font-body);
+  background: #141922; border: 1px solid #2a3347; border-radius: 6px;
+  color: #e2e8f0; padding: 7px 10px; font-size: 12px; font-family: inherit;
+  outline: none; min-width: 140px;
 }
+.book-filter-group input:focus, .book-filter-group select:focus {
+  border-color: #d4a843; box-shadow: 0 0 0 2px rgba(212,168,67,0.15);
+}
+.book-filter-group select option { background: #141922; color: #e2e8f0; }
+.book-filter-group input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
 .book-stats {
   display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap;
 }
 .book-stat {
-  background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+  background: #0d1117; border: 1px solid #1e2433; border-radius: 10px;
   padding: 14px 20px; flex: 1; min-width: 130px;
 }
-.book-stat .stat-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
-.book-stat .stat-value { font-size: 22px; font-weight: 700; color: var(--gold-300); }
-.book-table-wrap { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); }
+.book-stat .stat-label { font-size: 11px; color: #8899aa; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+.book-stat .stat-value { font-size: 22px; font-weight: 700; color: #fcd34d; }
+.book-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #1e2433; }
 .book-table {
   width: 100%; border-collapse: collapse; font-size: 12px;
-  background: var(--surface);
+  background: #0d1117;
 }
-.book-table thead tr { background: var(--surface-raised); }
-.book-table th { padding: 11px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
-.book-table td { padding: 11px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; white-space: nowrap; }
-.book-table tr:hover td { background: rgba(255,255,255,0.02); }
+.book-table thead tr { background: #141922; }
+.book-table th { padding: 11px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #8899aa; border-bottom: 1px solid #1e2433; white-space: nowrap; }
+.book-table td { padding: 11px 12px; color: #e2e8f0; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; white-space: nowrap; }
+.book-table tr:hover td { background: rgba(255,255,255,0.03); }
 .book-table tr:last-child td { border-bottom: none; }
 .book-badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
 .book-badge.anex { background: rgba(59,130,246,0.15); color: #60a5fa; }
