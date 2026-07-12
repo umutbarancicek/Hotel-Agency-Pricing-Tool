@@ -310,6 +310,130 @@ body::before {
 }
 .btn-print:hover { border-color: var(--gold-400); color: var(--gold-300); }
 
+/* SAVE BUTTON */
+.btn-save-reservation {
+  display: inline-flex; align-items: center; gap: 7px; padding: 12px 24px;
+  background: linear-gradient(135deg, #16a34a, #15803d); border: none;
+  border-radius: var(--radius-sm); color: #fff; font-family: var(--font-body);
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--transition);
+  box-shadow: 0 2px 12px rgba(22,163,74,0.25); width: 100%; justify-content: center; margin-top: 14px;
+}
+.btn-save-reservation:hover { background: linear-gradient(135deg, #15803d, #166534); box-shadow: 0 4px 20px rgba(22,163,74,0.4); transform: translateY(-1px); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+  background: #16a34a; color: #fff; padding: 13px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 6px 30px rgba(0,0,0,0.3);
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(80px); opacity: 0; transition: all 0.35s cubic-bezier(.34,1.56,.64,1);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { background: #dc2626; }
+
+/* RESERVATION BOOK SCREEN */
+#reservationBookScreen {
+  position: fixed; inset: 0; z-index: 3000; background: var(--bg);
+  display: none; overflow-y: auto; padding: 24px;
+}
+.book-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+}
+.book-title { font-size: 22px; font-weight: 700; color: var(--gold-300); display: flex; align-items: center; gap: 10px; }
+.book-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-book-action {
+  padding: 9px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface-raised); color: var(--text-primary); font-size: 12px;
+  font-family: var(--font-body); font-weight: 600; cursor: pointer; transition: var(--transition);
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-book-action:hover { border-color: var(--gold-400); color: var(--gold-300); }
+.btn-book-action.close { border-color: rgba(239,68,68,0.3); color: #ef4444; }
+.btn-book-action.close:hover { background: rgba(239,68,68,0.08); }
+.book-filters {
+  display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: flex-end;
+  background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+  padding: 16px;
+}
+.book-filter-group { display: flex; flex-direction: column; gap: 5px; }
+.book-filter-group label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
+.book-filter-group input, .book-filter-group select {
+  background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text-primary); padding: 7px 10px; font-size: 12px; font-family: var(--font-body);
+}
+.book-stats {
+  display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.book-stat {
+  background: var(--surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+  padding: 14px 20px; flex: 1; min-width: 130px;
+}
+.book-stat .stat-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+.book-stat .stat-value { font-size: 22px; font-weight: 700; color: var(--gold-300); }
+.book-table-wrap { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); }
+.book-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+  background: var(--surface);
+}
+.book-table thead tr { background: var(--surface-raised); }
+.book-table th { padding: 11px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); border-bottom: 1px solid var(--border-subtle); white-space: nowrap; }
+.book-table td { padding: 11px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; white-space: nowrap; }
+.book-table tr:hover td { background: rgba(255,255,255,0.02); }
+.book-table tr:last-child td { border-bottom: none; }
+.book-badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.book-badge.anex { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.book-badge.fit { background: rgba(168,85,247,0.15); color: #c084fc; }
+.book-badge.traveyo { background: rgba(34,197,94,0.15); color: #4ade80; }
+.book-badge.digerleri { background: rgba(100,116,139,0.15); color: #94a3b8; }
+.book-total-eur { font-weight: 700; color: var(--gold-300); }
+.btn-del {
+  background: transparent; border: 1px solid rgba(239,68,68,0.3); color: #ef4444;
+  border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 11px;
+  transition: var(--transition);
+}
+.btn-del:hover { background: rgba(239,68,68,0.1); }
+.book-empty { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+.book-empty .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+/* VOUCHER MODAL */
+#voucherModal {
+  position: fixed; inset: 0; z-index: 4000;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+#voucherModal.active { opacity: 1; pointer-events: all; }
+.voucher-modal-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 32px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transform: scale(0.92); transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+}
+#voucherModal.active .voucher-modal-box { transform: scale(1); }
+.voucher-modal-title { font-size: 17px; font-weight: 700; color: var(--gold-300); margin-bottom: 6px; }
+.voucher-modal-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; }
+.voucher-input {
+  width: 100%; background: var(--surface-raised); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-primary); padding: 11px 14px;
+  font-size: 15px; font-family: var(--font-body); font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase; box-sizing: border-box; margin-bottom: 16px;
+}
+.voucher-input:focus { outline: none; border-color: var(--gold-400); }
+.voucher-modal-actions { display: flex; gap: 10px; }
+.btn-voucher-save {
+  flex: 1; padding: 11px; background: linear-gradient(135deg,#16a34a,#15803d);
+  border: none; border-radius: var(--radius-sm); color: #fff; font-size: 13px;
+  font-weight: 700; cursor: pointer; transition: var(--transition);
+}
+.btn-voucher-save:hover { opacity: 0.9; }
+.btn-voucher-cancel {
+  padding: 11px 18px; background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 13px;
+  cursor: pointer; transition: var(--transition);
+}
+.btn-voucher-cancel:hover { border-color: var(--gold-400); color: var(--gold-300); }
+
+
 /* COLLAPSIBLE */
 .section-collapsible { margin-top: 20px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); }
 .section-toggle {
@@ -679,11 +803,131 @@ body::before {
   </div>
 </div>
 
+<!-- VOUCHER MODAL -->
+<div id="voucherModal">
+  <div class="voucher-modal-box">
+    <div class="voucher-modal-title">💾 Rezervasyonu Kaydet</div>
+    <div class="voucher-modal-sub">Rezervasyon kaydedilecek. Bilgileri doldurun.</div>
+
+    <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;display:block;margin-bottom:5px;">Voucher No</label>
+    <input type="text" id="voucherInput" class="voucher-input" placeholder="VOUCHER NO"
+      maxlength="30" onkeydown="if(event.key==='Enter') confirmSave()">
+
+    <div id="voucherAgencyWrap" style="display:none;">
+      <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;display:block;margin-bottom:5px;">Acenta Adı</label>
+      <input type="text" id="voucherAgencyName" class="voucher-input" placeholder="ACENTA ADI"
+        maxlength="50" onkeydown="if(event.key==='Enter') confirmSave()">
+    </div>
+
+    <div id="voucherError" style="color:#ef4444;font-size:12px;margin-bottom:10px;display:none;"></div>
+    <div class="voucher-modal-actions">
+      <button class="btn-voucher-cancel" onclick="closeVoucherModal()">İptal</button>
+      <button class="btn-voucher-save" onclick="confirmSave()">✅ Kaydet</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- TOAST -->
+<div id="toastEl" class="toast"></div>
+
+<!-- RESERVATION BOOK SCREEN -->
+<div id="reservationBookScreen">
+  <div class="book-header">
+    <div class="book-title">📋 Rezervasyon Defteri</div>
+    <div class="book-actions">
+      <button class="btn-book-action" onclick="exportReservationsCSV()">📥 CSV İndir</button>
+      <button class="btn-book-action close" onclick="closeReservationBook()">✖ Kapat</button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="book-filters">
+    <div class="book-filter-group">
+      <label>Başlangıç Tarihi</label>
+      <input type="date" id="filterDateFrom" onchange="renderReservationBook()">
+    </div>
+    <div class="book-filter-group">
+      <label>Bitiş Tarihi</label>
+      <input type="date" id="filterDateTo" onchange="renderReservationBook()">
+    </div>
+    <div class="book-filter-group">
+      <label>Otel</label>
+      <select id="filterHotel" onchange="renderReservationBook()">
+        <option value="">Tümü</option>
+      </select>
+    </div>
+    <div class="book-filter-group">
+      <label>Acenta Tipi</label>
+      <select id="filterAgencyType" onchange="renderReservationBook()">
+        <option value="">Tümü</option>
+        <option value="anex">Anex</option>
+        <option value="fit">Fit</option>
+        <option value="traveyo">Traveyo</option>
+        <option value="digerleri">Diğerleri</option>
+      </select>
+    </div>
+    <div class="book-filter-group">
+      <label>Voucher Ara</label>
+      <input type="text" id="filterVoucher" placeholder="Voucher no..." oninput="renderReservationBook()">
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="book-stats">
+    <div class="book-stat">
+      <div class="stat-label">Toplam Kayıt</div>
+      <div class="stat-value" id="statTotal">0</div>
+    </div>
+    <div class="book-stat">
+      <div class="stat-label">Toplam Tutar</div>
+      <div class="stat-value" id="statAmount">0 €</div>
+    </div>
+    <div class="book-stat">
+      <div class="stat-label">Toplam Gece</div>
+      <div class="stat-value" id="statNights">0</div>
+    </div>
+    <div class="book-stat">
+      <div class="stat-label">Toplam Kişi</div>
+      <div class="stat-value" id="statGuests">0</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="book-table-wrap">
+    <table class="book-table">
+      <thead>
+        <tr>
+          <th>Voucher</th>
+          <th>Otel</th>
+          <th>Acenta</th>
+          <th>C/IN</th>
+          <th>C/OUT</th>
+          <th>Gece</th>
+          <th>Kişi</th>
+          <th>Oda Tipi</th>
+          <th>Aksiyon</th>
+          <th>Toplam</th>
+          <th>Satış Tarihi</th>
+          <th>Kaydeden</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="bookTableBody"></tbody>
+    </table>
+  </div>
+  <div id="bookEmpty" class="book-empty" style="display:none;">
+    <div class="empty-icon">📭</div>
+    <p>Filtre kriterlerine uygun rezervasyon bulunamadı.</p>
+  </div>
+</div>
+
 <!-- MAIN APP -->
 <div id="mainApp" style="display:none;">
 <div class="top-bar" id="topBar">
   <div class="top-bar-user">👤 <strong id="topBarUsername"></strong></div>
   <button class="btn-topbar" id="topBarAdmin" onclick="openAdminPanel()" style="display:none;">⚙️ Admin</button>
+  <button class="btn-topbar" id="topBarDefter" onclick="showReservationBook()" style="display:none;">📋 Rezervasyon Defteri</button>
   <button class="btn-topbar" onclick="backToHotelSelect()">🏨 Otel Değiştir</button>
   <button class="btn-topbar danger" onclick="doLogout()">🚪 Çıkış</button>
 </div>
@@ -789,6 +1033,7 @@ body::before {
             <p>Tarih, misafir ve acenta bilgilerini girip<br><strong>"Fiyat Hesapla"</strong> butonuna tıklayın.</p>
           </div>
         </div>
+        <button class="btn-save-reservation" id="btnSaveReservation" style="display:none;" onclick="saveReservation()">💾 Faturasını Kaydet</button>
       </div>
     </div>
   </div>
@@ -989,12 +1234,15 @@ function selectHotel(hotelId) {
   const session = getSession();
   if (!session) { doLogout(); return; }
   session.selectedHotel = hotelId;
+  currentHotelId = hotelId;
   localStorage.setItem('gmh_session', JSON.stringify(session));
   document.getElementById('hotelSelectScreen').classList.add('hidden');
   document.getElementById('mainApp').style.display = 'block';
   document.getElementById('topBarUsername').textContent = session.username;
   const adminBtn = document.getElementById('topBarAdmin');
   if (adminBtn) adminBtn.style.display = session.role === 'admin' ? 'flex' : 'none';
+  const defterBtn = document.getElementById('topBarDefter');
+  if (defterBtn) defterBtn.style.display = session.role === 'admin' ? 'flex' : 'none';
   // Otele göre veri yükle
   loadHotelData(hotelId);
 }
@@ -1338,7 +1586,14 @@ const TRAVEYO_FREE_AGE = 12.99; // 0-12 free
 const TRAVEYO_START = '2026-06-13';
 const TRAVEYO_END = '2026-10-31';
 
-// Room configurations with multipliers
+// ================================================================
+// STATE
+// ================================================================
+let guestCount = 2;
+let agencies = JSON.parse(localStorage.getItem('gmh_agencies') || '[]');
+let currentAgencyType = 'digerleri';
+let currentHotelId = 'grand_miramor';
+let lastCalcData = null; // son hesaplama sonucu (kaydetmek için)
 // childSmall = 3-6.99 (free in most configs), childBig = 7-11.99 (paid)
 // Key format: adults_smallChildren_bigChildren
 const ROOM_CONFIGS = {
@@ -1365,12 +1620,7 @@ const ROOM_CONFIGS = {
   'TRP_0S_1B':       { label: 'Triple + 1Ç(7-11.99)',        desc: '3Y + 1Ç',          mult: 3.2,    formula: 'PP×3.2' },
 };
 
-// ================================================================
-// STATE
-// ================================================================
-let guestCount = 2;
-let agencies = JSON.parse(localStorage.getItem('gmh_agencies') || '[]');
-let currentAgencyType = 'pegas'; // 'pegas' or 'digerleri'
+
 
 // ================================================================
 // UTILITIES
@@ -1673,6 +1923,28 @@ function calculate() {
 function renderResults(data) {
   const container = document.getElementById('resultsContent');
   document.getElementById('btnPrint').style.display = 'inline-flex';
+
+  // Kaydet butonu göster
+  const btnSave = document.getElementById('btnSaveReservation');
+  if (btnSave) btnSave.style.display = '';
+
+  // Son hesaplamayı sakla
+  lastCalcData = data;
+  lastCalcData._hotelId = currentHotelId;
+  lastCalcData._hotelName = (HOTEL_CONFIGS[currentHotelId] || {}).name || currentHotelId;
+  lastCalcData._actionVersion = (document.getElementById('actionListSelect') || {}).value || '';
+  lastCalcData._agencyDisplayName = (() => {
+    if (currentAgencyType === 'anex') return 'Anex';
+    if (currentAgencyType === 'fit') return 'Fit';
+    if (currentAgencyType === 'traveyo') return 'Traveyo (Itaka/Cedok)';
+    // Diğerleri - seçili acenta adını al
+    const sel = document.getElementById('agencySelect');
+    if (sel && sel.value !== '__general__') {
+      const opt = sel.options[sel.selectedIndex];
+      return opt ? opt.text : 'Diğerleri';
+    }
+    return 'Genel Kontrat';
+  })();
 
   // Guest summary
   let guestHTML = '<div class="guest-summary">';
@@ -2233,6 +2505,240 @@ document.addEventListener('DOMContentLoaded', () => {
   init();
   checkAuth();
 });
+
+// ================================================================
+// REZERVASYON KAYIT SİSTEMİ
+// ================================================================
+
+function getReservations() {
+  try { return JSON.parse(localStorage.getItem('gmh_reservations') || '[]'); } catch { return []; }
+}
+function saveReservationsToStorage(list) {
+  localStorage.setItem('gmh_reservations', JSON.stringify(list));
+}
+
+function saveReservation() {
+  if (!lastCalcData) { showToast('Önce fiyat hesaplaması yapın.', true); return; }
+  // Modal aç
+  const modal = document.getElementById('voucherModal');
+  const inp = document.getElementById('voucherInput');
+  const agencyWrap = document.getElementById('voucherAgencyWrap');
+  const agencyInp = document.getElementById('voucherAgencyName');
+  const errEl = document.getElementById('voucherError');
+
+  // Diğerleri ise acenta alanı göster
+  if (currentAgencyType === 'digerleri') {
+    agencyWrap.style.display = '';
+    // Mevcut acenta adını varsayılan olarak doldur
+    const sel = document.getElementById('agencySelect');
+    if (agencyInp && sel && sel.value !== '__general__') {
+      const opt = sel.options[sel.selectedIndex];
+      agencyInp.value = opt ? opt.text : '';
+    } else if (agencyInp) {
+      agencyInp.value = '';
+    }
+  } else {
+    agencyWrap.style.display = 'none';
+  }
+
+  inp.value = '';
+  errEl.style.display = 'none';
+  modal.classList.add('active');
+  setTimeout(() => inp.focus(), 100);
+}
+
+function closeVoucherModal() {
+  document.getElementById('voucherModal').classList.remove('active');
+}
+
+function confirmSave() {
+  const voucherRaw = document.getElementById('voucherInput').value.trim();
+  const agencyWrap = document.getElementById('voucherAgencyWrap');
+  const agencyInp = document.getElementById('voucherAgencyName');
+  const errEl = document.getElementById('voucherError');
+
+  if (!voucherRaw) {
+    errEl.textContent = 'Voucher numarası boş olamaz.';
+    errEl.style.display = '';
+    document.getElementById('voucherInput').focus();
+    return;
+  }
+
+  let agencyNameOverride = '';
+  if (currentAgencyType === 'digerleri' && agencyWrap.style.display !== 'none') {
+    agencyNameOverride = agencyInp ? agencyInp.value.trim() : '';
+    if (!agencyNameOverride) {
+      errEl.textContent = 'Acenta adı boş olamaz.';
+      errEl.style.display = '';
+      agencyInp.focus();
+      return;
+    }
+  }
+
+  errEl.style.display = 'none';
+
+  const session = getSession();
+  const d = lastCalcData;
+
+  // Oda tipini okunabilir yap
+  const roomLabel = d.roomConfig ? (d.roomConfig.label || d.roomConfigKey || '') : (d.roomConfigKey || '');
+
+  // Acenta adını belirle
+  const agencyDisplay = agencyNameOverride || d._agencyDisplayName || currentAgencyType;
+
+  const rec = {
+    id: Date.now().toString(),
+    savedAt: new Date().toISOString(),
+    savedBy: session ? session.username : 'bilinmiyor',
+    voucher: voucherRaw.toUpperCase(),
+    hotelId: d._hotelId || currentHotelId,
+    hotelName: d._hotelName || '',
+    agencyType: currentAgencyType,
+    agencyName: agencyDisplay,
+    checkIn: d.checkIn ? d.checkIn.toISOString().split('T')[0] : '',
+    checkOut: d.checkOut ? d.checkOut.toISOString().split('T')[0] : '',
+    nights: d.nights || 0,
+    guestCount: (d.adults||[]).length + (d.childrenSmall||[]).length + (d.childrenBig||[]).length + (d.infants||[]).length,
+    ages: d.ages || [],
+    roomConfig: roomLabel,
+    actionVersion: d._actionVersion || '',
+    subtotal: d.subtotal || 0,
+    totalDiscount: d.totalDiscountAmount || 0,
+    grandTotal: d.grandTotal || 0,
+    ppn: d.ppn || 0,
+    currency: 'EUR',
+  };
+
+  const list = getReservations();
+  list.unshift(rec); // en yeni başa
+  saveReservationsToStorage(list);
+
+  closeVoucherModal();
+  showToast('✅ Rezervasyon kaydedildi! Voucher: ' + rec.voucher);
+}
+
+// ================================================================
+// REZERVASYON DEFTERİ
+// ================================================================
+
+function showReservationBook() {
+  // Otel filtre seçeneklerini doldur
+  const hotelSel = document.getElementById('filterHotel');
+  if (hotelSel) {
+    const hotels = [...new Set(getReservations().map(r => r.hotelName).filter(Boolean))];
+    hotelSel.innerHTML = '<option value="">Tümü</option>' +
+      HOTELS.map(h => `<option value="${h.id}">${h.name}</option>`).join('');
+  }
+  document.getElementById('reservationBookScreen').style.display = 'block';
+  renderReservationBook();
+}
+
+function closeReservationBook() {
+  document.getElementById('reservationBookScreen').style.display = 'none';
+}
+
+function renderReservationBook() {
+  const allRecs = getReservations();
+  const filterFrom   = document.getElementById('filterDateFrom')?.value || '';
+  const filterTo     = document.getElementById('filterDateTo')?.value   || '';
+  const filterHotel  = document.getElementById('filterHotel')?.value    || '';
+  const filterType   = document.getElementById('filterAgencyType')?.value || '';
+  const filterVoucher= (document.getElementById('filterVoucher')?.value || '').toUpperCase();
+
+  const filtered = allRecs.filter(r => {
+    if (filterFrom && r.savedAt.split('T')[0] < filterFrom) return false;
+    if (filterTo   && r.savedAt.split('T')[0] > filterTo)   return false;
+    if (filterHotel && r.hotelId !== filterHotel) return false;
+    if (filterType  && r.agencyType !== filterType) return false;
+    if (filterVoucher && !r.voucher.includes(filterVoucher)) return false;
+    return true;
+  });
+
+  // Stats
+  const totalAmt   = filtered.reduce((s, r) => s + (r.grandTotal || 0), 0);
+  const totalNights= filtered.reduce((s, r) => s + (r.nights || 0), 0);
+  const totalGuests= filtered.reduce((s, r) => s + (r.guestCount || 0), 0);
+  document.getElementById('statTotal').textContent  = filtered.length;
+  document.getElementById('statAmount').textContent = (Math.floor(totalAmt * 100) / 100).toFixed(2) + ' €';
+  document.getElementById('statNights').textContent = totalNights;
+  document.getElementById('statGuests').textContent = totalGuests;
+
+  const tbody = document.getElementById('bookTableBody');
+  const empty = document.getElementById('bookEmpty');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const agencyBadgeMap = { anex:'anex', fit:'fit', traveyo:'traveyo', digerleri:'digerleri' };
+
+  tbody.innerHTML = filtered.map(r => {
+    const ciDate  = r.checkIn  ? r.checkIn.split('-').reverse().join('.')  : '-';
+    const coDate  = r.checkOut ? r.checkOut.split('-').reverse().join('.') : '-';
+    const savedDate = r.savedAt ? new Date(r.savedAt).toLocaleDateString('tr-TR', {day:'2-digit',month:'2-digit',year:'numeric', hour:'2-digit', minute:'2-digit'}) : '-';
+    const badge = agencyBadgeMap[r.agencyType] || 'digerleri';
+    const totalStr = (Math.floor((r.grandTotal||0)*100)/100).toFixed(2) + ' €';
+    return `<tr>
+      <td><strong>${r.voucher}</strong></td>
+      <td>${r.hotelName || '-'}</td>
+      <td><span class="book-badge ${badge}">${r.agencyName || r.agencyType}</span></td>
+      <td>${ciDate}</td>
+      <td>${coDate}</td>
+      <td>${r.nights}</td>
+      <td>${r.guestCount}</td>
+      <td style="font-size:11px;">${r.roomConfig || '-'}</td>
+      <td style="font-size:11px;">${r.actionVersion || '-'}</td>
+      <td class="book-total-eur">${totalStr}</td>
+      <td style="font-size:11px;">${savedDate}</td>
+      <td style="font-size:11px;">${r.savedBy || '-'}</td>
+      <td><button class="btn-del" onclick="deleteReservation('${r.id}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteReservation(id) {
+  if (!confirm('Bu rezervasyonu silmek istediğinize emin misiniz?')) return;
+  const list = getReservations().filter(r => r.id !== id);
+  saveReservationsToStorage(list);
+  renderReservationBook();
+  showToast('🗑 Rezervasyon silindi.');
+}
+
+function exportReservationsCSV() {
+  const recs = getReservations();
+  if (recs.length === 0) { showToast('Kaydedilmiş rezervasyon yok.', true); return; }
+  const headers = ['Voucher','Otel','Acenta Tipi','Acenta Adı','C/IN','C/OUT','Gece','Kişi','Oda Tipi','Aksiyon','Ara Toplam (€)','İndirim (€)','Genel Toplam (€)','PPG (€)','Satış Tarihi','Kaydeden'];
+  const rows = recs.map(r => [
+    r.voucher, r.hotelName, r.agencyType, r.agencyName,
+    r.checkIn, r.checkOut, r.nights, r.guestCount, r.roomConfig, r.actionVersion,
+    (r.subtotal||0).toFixed(2), (r.totalDiscount||0).toFixed(2), (r.grandTotal||0).toFixed(2), (r.ppn||0).toFixed(2),
+    r.savedAt ? new Date(r.savedAt).toLocaleString('tr-TR') : '', r.savedBy
+  ].map(v => `"${String(v||'').replace(/"/g,'""')}"`));
+  const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'rezervasyonlar_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ================================================================
+// TOAST BİLDİRİMİ
+// ================================================================
+let _toastTimer = null;
+function showToast(msg, isError = false) {
+  const el = document.getElementById('toastEl');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'toast' + (isError ? ' error' : '');
+  void el.offsetWidth; // reflow
+  el.classList.add('show');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
 </script>
 </body>
 </html>
