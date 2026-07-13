@@ -3049,14 +3049,14 @@ function openExcelMapModal(headers, existingTemplate = null) {
     { id: 'mapRezNo', keywords: ['rez no', 'rezervasyon', 'rezervasyon no'] },
     { id: 'mapVoucher', keywords: ['voucher', 'vouch', 'kod'] },
     { id: 'mapAgency', keywords: ['acenta', 'agency', 'acente', 'operatör'] },
-    { id: 'mapCheckIn', keywords: ['giriş', 'c/in', 'check-in', 'check in', 'gelis'] },
-    { id: 'mapCheckOut', keywords: ['çıkış', 'c/out', 'check-out', 'check out', 'gidis'] },
-    { id: 'mapRoomConfig', keywords: ['oda', 'oda tipi', 'room'] },
+    { id: 'mapCheckIn', keywords: ['giriş tarihi', 'c/in', 'check-in', 'check in', 'gelis', 'giriş'] },
+    { id: 'mapCheckOut', keywords: ['çıkış tarihi', 'c/out', 'check-out', 'check out', 'gidis', 'çıkış'] },
+    { id: 'mapRoomConfig', keywords: ['oda tipi', 'oda', 'room'] },
     { id: 'mapAction', keywords: ['aksiyon', 'action', 'indirim'] },
-    { id: 'mapPrice', keywords: ['tutar', 'toplam', 'price', 'fiyat'] },
+    { id: 'mapPrice', keywords: ['toplam tutar', 'toplam fiyat', 'tutar', 'toplam', 'price', 'fiyat'] },
     { id: 'mapCurrency', keywords: ['kur', 'para', 'currency', 'birim'] },
-    { id: 'mapGuests', keywords: ['kişi', 'pax', 'guest', 'yetişkin', 'toplam kişi'] },
-    { id: 'mapSaleDate', keywords: ['satış', 'satış tarihi', 'alış', 'sale'] }
+    { id: 'mapGuests', keywords: ['toplam kişi', 'kişi', 'pax', 'guest', 'yetişkin'] },
+    { id: 'mapSaleDate', keywords: ['satış tarihi', 'alış tarihi', 'satış', 'alış', 'sale'] }
   ];
 
   ['mapRezNo', 'mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice', 'mapCurrency', 'mapGuests', 'mapSaleDate'].forEach(id => {
@@ -3185,13 +3185,21 @@ function processExcelImport(mapping, fileName) {
   }
 
   tempExcelData.forEach(row => {
-    const rawVch = row[mapping.voucher];
-    if (!rawVch) return;
-    const voucher = String(rawVch).trim();
-    
     let rezNo = null;
     if (mapping.rezNo && row[mapping.rezNo]) {
       rezNo = String(row[mapping.rezNo]).trim();
+    }
+    
+    const rawVch = row[mapping.voucher];
+    let voucher = rawVch ? String(rawVch).trim() : '';
+    
+    // Eğer ikisi de yoksa bu satırı atla
+    if (!voucher && !rezNo) return;
+    
+    // Voucher boşsa ama rezNo varsa, ekranda boş görünmemesi adına voucher yerine rezNo veya "Bilinmiyor" yazabiliriz
+    // Ya da sadece boş bırakıp rezNo üzerinden takibini yaparız. Burada voucher'a rezNo atayalım ki UI bozulmasın.
+    if (!voucher) {
+       voucher = rezNo;
     }
     
     // Aynı voucher numarası (veya Rez.No varsa ona göre) kontrol et
