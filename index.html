@@ -3207,12 +3207,22 @@ function renderReservationBook() {
     }
   });
 
-  // Stats
-  const totalAmt   = filtered.reduce((s, r) => s + (r.grandTotal || 0), 0);
-  const totalNights= filtered.reduce((s, r) => s + (r.nights || 0), 0);
-  const totalGuests= filtered.reduce((s, r) => s + (r.guestCount || 0), 0);
+  // Stats - kura göre ayrı topla, dönüştürme yapma
+  const totalAmtEUR = filtered.filter(r => r.currency !== 'TL' && r.currency !== 'TRY').reduce((s, r) => s + (r.grandTotal || 0), 0);
+  const totalAmtTL  = filtered.filter(r => r.currency === 'TL' || r.currency === 'TRY').reduce((s, r) => s + (r.grandTotal || 0), 0);
+  const totalNights = filtered.reduce((s, r) => s + (r.nights || 0), 0);
+  const totalGuests = filtered.reduce((s, r) => s + (r.guestCount || 0), 0);
   document.getElementById('statTotal').textContent  = filtered.length;
-  document.getElementById('statAmount').textContent = (Math.floor(totalAmt * 100) / 100).toFixed(2) + ' €';
+  // Tutar gösterimi: sadece EUR varsa €, sadece TL varsa ₺, ikisi de varsa ikisini göster
+  let amtDisplay = '';
+  if (totalAmtEUR > 0 && totalAmtTL > 0) {
+    amtDisplay = (Math.floor(totalAmtEUR*100)/100).toFixed(2) + ' €  +  ' + (Math.floor(totalAmtTL*100)/100).toFixed(2) + ' ₺';
+  } else if (totalAmtTL > 0) {
+    amtDisplay = (Math.floor(totalAmtTL*100)/100).toFixed(2) + ' ₺';
+  } else {
+    amtDisplay = (Math.floor(totalAmtEUR*100)/100).toFixed(2) + ' €';
+  }
+  document.getElementById('statAmount').textContent = amtDisplay;
   document.getElementById('statNights').textContent = totalNights;
   document.getElementById('statGuests').textContent = totalGuests;
 
