@@ -962,6 +962,7 @@ body::before {
           <th class="sortable" onclick="setSort('guestCount')">Kişi<span class="sort-icon">↕</span></th>
           <th>Oda Tipi</th>
           <th>Aksiyon</th>
+          <th class="sortable" onclick="setSort('currency')">Kur<span class="sort-icon">↕</span></th>
           <th class="sortable" onclick="setSort('grandTotal')">Toplam<span class="sort-icon">↕</span></th>
           <th class="sortable" onclick="setSort('savedAt')">Satış Tarihi<span class="sort-icon">↕</span></th>
           <th class="sortable" onclick="setSort('savedBy')">Kaydeden<span class="sort-icon">↕</span></th>
@@ -2905,7 +2906,7 @@ function handleExcelUpload(e) {
       const savedMapStr = localStorage.getItem('gmh_excel_map');
       if (savedMapStr) {
         const savedMap = JSON.parse(savedMapStr);
-        if (headers.includes(savedMap.voucher) && headers.includes(savedMap.checkIn)) {
+        if (headers.includes(savedMap.voucher) && headers.includes(savedMap.checkIn) && savedMap.currency) {
           processExcelImport(savedMap, uploadedFileName);
           e.target.value = '';
           return;
@@ -3048,14 +3049,12 @@ function processExcelImport(mapping, fileName) {
       price = parseFloat(rawPrice) || 0;
     }
     
-    // Kur: TL ise not düş ama EUR olarak sakla (kur bilgisi ayrı tutulur)
+    // Kur: Ne gelirse onu kullan (EUR, TL, USD, RUB vb.)
     let currency = 'EUR';
-    let isTL = false;
     if (mapping.currency && row[mapping.currency]) {
       const kurAdi = String(row[mapping.currency]).trim().toUpperCase();
-      if (kurAdi === 'TL' || kurAdi === 'TRY') {
-        currency = 'TL';
-        isTL = true;
+      if (kurAdi) {
+        currency = kurAdi;
       }
     }
     
@@ -3309,8 +3308,12 @@ function renderReservationBook() {
     const coDate  = r.checkOut ? r.checkOut.split('-').reverse().join('.') : '-';
     const savedDate = r.savedAt ? new Date(r.savedAt).toLocaleDateString('tr-TR', {day:'2-digit',month:'2-digit',year:'numeric', hour:'2-digit', minute:'2-digit'}) : '-';
     const badge = agencyBadgeMap[r.agencyType] || 'digerleri';
-    const currSymbol = (r.currency === 'TL' || r.currency === 'TRY') ? '₺' : '€';
-    const totalStr = (Math.floor((r.grandTotal||0)*100)/100).toFixed(2) + ' ' + currSymbol;
+    
+    // Kur ve sembol bulma
+    const curCode = r.currency || 'EUR';
+    const sym = currSymbols[curCode] || curCode;
+    const totalStr = (Math.floor((r.grandTotal||0)*100)/100).toLocaleString('tr-TR', {minimumFractionDigits:2});
+
     return `<tr>
       <td><strong>${r.voucher}</strong></td>
       <td>${r.hotelName || '-'}</td>
@@ -3321,7 +3324,8 @@ function renderReservationBook() {
       <td>${r.guestCount}</td>
       <td style="font-size:11px;">${r.roomConfig || '-'}</td>
       <td style="font-size:11px;">${r.actionVersion || '-'}</td>
-      <td class="book-total-eur">${totalStr}</td>
+      <td><span style="background:rgba(255,255,255,0.1);padding:3px 6px;border-radius:4px;font-size:11px;font-weight:600;color:#94a3b8;">${curCode}</span></td>
+      <td class="book-total-eur">${totalStr} ${sym}</td>
       <td style="font-size:11px;">${savedDate}</td>
       <td style="font-size:11px;">${r.savedBy || '-'}</td>
       <td><button class="btn-del" onclick="deleteReservation('${r.id}')">🗑</button></td>
