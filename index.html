@@ -3185,7 +3185,7 @@ function renderReservationBook() {
     return `<tr>
       <td><strong>${r.voucher}</strong></td>
       <td>${r.hotelName || '-'}</td>
-      <td><span class="book-badge ${badge}">${r.agencyNameOverride || r.agencyName || r.agencyType}</span></td>
+      <td><span class="book-badge ${badge}">${String(r.agencyNameOverride || r.agencyName || r.agencyType).toUpperCase()}</span></td>
       <td>${ciDate}</td>
       <td>${coDate}</td>
       <td>${r.nights}</td>
