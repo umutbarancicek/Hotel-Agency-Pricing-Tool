@@ -3187,12 +3187,12 @@ function exportReservationsCSV() {
   if (recs.length === 0) { showToast('Kaydedilmiş rezervasyon yok.', true); return; }
   const headers = ['Voucher','Otel','Acenta Tipi','Acenta Adı','C/IN','C/OUT','Gece','Kişi','Oda Tipi','Aksiyon','Ara Toplam (€)','İndirim (€)','Genel Toplam (€)','PPG (€)','Satış Tarihi','Kaydeden'];
   const rows = recs.map(r => [
-    r.voucher, r.hotelName, r.agencyType, r.agencyName,
+    r.voucher, r.hotelName, r.agencyType, r.agencyNameOverride || r.agencyName,
     r.checkIn, r.checkOut, r.nights, r.guestCount, r.roomConfig, r.actionVersion,
     (r.subtotal||0).toFixed(2), (r.totalDiscount||0).toFixed(2), (r.grandTotal||0).toFixed(2), (r.ppn||0).toFixed(2),
     r.savedAt ? new Date(r.savedAt).toLocaleString('tr-TR') : '', r.savedBy
   ].map(v => `"${String(v||'').replace(/"/g,'""')}"`));
-  const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\r\n');
+  const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(';')).join('\r\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
