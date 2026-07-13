@@ -895,13 +895,9 @@ body::before {
       </select>
     </div>
     <div class="book-filter-group">
-      <label>Acenta Tipi</label>
+      <label>Acenta</label>
       <select id="filterAgencyType" onchange="renderReservationBook()">
         <option value="">Tümü</option>
-        <option value="anex">Anex</option>
-        <option value="fit">Fit</option>
-        <option value="traveyo">Traveyo</option>
-        <option value="digerleri">Diğerleri</option>
       </select>
     </div>
     <div class="book-filter-group">
@@ -953,6 +949,7 @@ body::before {
     <table class="book-table">
       <thead>
         <tr>
+          <th class="sortable" onclick="setSort('rezNo')">Rez.No<span class="sort-icon">↕</span></th>
           <th class="sortable" onclick="setSort('voucher')">Voucher<span class="sort-icon">↕</span></th>
           <th class="sortable" onclick="setSort('hotelName')">Otel<span class="sort-icon">↕</span></th>
           <th class="sortable" onclick="setSort('agencyName')">Acenta<span class="sort-icon">↕</span></th>
@@ -1189,6 +1186,10 @@ body::before {
       Sistem yüklediğiniz Excel'deki başlıkları tespit etti. Lütfen sadece ihtiyacımız olan 4 bilgiyi aşağıdaki listeden seçin. Diğer tüm gereksiz veriler otomatik silinecektir. (Bunu sadece 1 kez yapacaksınız!)
     </div>
     
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Rezervasyon No Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapRezNo" class="form-input"></select>
+    </div>
     <div class="form-group" style="margin-bottom:10px;">
       <label class="form-label">Voucher Numarası Hangi Sütunda?</label>
       <select id="mapVoucher" class="form-input"></select>
@@ -2864,11 +2865,23 @@ function showReservationBook() {
   // Para birimi filtre seçeneklerini dinamik doldur
   const currencySel = document.getElementById('filterCurrency');
   if (currencySel) {
-    const currSymbols = { 'EUR':'€','TL':'₺','TRY':'₺','USD':'$','GBP':'£','RUB':'₽','CHF':'Fr','JPY':'¥','CNY':'¥','CAD':'C$','AUD':'A$','SEK':'kr','NOK':'kr','DKK':'kr','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'lev','HRK':'kn','UAH':'₴','AED':'د.إ','SAR':'ر.س' };
+    const currSymbols = { 'EUR':'€','EURO':'€','TL':'₺','TRY':'₺','USD':'$','GBP':'£','RUB':'₽','CHF':'Fr','JPY':'¥','CNY':'¥','CAD':'C$','AUD':'A$','SEK':'kr','NOK':'kr','DKK':'kr','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'lev','HRK':'kn','UAH':'₴','AED':'د.إ','SAR':'ر.س' };
     const currencies = [...new Set(allRecs.map(r => r.currency || 'EUR').filter(Boolean))].sort();
     currencySel.innerHTML = '<option value="">Tümü</option>' +
-      currencies.map(c => `<option value="${c}">${currSymbols[c] || c} ${c}</option>`).join('');
+      currencies.map(c => {
+        const sym = currSymbols[c] ? currSymbols[c] + ' ' : '';
+        return `<option value="${c}">${sym}${c}</option>`;
+      }).join('');
   }
+
+  // Acenta filtre seçeneklerini dinamik doldur
+  const agencySel = document.getElementById('filterAgencyType');
+  if (agencySel) {
+    const agencies = [...new Set(allRecs.map(r => String(r.agencyNameOverride || r.agencyName || r.agencyType).toUpperCase()).filter(Boolean))].sort();
+    agencySel.innerHTML = '<option value="">Tümü</option>' +
+      agencies.map(a => `<option value="${a}">${escapeHTML(a)}</option>`).join('');
+  }
+
   document.getElementById('reservationBookScreen').style.display = 'block';
   renderReservationBook();
 }
@@ -2928,27 +2941,30 @@ function openExcelMapModal(headers) {
   const opts = '<option value="">-- Lütfen Seçiniz --</option>' + 
                headers.map(h => `<option value="${escapeHTML(h)}">${escapeHTML(h)}</option>`).join('');
                
-  ['mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice', 'mapCurrency', 'mapGuests', 'mapSaleDate'].forEach(id => {
+  const mapFields = [
+    { id: 'mapRezNo', keywords: ['rez no', 'rezervasyon', 'rezervasyon no'] },
+    { id: 'mapVoucher', keywords: ['voucher', 'vouch', 'kod'] },
+    { id: 'mapAgency', keywords: ['acenta', 'agency', 'acente', 'operatör'] },
+    { id: 'mapCheckIn', keywords: ['giriş', 'c/in', 'check-in', 'check in', 'gelis'] },
+    { id: 'mapCheckOut', keywords: ['çıkış', 'c/out', 'check-out', 'check out', 'gidis'] },
+    { id: 'mapRoomConfig', keywords: ['oda', 'oda tipi', 'room'] },
+    { id: 'mapAction', keywords: ['aksiyon', 'action', 'indirim'] },
+    { id: 'mapPrice', keywords: ['tutar', 'toplam', 'price', 'fiyat'] },
+    { id: 'mapCurrency', keywords: ['kur', 'para', 'currency', 'birim'] },
+    { id: 'mapGuests', keywords: ['kişi', 'pax', 'guest', 'yetişkin', 'toplam kişi'] },
+    { id: 'mapSaleDate', keywords: ['satış', 'satış tarihi', 'alış', 'sale'] }
+  ];
+
+  ['mapRezNo', 'mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice', 'mapCurrency', 'mapGuests', 'mapSaleDate'].forEach(id => {
     document.getElementById(id).innerHTML = opts;
   });
-  
-  // RMOS otomatik eşleştirme
-  const rmosMappings = {
-    'mapVoucher':  ['Voucher','VOUCHER','Rez.No','REZ.NO'],
-    'mapAgency':   ['Acenta','ACENTA','Acenta Adı'],
-    'mapCheckIn':  ['Giriş Tarihi','GİRİŞ TARİHİ','C/IN','Check-In'],
-    'mapCheckOut': ['Çıkış Tarihi','ÇIKIŞ TARİHİ','C/OUT','Check-Out'],
-    'mapPrice':    ['Toplam Tutar','TOPLAM TUTAR','Tutar'],
-    'mapCurrency': ['Kur Adı','KUR ADI','Para Birimi','PARA BİRİMİ'],
-    'mapGuests':   ['Toplam Kişi','TOPLAM KİŞİ','Kişi Sayısı'],
-    'mapSaleDate': ['Alış Tarihi','ALIŞ TARİHİ','Satış Tarihi','Kayıt Tarihi'],
-    'mapRoomConfig': ['Oda Tipi','ODA TİPİ','Oda'],
-    'mapAction':   ['Aksiyon','ACTION']
-  };
-  Object.entries(rmosMappings).forEach(([selectId, candidates]) => {
-    const sel = document.getElementById(selectId);
+
+  mapFields.forEach(mf => {
+    const sel = document.getElementById(mf.id);
+    const candidates = mf.keywords.map(k => k.toLowerCase());
+    sel.value = '';
     for (const candidate of candidates) {
-      const found = headers.find(h => h.trim() === candidate);
+      const found = headers.find(h => h.trim().toLowerCase().includes(candidate));
       if (found) { sel.value = found; break; }
     }
   });
@@ -2971,6 +2987,7 @@ function startExcelImport() {
   }
   
   const mapping = {
+    rezNo: document.getElementById('mapRezNo').value,
     voucher: mapVoucher,
     agency: document.getElementById('mapAgency').value,
     checkIn: mapCheckIn,
@@ -3024,8 +3041,20 @@ function processExcelImport(mapping, fileName) {
     if (!rawVch) return;
     const voucher = String(rawVch).trim();
     
-    // Aynı voucher numarası varsa atla
-    if (existing.find(e => e.voucher === voucher)) {
+    let rezNo = null;
+    if (mapping.rezNo && row[mapping.rezNo]) {
+      rezNo = String(row[mapping.rezNo]).trim();
+    }
+    
+    // Aynı voucher numarası (veya Rez.No varsa ona göre) kontrol et
+    let existingIdx = -1;
+    if (rezNo) {
+      existingIdx = existing.findIndex(e => e.rezNo === rezNo);
+    } else {
+      existingIdx = existing.findIndex(e => e.voucher === voucher);
+    }
+
+    if (existingIdx > -1) {
       skippedCount++;
       return;
     }
@@ -3040,7 +3069,7 @@ function processExcelImport(mapping, fileName) {
       if(nights <= 0) nights = 1;
     } catch(e) {}
     
-    // Fiyat: Daha esnek format. "500,00 USD" veya "15.000,00" veya "500.00"
+    // Fiyat
     let price = 0;
     if (mapping.price && row[mapping.price]) {
       let rawPrice = String(row[mapping.price]).trim();
@@ -3070,12 +3099,14 @@ function processExcelImport(mapping, fileName) {
       price = parseFloat(numericStr) || 0;
     }
     
-    // Kur: Ne gelirse onu kullan (EUR, TL, USD, RUB vb.)
+    // Kur
     let currency = 'EUR';
     if (mapping.currency && row[mapping.currency]) {
       const kurAdi = String(row[mapping.currency]).trim().toUpperCase();
       if (kurAdi) {
-        currency = kurAdi;
+        if (kurAdi === 'EURO') currency = 'EUR';
+        else if (kurAdi === 'TRY') currency = 'TL';
+        else currency = kurAdi;
       }
     }
     
@@ -3085,7 +3116,6 @@ function processExcelImport(mapping, fileName) {
     }
     
     let agType = "digerleri";
-    // Türkçe karakter normalize ederek karşılaştır (FİT = FIT, vb.)
     const agNorm = rawAgency.replace(/İ/g,'I').replace(/ı/g,'I').replace(/Ş/g,'S').replace(/ş/g,'S').replace(/Ğ/g,'G').replace(/ğ/g,'G').replace(/Ü/g,'U').replace(/ü/g,'U').replace(/Ö/g,'O').replace(/ö/g,'O').replace(/Ç/g,'C').replace(/ç/g,'C');
     if (agNorm.includes('ANEX')) agType = "anex";
     else if (/\bFIT\b/.test(agNorm) && !agNorm.includes('MUNFERIT') && !agNorm.includes('MÜNFERIT')) agType = "fit";
@@ -3103,6 +3133,7 @@ function processExcelImport(mapping, fileName) {
     
     existing.push({
       id: "exc_" + Date.now() + "_" + Math.floor(Math.random()*10000),
+      rezNo: rezNo,
       voucher: voucher,
       hotelId: currentHotelId || "h1",
       hotelName: "Grand Miramor",
@@ -3244,7 +3275,7 @@ function renderReservationBook() {
     if (filterFrom && dateStr < filterFrom) return false;
     if (filterTo   && dateStr > filterTo)   return false;
     if (filterHotel && r.hotelId !== filterHotel) return false;
-    if (filterType  && r.agencyType !== filterType) return false;
+    if (filterType && String(r.agencyNameOverride || r.agencyName || r.agencyType).toUpperCase() !== filterType) return false;
     if (filterCurrSel && (r.currency || 'EUR') !== filterCurrSel) return false;
     if (filterVoucher && !r.voucher.toUpperCase().includes(filterVoucher)) return false;
     if (filterSavedBy && r.savedBy !== filterSavedBy) return false;
@@ -3293,7 +3324,7 @@ function renderReservationBook() {
     const cur = r.currency || 'EUR';
     currencyTotals[cur] = (currencyTotals[cur] || 0) + (r.grandTotal || 0);
   });
-  const currSymbols = { 'EUR':'€','TL':'₺','TRY':'₺','USD':'$','GBP':'£','RUB':'₽','CHF':'Fr','JPY':'¥','CNY':'¥','CAD':'C$','AUD':'A$','SEK':'kr','NOK':'kr','DKK':'kr','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'lev','HRK':'kn','UAH':'₴','AED':'د.إ','SAR':'ر.س' };
+  const currSymbols = { 'EUR':'€','EURO':'€','TL':'₺','TRY':'₺','USD':'$','GBP':'£','RUB':'₽','CHF':'Fr','JPY':'¥','CNY':'¥','CAD':'C$','AUD':'A$','SEK':'kr','NOK':'kr','DKK':'kr','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'lev','HRK':'kn','UAH':'₴','AED':'د.إ','SAR':'ر.س' };
   const totalNights = filtered.reduce((s, r) => s + (r.nights || 0), 0);
   const totalGuests = filtered.reduce((s, r) => s + (r.guestCount || 0), 0);
   document.getElementById('statTotal').textContent = filtered.length;
@@ -3336,6 +3367,7 @@ function renderReservationBook() {
     const totalStr = (Math.floor((r.grandTotal||0)*100)/100).toLocaleString('tr-TR', {minimumFractionDigits:2});
 
     return `<tr>
+      <td><small style="color:#94a3b8;">${r.rezNo ? '#' + r.rezNo : '-'}</small></td>
       <td><strong>${r.voucher}</strong></td>
       <td>${r.hotelName || '-'}</td>
       <td><span class="book-badge ${badge}">${String(r.agencyNameOverride || r.agencyName || r.agencyType).toUpperCase()}</span></td>
