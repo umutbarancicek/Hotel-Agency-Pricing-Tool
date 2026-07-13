@@ -917,6 +917,12 @@ body::before {
     <div class="book-filter-group">
       <label>Aksiyon</label>
       <select id="filterAction" onchange="renderReservationBook()">
+      <option value="">Tümü</option>
+      </select>
+    </div>
+    <div class="book-filter-group">
+      <label>Para Birimi</label>
+      <select id="filterCurrency" onchange="renderReservationBook()">
         <option value="">Tümü</option>
       </select>
     </div>
@@ -928,9 +934,9 @@ body::before {
       <div class="stat-label">Toplam Kayıt</div>
       <div class="stat-value" id="statTotal">0</div>
     </div>
-    <div class="book-stat">
+    <div class="book-stat" style="flex:2; min-width:220px;">
       <div class="stat-label">Toplam Tutar</div>
-      <div class="stat-value" id="statAmount">0 €</div>
+      <div id="statAmount" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;"></div>
     </div>
     <div class="book-stat">
       <div class="stat-label">Toplam Gece</div>
@@ -2854,6 +2860,14 @@ function showReservationBook() {
     actionSel.innerHTML = '<option value="">Tümü</option>' +
       actions.map(a => `<option value="${a}">${a}</option>`).join('');
   }
+  // Para birimi filtre seçeneklerini dinamik doldur
+  const currencySel = document.getElementById('filterCurrency');
+  if (currencySel) {
+    const currSymbols = { 'EUR':'€','TL':'₺','TRY':'₺','USD':'$','GBP':'£','RUB':'₽','CHF':'Fr','JPY':'¥','CNY':'¥','CAD':'C$','AUD':'A$','SEK':'kr','NOK':'kr','DKK':'kr','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'lev','HRK':'kn','UAH':'₴','AED':'د.إ','SAR':'ر.س' };
+    const currencies = [...new Set(allRecs.map(r => r.currency || 'EUR').filter(Boolean))].sort();
+    currencySel.innerHTML = '<option value="">Tümü</option>' +
+      currencies.map(c => `<option value="${c}">${currSymbols[c] || c} ${c}</option>`).join('');
+  }
   document.getElementById('reservationBookScreen').style.display = 'block';
   renderReservationBook();
 }
@@ -3179,10 +3193,11 @@ function renderReservationBook() {
   const filterFrom   = document.getElementById('filterDateFrom')?.value || '';
   const filterTo     = document.getElementById('filterDateTo')?.value   || '';
   const filterHotel  = document.getElementById('filterHotel')?.value    || '';
-  const filterType   = document.getElementById('filterAgencyType')?.value || '';
-  const filterVoucher= (document.getElementById('filterVoucher')?.value || '').toUpperCase();
-  const filterSavedBy= document.getElementById('filterSavedBy')?.value || '';
-  const filterAction = document.getElementById('filterAction')?.value || '';
+  const filterType     = document.getElementById('filterAgencyType')?.value || '';
+  const filterCurrSel  = document.getElementById('filterCurrency')?.value || '';
+  const filterVoucher  = (document.getElementById('filterVoucher')?.value || '').toUpperCase();
+  const filterSavedBy  = document.getElementById('filterSavedBy')?.value || '';
+  const filterAction   = document.getElementById('filterAction')?.value || '';
 
   const filtered = allRecs.filter(r => {
     let dateStr = '';
@@ -3210,6 +3225,7 @@ function renderReservationBook() {
     if (filterTo   && dateStr > filterTo)   return false;
     if (filterHotel && r.hotelId !== filterHotel) return false;
     if (filterType  && r.agencyType !== filterType) return false;
+    if (filterCurrSel && (r.currency || 'EUR') !== filterCurrSel) return false;
     if (filterVoucher && !r.voucher.toUpperCase().includes(filterVoucher)) return false;
     if (filterSavedBy && r.savedBy !== filterSavedBy) return false;
     if (filterAction && r.actionVersion !== filterAction) return false;
@@ -3250,24 +3266,31 @@ function renderReservationBook() {
     }
   });
 
-  // Stats - kura göre ayrı topla, dönüştürme yapma
-  const totalAmtEUR = filtered.filter(r => r.currency !== 'TL' && r.currency !== 'TRY').reduce((s, r) => s + (r.grandTotal || 0), 0);
-  const totalAmtTL  = filtered.filter(r => r.currency === 'TL' || r.currency === 'TRY').reduce((s, r) => s + (r.grandTotal || 0), 0);
+  // Stats - her kuru ayrı topla
+  const filterCurrency = document.getElementById('filterCurrency')?.value || '';
+  const currencyTotals = {};
+  filtered.forEach(r => {
+    const cur = r.currency || 'EUR';
+    currencyTotals[cur] = (currencyTotals[cur] || 0) + (r.grandTotal || 0);
+  });
+  const currSymbols = { 'EUR':'€','TL':'₺','TRY':'₺','USD':'$','GBP':'£','RUB':'₽','CHF':'Fr','JPY':'¥','CNY':'¥','CAD':'C$','AUD':'A$','SEK':'kr','NOK':'kr','DKK':'kr','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'lev','HRK':'kn','UAH':'₴','AED':'د.إ','SAR':'ر.س' };
   const totalNights = filtered.reduce((s, r) => s + (r.nights || 0), 0);
   const totalGuests = filtered.reduce((s, r) => s + (r.guestCount || 0), 0);
-  document.getElementById('statTotal').textContent  = filtered.length;
-  // Tutar gösterimi: sadece EUR varsa €, sadece TL varsa ₺, ikisi de varsa ikisini göster
-  let amtDisplay = '';
-  if (totalAmtEUR > 0 && totalAmtTL > 0) {
-    amtDisplay = (Math.floor(totalAmtEUR*100)/100).toFixed(2) + ' €  +  ' + (Math.floor(totalAmtTL*100)/100).toFixed(2) + ' ₺';
-  } else if (totalAmtTL > 0) {
-    amtDisplay = (Math.floor(totalAmtTL*100)/100).toFixed(2) + ' ₺';
-  } else {
-    amtDisplay = (Math.floor(totalAmtEUR*100)/100).toFixed(2) + ' €';
-  }
-  document.getElementById('statAmount').textContent = amtDisplay;
+  document.getElementById('statTotal').textContent = filtered.length;
   document.getElementById('statNights').textContent = totalNights;
   document.getElementById('statGuests').textContent = totalGuests;
+
+  // Kur tablosu gösterimi
+  const amtEl = document.getElementById('statAmount');
+  const entries = Object.entries(currencyTotals);
+  if (entries.length === 0) {
+    amtEl.innerHTML = '<span style="font-size:22px;font-weight:700;color:#fcd34d;">0 €</span>';
+  } else {
+    amtEl.innerHTML = entries.map(([cur, amt]) => {
+      const sym = currSymbols[cur] || cur;
+      return `<span style="font-size:20px;font-weight:700;color:#fcd34d;background:rgba(252,211,77,0.08);border:1px solid rgba(252,211,77,0.2);border-radius:8px;padding:3px 10px;white-space:nowrap;">${(Math.floor(amt*100)/100).toLocaleString('tr-TR', {minimumFractionDigits:2})} ${sym}</span>`;
+    }).join('');
+  }
 
   const tbody = document.getElementById('bookTableBody');
   const empty = document.getElementById('bookEmpty');
