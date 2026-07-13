@@ -2863,7 +2863,7 @@ function showReservationBook() {
   // Para birimi filtre seçeneklerini dinamik doldur
   const currencySel = document.getElementById('filterCurrency');
   if (currencySel) {
-    const currSymbols = { 'EUR': '€', 'TL': '₺', 'TRY': '₺', 'USD': '$', 'GBP': '£' };
+    const currSymbols = { 'EUR':'€','TL':'₺','TRY':'₺','USD':'$','GBP':'£','RUB':'₽','CHF':'Fr','JPY':'¥','CNY':'¥','CAD':'C$','AUD':'A$','SEK':'kr','NOK':'kr','DKK':'kr','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'lev','HRK':'kn','UAH':'₴','AED':'د.إ','SAR':'ر.س' };
     const currencies = [...new Set(allRecs.map(r => r.currency || 'EUR').filter(Boolean))].sort();
     currencySel.innerHTML = '<option value="">Tümü</option>' +
       currencies.map(c => `<option value="${c}">${currSymbols[c] || c} ${c}</option>`).join('');
@@ -3273,7 +3273,7 @@ function renderReservationBook() {
     const cur = r.currency || 'EUR';
     currencyTotals[cur] = (currencyTotals[cur] || 0) + (r.grandTotal || 0);
   });
-  const currSymbols = { 'EUR': '€', 'TL': '₺', 'TRY': '₺', 'USD': '$', 'GBP': '£' };
+  const currSymbols = { 'EUR':'€','TL':'₺','TRY':'₺','USD':'$','GBP':'£','RUB':'₽','CHF':'Fr','JPY':'¥','CNY':'¥','CAD':'C$','AUD':'A$','SEK':'kr','NOK':'kr','DKK':'kr','PLN':'zł','CZK':'Kč','HUF':'Ft','RON':'lei','BGN':'lev','HRK':'kn','UAH':'₴','AED':'د.إ','SAR':'ر.س' };
   const totalNights = filtered.reduce((s, r) => s + (r.nights || 0), 0);
   const totalGuests = filtered.reduce((s, r) => s + (r.guestCount || 0), 0);
   document.getElementById('statTotal').textContent = filtered.length;
