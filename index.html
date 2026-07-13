@@ -1207,8 +1207,20 @@ body::before {
       <select id="mapAction" class="form-input"></select>
     </div>
     <div class="form-group" style="margin-bottom:10px;">
-      <label class="form-label">Tutar Hangi Sütunda? (Opsiyonel)</label>
+      <label class="form-label">Toplam Tutar Hangi Sütunda? (Opsiyonel)</label>
       <select id="mapPrice" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Kur Adı (TL/EURO) Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapCurrency" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Toplam Kişi Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapGuests" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Satış/Alış Tarihi Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapSaleDate" class="form-input"></select>
     </div>
 
     <div class="modal-actions" style="margin-top:20px;">
@@ -2851,19 +2863,20 @@ function showReservationBook() {
 // ================================================================
 
 let tempExcelData = null;
+let tempExcelFileName = '';
 
 function handleExcelUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
+  const uploadedFileName = file.name;
   reader.onload = function(evt) {
     try {
       const data = evt.target.result;
       const workbook = XLSX.read(data, {type: 'binary'});
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-      // raw:false to get formatted date strings if possible
       const json = XLSX.utils.sheet_to_json(worksheet, {raw: false, defval: ""});
       
       if (json.length === 0) {
@@ -2873,13 +2886,13 @@ function handleExcelUpload(e) {
       
       const headers = Object.keys(json[0]).filter(h => h.trim() !== '');
       tempExcelData = json;
+      tempExcelFileName = uploadedFileName;
       
       const savedMapStr = localStorage.getItem('gmh_excel_map');
       if (savedMapStr) {
         const savedMap = JSON.parse(savedMapStr);
-        // Doğrulama: Kayıtlı başlıklar bu excel'de var mı?
         if (headers.includes(savedMap.voucher) && headers.includes(savedMap.checkIn)) {
-          processExcelImport(savedMap);
+          processExcelImport(savedMap, uploadedFileName);
           e.target.value = '';
           return;
         }
@@ -2900,8 +2913,29 @@ function openExcelMapModal(headers) {
   const opts = '<option value="">-- Lütfen Seçiniz --</option>' + 
                headers.map(h => `<option value="${escapeHTML(h)}">${escapeHTML(h)}</option>`).join('');
                
-  ['mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice'].forEach(id => {
+  ['mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice', 'mapCurrency', 'mapGuests', 'mapSaleDate'].forEach(id => {
     document.getElementById(id).innerHTML = opts;
+  });
+  
+  // RMOS otomatik eşleştirme
+  const rmosMappings = {
+    'mapVoucher':  ['Voucher','VOUCHER','Rez.No','REZ.NO'],
+    'mapAgency':   ['Acenta','ACENTA','Acenta Adı'],
+    'mapCheckIn':  ['Giriş Tarihi','GİRİŞ TARİHİ','C/IN','Check-In'],
+    'mapCheckOut': ['Çıkış Tarihi','ÇIKIŞ TARİHİ','C/OUT','Check-Out'],
+    'mapPrice':    ['Toplam Tutar','TOPLAM TUTAR','Tutar'],
+    'mapCurrency': ['Kur Adı','KUR ADI','Para Birimi','PARA BİRİMİ'],
+    'mapGuests':   ['Toplam Kişi','TOPLAM KİŞİ','Kişi Sayısı'],
+    'mapSaleDate': ['Alış Tarihi','ALIŞ TARİHİ','Satış Tarihi','Kayıt Tarihi'],
+    'mapRoomConfig': ['Oda Tipi','ODA TİPİ','Oda'],
+    'mapAction':   ['Aksiyon','ACTION']
+  };
+  Object.entries(rmosMappings).forEach(([selectId, candidates]) => {
+    const sel = document.getElementById(selectId);
+    for (const candidate of candidates) {
+      const found = headers.find(h => h.trim() === candidate);
+      if (found) { sel.value = found; break; }
+    }
   });
   
   document.getElementById('excelMapModal').classList.add('active');
@@ -2928,21 +2962,26 @@ function startExcelImport() {
     checkOut: document.getElementById('mapCheckOut').value,
     roomConfig: document.getElementById('mapRoomConfig').value,
     action: document.getElementById('mapAction').value,
-    price: document.getElementById('mapPrice').value
+    price: document.getElementById('mapPrice').value,
+    currency: document.getElementById('mapCurrency').value,
+    guests: document.getElementById('mapGuests').value,
+    saleDate: document.getElementById('mapSaleDate').value
   };
   
   localStorage.setItem('gmh_excel_map', JSON.stringify(mapping));
-  processExcelImport(mapping);
+  processExcelImport(mapping, tempExcelFileName);
   closeExcelMapModal();
 }
 
-function processExcelImport(mapping) {
+function processExcelImport(mapping, fileName) {
   if (!tempExcelData || tempExcelData.length === 0) return;
   
   let existing = getReservations();
   let addedCount = 0;
   let skippedCount = 0;
   const saleDate = dateToStr(new Date());
+  const batchId = 'batch_' + Date.now();
+  const batchLabel = (fileName ? fileName.replace(/\.[^.]+$/, '') : 'Excel') + ' – ' + new Date().toLocaleString('tr-TR');
 
   function parseExcelDate(dStr) {
     if(!dStr) return "";
@@ -2986,9 +3025,24 @@ function processExcelImport(mapping) {
       if(nights <= 0) nights = 1;
     } catch(e) {}
     
+    // Fiyat: Türkçe format "30.000,00" -> 30000.00
     let price = 0;
     if (mapping.price && row[mapping.price]) {
-      price = parseFloat(String(row[mapping.price]).replace(',','.')) || 0;
+      let rawPrice = String(row[mapping.price]).trim();
+      // TR sayı formatı: binlik ayraç nokta, ondalık virgül -> "30.000,00"
+      rawPrice = rawPrice.replace(/\./g, '').replace(',', '.');
+      price = parseFloat(rawPrice) || 0;
+    }
+    
+    // Kur: TL ise not düş ama EUR olarak sakla (kur bilgisi ayrı tutulur)
+    let currency = 'EUR';
+    let isTL = false;
+    if (mapping.currency && row[mapping.currency]) {
+      const kurAdi = String(row[mapping.currency]).trim().toUpperCase();
+      if (kurAdi === 'TL' || kurAdi === 'TRY') {
+        currency = 'TL';
+        isTL = true;
+      }
     }
     
     let rawAgency = "";
@@ -2997,9 +3051,11 @@ function processExcelImport(mapping) {
     }
     
     let agType = "digerleri";
-    if (rawAgency.includes('ANEX')) agType = "anex";
-    else if (rawAgency.includes('FIT')) agType = "fit";
-    else if (rawAgency.includes('TRAVEYO') || rawAgency.includes('ITAKA') || rawAgency.includes('CEDOK')) agType = "traveyo";
+    // Türkçe karakter normalize ederek karşılaştır (FİT = FIT, vb.)
+    const agNorm = rawAgency.replace(/İ/g,'I').replace(/ı/g,'I').replace(/Ş/g,'S').replace(/ş/g,'S').replace(/Ğ/g,'G').replace(/ğ/g,'G').replace(/Ü/g,'U').replace(/ü/g,'U').replace(/Ö/g,'O').replace(/ö/g,'O').replace(/Ç/g,'C').replace(/ç/g,'C');
+    if (agNorm.includes('ANEX')) agType = "anex";
+    else if (/\bFIT\b/.test(agNorm) && !agNorm.includes('MUNFERIT') && !agNorm.includes('MÜNFERIT')) agType = "fit";
+    else if (agNorm.includes('TRAVEYO') || agNorm.includes('ITAKA') || agNorm.includes('CEDOK') || agNorm.includes('ITHAKA')) agType = "traveyo";
     
     let roomCfg = "-";
     if (mapping.roomConfig && row[mapping.roomConfig]) {
@@ -3025,11 +3081,14 @@ function processExcelImport(mapping) {
       actionVersion: actVer,
       roomType: "standart",
       roomConfig: roomCfg,
-      currency: "EUR",
+      currency: currency,
       subtotal: price,
       grandTotal: price,
-      guestCount: 2,
-      guests: [{age:30}, {age:30}],
+      guestCount: (mapping.guests && row[mapping.guests] ? (parseInt(row[mapping.guests]) || 2) : 2),
+      guests: Array.from({length: (mapping.guests && row[mapping.guests] ? (parseInt(row[mapping.guests]) || 2) : 2)}, () => ({age:30})),
+      saleDate: (mapping.saleDate && row[mapping.saleDate] ? parseExcelDate(String(row[mapping.saleDate])) : saleDate),
+      batchId: batchId,
+      batchLabel: batchLabel,
       savedBy: "Excel",
       savedAt: new Date().toISOString()
     });
@@ -3046,18 +3105,54 @@ function processExcelImport(mapping) {
 }
 
 function deleteExcelImports() {
-  if (confirm("DİKKAT: Excel'den yüklediğiniz TÜM rezervasyonlar silinecek ve Excel sütun eşleştirme ayarlarınız sıfırlanacaktır.\n\nOnaylıyor musunuz?")) {
-    let recs = getReservations();
-    const originalLength = recs.length;
-    recs = recs.filter(r => r.savedBy !== "Excel");
-    const deletedCount = originalLength - recs.length;
-    
-    saveReservationsToStorage(recs);
-    localStorage.removeItem('gmh_excel_map');
-    renderReservationBook();
-    
-    alert(`İşlem başarılı. ${deletedCount} adet Excel kaydı silindi ve eşleştirme ayarları sıfırlandı.`);
+  const recs = getReservations();
+  const excelRecs = recs.filter(r => r.savedBy === 'Excel');
+  if (excelRecs.length === 0) {
+    showToast('Silinecek Excel kaydı bulunamadı.', true);
+    return;
   }
+  // Benzersiz batch'leri topla
+  const batches = [];
+  const seenB = new Set();
+  excelRecs.forEach(r => {
+    const bid = r.batchId || 'legacy';
+    if (!seenB.has(bid)) {
+      seenB.add(bid);
+      const lbl = r.batchLabel || ('Excel Yüklemesi – ' + (r.savedAt ? new Date(r.savedAt).toLocaleString('tr-TR') : 'Bilinmiyor'));
+      const cnt = excelRecs.filter(x => (x.batchId || 'legacy') === bid).length;
+      batches.push({ id: bid, label: lbl, count: cnt });
+    }
+  });
+  let rows = batches.map((b,i) => `
+    <label style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;cursor:pointer;">
+      <input type="radio" name="batchSel" value="${b.id}" ${i===0?'checked':''}>
+      <span style="flex:1;font-size:13px;color:#e2e8f0;">${b.label}</span>
+      <span style="font-size:11px;color:#f0c040;white-space:nowrap;">${b.count} kayıt</span>
+    </label>`).join('');
+  const html = `<div id="batchDeleteModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;">
+    <div style="background:#1e2433;border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:28px;min-width:420px;max-width:540px;">
+      <div style="font-size:16px;font-weight:700;color:#f0c040;margin-bottom:6px;">🗑️ Hangi Excel Paketini Silmek İstiyorsunuz?</div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:16px;">Sadece seçtiğiniz paketteki rezervasyonlar silinecek.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">${rows}</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="document.getElementById('batchDeleteModal').remove()" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#94a3b8;padding:8px 18px;border-radius:8px;cursor:pointer;">İptal</button>
+        <button onclick="confirmBatchDelete()" style="background:rgba(239,68,68,0.85);border:none;color:white;padding:8px 20px;border-radius:8px;cursor:pointer;font-weight:700;">🗑️ Seçili Paketi Sil</button>
+      </div>
+    </div></div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function confirmBatchDelete() {
+  const sel = document.querySelector('input[name="batchSel"]:checked');
+  if (!sel) return;
+  const batchId = sel.value;
+  let recs = getReservations();
+  const before = recs.length;
+  recs = recs.filter(r => !(r.savedBy === 'Excel' && (r.batchId || 'legacy') === batchId));
+  saveReservationsToStorage(recs);
+  renderReservationBook();
+  document.getElementById('batchDeleteModal')?.remove();
+  showToast(`✅ ${before - recs.length} Excel kaydı silindi.`);
 }
 
 function closeReservationBook() {
@@ -3155,12 +3250,22 @@ function renderReservationBook() {
     }
   });
 
-  // Stats
-  const totalAmt   = filtered.reduce((s, r) => s + (r.grandTotal || 0), 0);
-  const totalNights= filtered.reduce((s, r) => s + (r.nights || 0), 0);
-  const totalGuests= filtered.reduce((s, r) => s + (r.guestCount || 0), 0);
+  // Stats - kura göre ayrı topla, dönüştürme yapma
+  const totalAmtEUR = filtered.filter(r => r.currency !== 'TL' && r.currency !== 'TRY').reduce((s, r) => s + (r.grandTotal || 0), 0);
+  const totalAmtTL  = filtered.filter(r => r.currency === 'TL' || r.currency === 'TRY').reduce((s, r) => s + (r.grandTotal || 0), 0);
+  const totalNights = filtered.reduce((s, r) => s + (r.nights || 0), 0);
+  const totalGuests = filtered.reduce((s, r) => s + (r.guestCount || 0), 0);
   document.getElementById('statTotal').textContent  = filtered.length;
-  document.getElementById('statAmount').textContent = (Math.floor(totalAmt * 100) / 100).toFixed(2) + ' €';
+  // Tutar gösterimi: sadece EUR varsa €, sadece TL varsa ₺, ikisi de varsa ikisini göster
+  let amtDisplay = '';
+  if (totalAmtEUR > 0 && totalAmtTL > 0) {
+    amtDisplay = (Math.floor(totalAmtEUR*100)/100).toFixed(2) + ' €  +  ' + (Math.floor(totalAmtTL*100)/100).toFixed(2) + ' ₺';
+  } else if (totalAmtTL > 0) {
+    amtDisplay = (Math.floor(totalAmtTL*100)/100).toFixed(2) + ' ₺';
+  } else {
+    amtDisplay = (Math.floor(totalAmtEUR*100)/100).toFixed(2) + ' €';
+  }
+  document.getElementById('statAmount').textContent = amtDisplay;
   document.getElementById('statNights').textContent = totalNights;
   document.getElementById('statGuests').textContent = totalGuests;
 
@@ -3181,7 +3286,8 @@ function renderReservationBook() {
     const coDate  = r.checkOut ? r.checkOut.split('-').reverse().join('.') : '-';
     const savedDate = r.savedAt ? new Date(r.savedAt).toLocaleDateString('tr-TR', {day:'2-digit',month:'2-digit',year:'numeric', hour:'2-digit', minute:'2-digit'}) : '-';
     const badge = agencyBadgeMap[r.agencyType] || 'digerleri';
-    const totalStr = (Math.floor((r.grandTotal||0)*100)/100).toFixed(2) + ' €';
+    const currSymbol = (r.currency === 'TL' || r.currency === 'TRY') ? '₺' : '€';
+    const totalStr = (Math.floor((r.grandTotal||0)*100)/100).toFixed(2) + ' ' + currSymbol;
     return `<tr>
       <td><strong>${r.voucher}</strong></td>
       <td>${r.hotelName || '-'}</td>
