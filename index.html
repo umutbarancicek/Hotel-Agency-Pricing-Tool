@@ -2791,16 +2791,16 @@ async function syncWithRMOS() {
       if (addedCount > 0) {
         saveReservationsToStorage(existing);
         showReservationBook(); // Listeyi yenile
-        alert(addedCount + ' yeni rezervasyon RMOS\\'tan başarıyla çekildi!');
+        alert(addedCount + " yeni rezervasyon RMOS'tan başarıyla çekildi!");
       } else {
-        alert('RMOS\\'tan gelen veriler zaten defterinizde kayıtlı. Yeni kayıt bulunamadı.');
+        alert("RMOS'tan gelen veriler zaten defterinizde kayıtlı. Yeni kayıt bulunamadı.");
       }
     } else {
       alert('RMOS bağlantısında sorun oluştu veya veri boş döndü.');
     }
   } catch (err) {
     console.error('RMOS Sync Error:', err);
-    alert('RMOS köprü sunucusuna (Backend) ulaşılamıyor. Lütfen server.js\\'in çalıştığından emin olun.');
+    alert("RMOS köprü sunucusuna (Backend) ulaşılamıyor. Lütfen server.js'in çalıştığından emin olun.");
   } finally {
     btn.innerHTML = originalText;
     btn.disabled = false;
