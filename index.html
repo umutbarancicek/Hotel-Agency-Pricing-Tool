@@ -860,6 +860,7 @@ body::before {
       <select id="filterDateType" onchange="renderReservationBook()">
         <option value="savedAt">Satış Tarihi</option>
         <option value="checkIn">C/IN Tarihi</option>
+        <option value="checkOut">C/OUT Tarihi</option>
       </select>
     </div>
     <div class="book-filter-group">
@@ -889,6 +890,14 @@ body::before {
     <div class="book-filter-group">
       <label>Voucher Ara</label>
       <input type="text" id="filterVoucher" placeholder="Voucher no..." oninput="renderReservationBook()">
+    </div>
+    <div class="book-filter-group">
+      <label>Kaydeden</label>
+      <input type="text" id="filterSavedBy" placeholder="Kullanıcı..." oninput="renderReservationBook()">
+    </div>
+    <div class="book-filter-group">
+      <label>Aksiyon</label>
+      <input type="text" id="filterAction" placeholder="Aksiyon adı..." oninput="renderReservationBook()">
     </div>
   </div>
 
@@ -2679,6 +2688,8 @@ function renderReservationBook() {
   const filterHotel  = document.getElementById('filterHotel')?.value    || '';
   const filterType   = document.getElementById('filterAgencyType')?.value || '';
   const filterVoucher= (document.getElementById('filterVoucher')?.value || '').toUpperCase();
+  const filterSavedBy= (document.getElementById('filterSavedBy')?.value || '').toLowerCase();
+  const filterAction = (document.getElementById('filterAction')?.value || '').toLowerCase();
 
   const filtered = allRecs.filter(r => {
     let dateStr = '';
@@ -2690,6 +2701,14 @@ function renderReservationBook() {
       } else {
         dateStr = r.checkIn || '';
       }
+    } else if (filterDateType === 'checkOut') {
+      // r.checkOut is "DD.MM.YYYY"
+      if (r.checkOut && r.checkOut.includes('.')) {
+        const p = r.checkOut.split('.');
+        dateStr = `${p[2]}-${p[1]}-${p[0]}`;
+      } else {
+        dateStr = r.checkOut || '';
+      }
     } else {
       dateStr = r.savedAt ? r.savedAt.split('T')[0] : '';
     }
@@ -2698,7 +2717,9 @@ function renderReservationBook() {
     if (filterTo   && dateStr > filterTo)   return false;
     if (filterHotel && r.hotelId !== filterHotel) return false;
     if (filterType  && r.agencyType !== filterType) return false;
-    if (filterVoucher && !r.voucher.includes(filterVoucher)) return false;
+    if (filterVoucher && !r.voucher.toUpperCase().includes(filterVoucher)) return false;
+    if (filterSavedBy && !(r.savedBy || '').toLowerCase().includes(filterSavedBy)) return false;
+    if (filterAction && !(r.actionVersion || '').toLowerCase().includes(filterAction)) return false;
     return true;
   });
 
