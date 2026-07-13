@@ -3040,13 +3040,34 @@ function processExcelImport(mapping, fileName) {
       if(nights <= 0) nights = 1;
     } catch(e) {}
     
-    // Fiyat: Türkçe format "30.000,00" -> 30000.00
+    // Fiyat: Daha esnek format. "500,00 USD" veya "15.000,00" veya "500.00"
     let price = 0;
     if (mapping.price && row[mapping.price]) {
       let rawPrice = String(row[mapping.price]).trim();
-      // TR sayı formatı: binlik ayraç nokta, ondalık virgül -> "30.000,00"
-      rawPrice = rawPrice.replace(/\./g, '').replace(',', '.');
-      price = parseFloat(rawPrice) || 0;
+      let numericStr = rawPrice.replace(/[^\d.,-]/g, '');
+      let pIdx = numericStr.lastIndexOf('.');
+      let cIdx = numericStr.lastIndexOf(',');
+      
+      if (pIdx > -1 && cIdx > -1) {
+        if (pIdx > cIdx) {
+          numericStr = numericStr.replace(/,/g, '');
+        } else {
+          numericStr = numericStr.replace(/\./g, '').replace(',', '.');
+        }
+      } else if (cIdx > -1) {
+        let parts = numericStr.split(',');
+        if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3 && numericStr.length > 6)) {
+           numericStr = numericStr.replace(/,/g, '');
+        } else {
+           numericStr = numericStr.replace(',', '.');
+        }
+      } else if (pIdx > -1) {
+        let parts = numericStr.split('.');
+        if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+           numericStr = numericStr.replace(/\./g, '');
+        }
+      }
+      price = parseFloat(numericStr) || 0;
     }
     
     // Kur: Ne gelirse onu kullan (EUR, TL, USD, RUB vb.)
