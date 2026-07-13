@@ -828,7 +828,12 @@ body::before {
     <div id="voucherAgencyWrap" style="display:none;">
       <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;display:block;margin-bottom:5px;">Acenta Adı</label>
       <input type="text" id="voucherAgencyName" class="voucher-input" placeholder="ACENTA ADI"
-        maxlength="50" onkeydown="if(event.key==='Enter') confirmSave()">
+        maxlength="50" list="agencyDatalist" oninput="this.value = this.value.toUpperCase()" onkeydown="if(event.key==='Enter') confirmSave()">
+      <datalist id="agencyDatalist"></datalist>
+      <div style="margin-top:8px; display:flex; align-items:center; gap:6px;">
+        <input type="checkbox" id="voucherSaveAgencyCb" style="width:14px; height:14px; accent-color:#fcd34d; cursor:pointer;">
+        <label for="voucherSaveAgencyCb" style="font-size:11px; color:var(--text-secondary); cursor:pointer; user-select:none;">Acentayı Kaydet (Daha sonra listede çıkar)</label>
+      </div>
     </div>
 
     <div id="voucherError" style="color:#ef4444;font-size:12px;margin-bottom:10px;display:none;"></div>
@@ -1972,8 +1977,11 @@ function renderResults(data) {
     // Diğerleri - seçili acenta adını al
     const sel = document.getElementById('agencySelect');
     if (sel && sel.value !== '__general__') {
+      if (sel.value === 'rocket_tour') return 'Rocket Tour';
+      const f = agencies.find(a => a.id === sel.value);
+      if (f) return f.name;
       const opt = sel.options[sel.selectedIndex];
-      return opt ? opt.text : 'Diğerleri';
+      return opt ? opt.text.replace(/ \([+-]%\d+\)$/, '').replace(/🚀 /, '') : 'Diğerleri';
     }
     return ''; // Boş bırak, böylece voucher modalında ne girilirse o alınır
   })();
@@ -2283,8 +2291,8 @@ function renderAgencyList() {
     container.innerHTML = html;
   }
   const cv = select.value;
-  select.innerHTML = '<option value="__general__">Genel Kontrat (İndirimsiz)</option>' +
-                     '<option value="rocket_tour">🚀 Rocket Tour (-%2)</option>';
+  select.innerHTML = '<option value="__general__">Seçimsiz (Genel Kontrat Fiyatları)</option>' +
+                     '<option value="rocket_tour">Rocket Tour (-%2)</option>';
   for (const a of agencies) {
     const o = document.createElement('option');
     o.value = a.id;
@@ -2492,6 +2500,7 @@ function init() {
   updateCheckOutFromNights();
   renderGuestAges();
   renderAgencyList();
+  renderAgencyDatalist();
   updateConditionsBanner('08.07.2026');
   renderRateCard();
   document.getElementById('checkIn').addEventListener('input', updateCheckOutFromNights);
@@ -2512,26 +2521,6 @@ function init() {
     }
   });
   document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-}
-function init() {
-  const today = new Date();
-  const todayStr = dateToStr(today);
-  document.getElementById('checkIn').value = todayStr;
-  document.getElementById('saleDate').value = todayStr;
-  updateCheckOutFromNights();
-  renderGuestAges();
-  renderAgencyList();
-  updateConditionsBanner('08.07.2026');
-  renderRateCard();
-  document.getElementById('checkIn').addEventListener('input', updateCheckOutFromNights);
-  document.getElementById('checkIn').addEventListener('change', updateCheckOutFromNights);
-  document.getElementById('nightsInput').addEventListener('input', updateCheckOutFromNights);
-  document.getElementById('nightsInput').addEventListener('change', updateCheckOutFromNights);
-  document.getElementById('checkOut').addEventListener('input', updateNightsFromDates);
-  document.getElementById('checkOut').addEventListener('change', updateNightsFromDates);
-  document.getElementById('agencySelect').addEventListener('change', () => { for (let i = 0; i < guestCount; i++) updateBadge(i); });
-  document.getElementById('agencyModal').addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) closeAgencyModal(); });
-  document.getElementById('adminModal').addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) closeAdminPanel(); });
 }
 document.addEventListener('DOMContentLoaded', () => {
   init();
@@ -2565,10 +2554,12 @@ function saveReservation() {
     const sel = document.getElementById('agencySelect');
     if (agencyInp && sel && sel.value !== '__general__') {
       const opt = sel.options[sel.selectedIndex];
-      agencyInp.value = opt ? opt.text : '';
+      agencyInp.value = opt ? opt.text.toUpperCase() : '';
     } else if (agencyInp) {
       agencyInp.value = ''; // Kullanıcı kendisi girmeli
     }
+    const cb = document.getElementById('voucherSaveAgencyCb');
+    if(cb) cb.checked = false;
   } else {
     agencyWrap.style.display = 'none';
   }
@@ -2598,12 +2589,23 @@ function confirmSave() {
 
   let agencyNameOverride = '';
   if (currentAgencyType === 'digerleri' && agencyWrap.style.display !== 'none') {
-    agencyNameOverride = agencyInp ? agencyInp.value.trim() : '';
+    agencyNameOverride = agencyInp ? agencyInp.value.trim().toUpperCase() : '';
     if (!agencyNameOverride) {
       errEl.textContent = 'Lütfen acenta adını girin (Örn: Jolly, ETS vb.). Belirtmek istemiyorsanız "-" koyabilirsiniz.';
       errEl.style.display = '';
       agencyInp.focus();
       return;
+    }
+
+    // Acentayı kaydet checkbox işaretli mi?
+    const cb = document.getElementById('voucherSaveAgencyCb');
+    if (cb && cb.checked && agencyNameOverride && agencyNameOverride !== '-') {
+      let customs = JSON.parse(localStorage.getItem('gmh_custom_agency_names') || '[]');
+      if (!customs.includes(agencyNameOverride)) {
+        customs.push(agencyNameOverride);
+        localStorage.setItem('gmh_custom_agency_names', JSON.stringify(customs));
+        renderAgencyDatalist();
+      }
     }
   }
 
