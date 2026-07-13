@@ -924,9 +924,6 @@ body::before {
       <label>Para Birimi</label>
       <select id="filterCurrency" onchange="renderReservationBook()">
         <option value="">Tümü</option>
-        <option value="EUR">€ EUR</option>
-        <option value="TL">₺ TL</option>
-        <option value="USD">$ USD</option>
       </select>
     </div>
   </div>
@@ -2862,6 +2859,14 @@ function showReservationBook() {
     const actions = [...new Set(allRecs.map(r => r.actionVersion).filter(Boolean))].sort();
     actionSel.innerHTML = '<option value="">Tümü</option>' +
       actions.map(a => `<option value="${a}">${a}</option>`).join('');
+  }
+  // Para birimi filtre seçeneklerini dinamik doldur
+  const currencySel = document.getElementById('filterCurrency');
+  if (currencySel) {
+    const currSymbols = { 'EUR': '€', 'TL': '₺', 'TRY': '₺', 'USD': '$', 'GBP': '£' };
+    const currencies = [...new Set(allRecs.map(r => r.currency || 'EUR').filter(Boolean))].sort();
+    currencySel.innerHTML = '<option value="">Tümü</option>' +
+      currencies.map(c => `<option value="${c}">${currSymbols[c] || c} ${c}</option>`).join('');
   }
   document.getElementById('reservationBookScreen').style.display = 'block';
   renderReservationBook();
