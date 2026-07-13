@@ -3005,7 +3005,7 @@ function processExcelImport(mapping) {
       guestCount: 2,
       guests: [{age:30}, {age:30}],
       savedBy: "Excel",
-      savedAt: Date.now()
+      savedAt: new Date().toISOString()
     });
     addedCount++;
   });
@@ -3082,7 +3082,7 @@ function renderReservationBook() {
         dateStr = r.checkOut || '';
       }
     } else {
-      dateStr = r.savedAt ? r.savedAt.split('T')[0] : '';
+      dateStr = r.savedAt ? String(r.savedAt).split('T')[0] : '';
     }
 
     if (filterFrom && dateStr < filterFrom) return false;
