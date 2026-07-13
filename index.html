@@ -3054,7 +3054,7 @@ function processExcelImport(mapping, fileName) {
     // Türkçe karakter normalize ederek karşılaştır (FİT = FIT, vb.)
     const agNorm = rawAgency.replace(/İ/g,'I').replace(/ı/g,'I').replace(/Ş/g,'S').replace(/ş/g,'S').replace(/Ğ/g,'G').replace(/ğ/g,'G').replace(/Ü/g,'U').replace(/ü/g,'U').replace(/Ö/g,'O').replace(/ö/g,'O').replace(/Ç/g,'C').replace(/ç/g,'C');
     if (agNorm.includes('ANEX')) agType = "anex";
-    else if (agNorm.includes('FIT')) agType = "fit";
+    else if (/\bFIT\b/.test(agNorm) && !agNorm.includes('MUNFERIT') && !agNorm.includes('MÜNFERIT')) agType = "fit";
     else if (agNorm.includes('TRAVEYO') || agNorm.includes('ITAKA') || agNorm.includes('CEDOK') || agNorm.includes('ITHAKA')) agType = "traveyo";
     
     let roomCfg = "-";
