@@ -893,11 +893,15 @@ body::before {
     </div>
     <div class="book-filter-group">
       <label>Kaydeden</label>
-      <input type="text" id="filterSavedBy" placeholder="Kullanıcı..." oninput="renderReservationBook()">
+      <select id="filterSavedBy" onchange="renderReservationBook()">
+        <option value="">Tümü</option>
+      </select>
     </div>
     <div class="book-filter-group">
       <label>Aksiyon</label>
-      <input type="text" id="filterAction" placeholder="Aksiyon adı..." oninput="renderReservationBook()">
+      <select id="filterAction" onchange="renderReservationBook()">
+        <option value="">Tümü</option>
+      </select>
     </div>
   </div>
 
@@ -2651,12 +2655,29 @@ function confirmSave() {
 // ================================================================
 
 function showReservationBook() {
+  const allRecs = getReservations();
+  
   // Otel filtre seçeneklerini doldur
   const hotelSel = document.getElementById('filterHotel');
   if (hotelSel) {
-    const hotels = [...new Set(getReservations().map(r => r.hotelName).filter(Boolean))];
     hotelSel.innerHTML = '<option value="">Tümü</option>' +
       HOTELS.map(h => `<option value="${h.id}">${h.name}</option>`).join('');
+  }
+
+  // Kaydeden filtre seçeneklerini dinamik doldur
+  const savedBySel = document.getElementById('filterSavedBy');
+  if (savedBySel) {
+    const savedBys = [...new Set(allRecs.map(r => r.savedBy).filter(Boolean))].sort();
+    savedBySel.innerHTML = '<option value="">Tümü</option>' +
+      savedBys.map(s => `<option value="${s}">${s}</option>`).join('');
+  }
+
+  // Aksiyon filtre seçeneklerini dinamik doldur
+  const actionSel = document.getElementById('filterAction');
+  if (actionSel) {
+    const actions = [...new Set(allRecs.map(r => r.actionVersion).filter(Boolean))].sort();
+    actionSel.innerHTML = '<option value="">Tümü</option>' +
+      actions.map(a => `<option value="${a}">${a}</option>`).join('');
   }
   document.getElementById('reservationBookScreen').style.display = 'block';
   renderReservationBook();
@@ -2688,8 +2709,8 @@ function renderReservationBook() {
   const filterHotel  = document.getElementById('filterHotel')?.value    || '';
   const filterType   = document.getElementById('filterAgencyType')?.value || '';
   const filterVoucher= (document.getElementById('filterVoucher')?.value || '').toUpperCase();
-  const filterSavedBy= (document.getElementById('filterSavedBy')?.value || '').toLowerCase();
-  const filterAction = (document.getElementById('filterAction')?.value || '').toLowerCase();
+  const filterSavedBy= document.getElementById('filterSavedBy')?.value || '';
+  const filterAction = document.getElementById('filterAction')?.value || '';
 
   const filtered = allRecs.filter(r => {
     let dateStr = '';
@@ -2718,8 +2739,8 @@ function renderReservationBook() {
     if (filterHotel && r.hotelId !== filterHotel) return false;
     if (filterType  && r.agencyType !== filterType) return false;
     if (filterVoucher && !r.voucher.toUpperCase().includes(filterVoucher)) return false;
-    if (filterSavedBy && !(r.savedBy || '').toLowerCase().includes(filterSavedBy)) return false;
-    if (filterAction && !(r.actionVersion || '').toLowerCase().includes(filterAction)) return false;
+    if (filterSavedBy && r.savedBy !== filterSavedBy) return false;
+    if (filterAction && r.actionVersion !== filterAction) return false;
     return true;
   });
 
