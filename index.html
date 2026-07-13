@@ -743,6 +743,7 @@ body::before {
 .user-badge.admin { background: rgba(212,168,67,0.12); color: var(--gold-300); }
 .user-badge.user { background: rgba(100,116,139,0.12); color: var(--text-muted); }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -859,6 +860,11 @@ body::before {
   <div class="book-header">
     <div class="book-title">📋 Rezervasyon Defteri</div>
     <div class="book-actions">
+      <input type="file" id="excelUploadInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
+      <button class="btn-book-action" style="background:#10b981; color:white; border-color:#059669;" onclick="document.getElementById('excelUploadInput').click()">📥 Excel Yükle</button>
+      <button class="btn-book-action" style="background:rgba(239,68,68,0.1); color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="deleteExcelImports()">🧹 Excel'i Temizle</button>
+      <button class="btn-book-action" style="background:#2563eb; color:white; border-color:#1d4ed8;" onclick="syncWithRMOS()" id="btnRmosSync">🔄 RMOS Senkronize Et</button>
+      <button class="btn-book-action" onclick="renderReservationBook()">🔄 Yenile</button>
       <button class="btn-book-action" onclick="exportReservationsCSV()">📥 CSV İndir</button>
       <button class="btn-book-action close" onclick="closeReservationBook()">✖ Kapat</button>
     </div>
@@ -1164,6 +1170,50 @@ body::before {
     <div class="modal-actions">
       <button class="btn-modal secondary" onclick="closeAgencyModal()">İptal</button>
       <button class="btn-modal primary" onclick="saveAgency()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXCEL MAP MODAL -->
+<div class="modal-overlay" id="excelMapModal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-title">Excel Sütunlarını Eşleştir</div>
+    <div style="font-size:12px; margin-bottom:15px; color:var(--text-secondary); line-height:1.4;">
+      Sistem yüklediğiniz Excel'deki başlıkları tespit etti. Lütfen sadece ihtiyacımız olan 4 bilgiyi aşağıdaki listeden seçin. Diğer tüm gereksiz veriler otomatik silinecektir. (Bunu sadece 1 kez yapacaksınız!)
+    </div>
+    
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Voucher Numarası Hangi Sütunda?</label>
+      <select id="mapVoucher" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Acenta Adı Hangi Sütunda?</label>
+      <select id="mapAgency" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Giriş Tarihi (C/IN) Hangi Sütunda?</label>
+      <select id="mapCheckIn" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Çıkış Tarihi (C/OUT) Hangi Sütunda?</label>
+      <select id="mapCheckOut" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Oda Tipi Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapRoomConfig" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Aksiyon Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapAction" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Tutar Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapPrice" class="form-input"></select>
+    </div>
+
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn-modal secondary" onclick="closeExcelMapModal()">İptal</button>
+      <button class="btn-modal primary" onclick="startExcelImport()">Kaydet ve İçe Aktar</button>
     </div>
   </div>
 </div>
@@ -2724,6 +2774,49 @@ function confirmSave() {
 // REZERVASYON DEFTERİ
 // ================================================================
 
+function closeReservationBook() {
+  document.getElementById('reservationBookScreen').style.display = 'none';
+}
+
+async function syncWithRMOS() {
+  const btn = document.getElementById('btnRmosSync');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Yükleniyor...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('http://localhost:3000/api/sync-reservations');
+    const data = await res.json();
+    if (data.success && data.data && data.data.length > 0) {
+      let existing = getReservations();
+      let addedCount = 0;
+      data.data.forEach(r => {
+        // Aynı voucher veya ID var mı kontrol et
+        const exists = existing.find(ex => ex.id === r.id || ex.voucher === r.voucher);
+        if (!exists) {
+          existing.push(r);
+          addedCount++;
+        }
+      });
+      if (addedCount > 0) {
+        saveReservationsToStorage(existing);
+        showReservationBook(); // Listeyi yenile
+        alert(addedCount + " yeni rezervasyon RMOS'tan başarıyla çekildi!");
+      } else {
+        alert("RMOS'tan gelen veriler zaten defterinizde kayıtlı. Yeni kayıt bulunamadı.");
+      }
+    } else {
+      alert('RMOS bağlantısında sorun oluştu veya veri boş döndü.');
+    }
+  } catch (err) {
+    console.error('RMOS Sync Error:', err);
+    alert("RMOS köprü sunucusuna (Backend) ulaşılamıyor. Lütfen server.js'in çalıştığından emin olun.");
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
 function showReservationBook() {
   const allRecs = getReservations();
   
@@ -2751,6 +2844,220 @@ function showReservationBook() {
   }
   document.getElementById('reservationBookScreen').style.display = 'block';
   renderReservationBook();
+}
+
+// ================================================================
+// EXCEL IMPORT ENGINE (DİNAMİK)
+// ================================================================
+
+let tempExcelData = null;
+
+function handleExcelUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = evt.target.result;
+      const workbook = XLSX.read(data, {type: 'binary'});
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      // raw:false to get formatted date strings if possible
+      const json = XLSX.utils.sheet_to_json(worksheet, {raw: false, defval: ""});
+      
+      if (json.length === 0) {
+        alert("Yüklediğiniz dosya boş veya okunamadı.");
+        return;
+      }
+      
+      const headers = Object.keys(json[0]).filter(h => h.trim() !== '');
+      tempExcelData = json;
+      
+      const savedMapStr = localStorage.getItem('gmh_excel_map');
+      if (savedMapStr) {
+        const savedMap = JSON.parse(savedMapStr);
+        // Doğrulama: Kayıtlı başlıklar bu excel'de var mı?
+        if (headers.includes(savedMap.voucher) && headers.includes(savedMap.checkIn)) {
+          processExcelImport(savedMap);
+          e.target.value = '';
+          return;
+        }
+      }
+      
+      openExcelMapModal(headers);
+    } catch(err) {
+      console.error(err);
+      alert("Excel dosyası okunurken hata oluştu!");
+    } finally {
+      e.target.value = '';
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function openExcelMapModal(headers) {
+  const opts = '<option value="">-- Lütfen Seçiniz --</option>' + 
+               headers.map(h => `<option value="${escapeHTML(h)}">${escapeHTML(h)}</option>`).join('');
+               
+  ['mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice'].forEach(id => {
+    document.getElementById(id).innerHTML = opts;
+  });
+  
+  document.getElementById('excelMapModal').classList.add('active');
+}
+
+function closeExcelMapModal() {
+  document.getElementById('excelMapModal').classList.remove('active');
+  tempExcelData = null;
+}
+
+function startExcelImport() {
+  const mapVoucher = document.getElementById('mapVoucher').value;
+  const mapCheckIn = document.getElementById('mapCheckIn').value;
+  
+  if (!mapVoucher || !mapCheckIn) {
+    alert("Lütfen en az 'Voucher Numarası' ve 'Giriş Tarihi' sütunlarını eşleştirin!");
+    return;
+  }
+  
+  const mapping = {
+    voucher: mapVoucher,
+    agency: document.getElementById('mapAgency').value,
+    checkIn: mapCheckIn,
+    checkOut: document.getElementById('mapCheckOut').value,
+    roomConfig: document.getElementById('mapRoomConfig').value,
+    action: document.getElementById('mapAction').value,
+    price: document.getElementById('mapPrice').value
+  };
+  
+  localStorage.setItem('gmh_excel_map', JSON.stringify(mapping));
+  processExcelImport(mapping);
+  closeExcelMapModal();
+}
+
+function processExcelImport(mapping) {
+  if (!tempExcelData || tempExcelData.length === 0) return;
+  
+  let existing = getReservations();
+  let addedCount = 0;
+  let skippedCount = 0;
+  const saleDate = dateToStr(new Date());
+
+  function parseExcelDate(dStr) {
+    if(!dStr) return "";
+    let s = String(dStr).split(' ')[0]; // saat kısmını at
+    if(s.includes('.')) {
+      const p = s.split('.');
+      if(p.length >= 3) {
+        let y = p[2].length === 2 ? "20"+p[2] : p[2];
+        return `${y}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+      }
+    }
+    if(s.includes('/')) {
+      const p = s.split('/');
+      if(p.length >= 3) {
+        let y = p[2].length === 2 ? "20"+p[2] : p[2];
+        return `${y}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`;
+      }
+    }
+    if(s.includes('-')) return s;
+    return dStr;
+  }
+
+  tempExcelData.forEach(row => {
+    const rawVch = row[mapping.voucher];
+    if (!rawVch) return;
+    const voucher = String(rawVch).trim();
+    
+    // Aynı voucher numarası varsa atla
+    if (existing.find(e => e.voucher === voucher)) {
+      skippedCount++;
+      return;
+    }
+    
+    let ci = parseExcelDate(row[mapping.checkIn]) || saleDate;
+    let co = mapping.checkOut ? parseExcelDate(row[mapping.checkOut]) : ci;
+    if(!co) co = ci;
+    
+    let nights = 1;
+    try {
+      nights = daysBetween(parseDate(ci), parseDate(co));
+      if(nights <= 0) nights = 1;
+    } catch(e) {}
+    
+    let price = 0;
+    if (mapping.price && row[mapping.price]) {
+      price = parseFloat(String(row[mapping.price]).replace(',','.')) || 0;
+    }
+    
+    let rawAgency = "";
+    if (mapping.agency && row[mapping.agency]) {
+      rawAgency = String(row[mapping.agency]).trim().toUpperCase();
+    }
+    
+    let agType = "digerleri";
+    if (rawAgency.includes('ANEX')) agType = "anex";
+    else if (rawAgency.includes('FIT')) agType = "fit";
+    else if (rawAgency.includes('TRAVEYO') || rawAgency.includes('ITAKA') || rawAgency.includes('CEDOK')) agType = "traveyo";
+    
+    let roomCfg = "-";
+    if (mapping.roomConfig && row[mapping.roomConfig]) {
+      roomCfg = String(row[mapping.roomConfig]).trim();
+    }
+    
+    let actVer = "Excel Aktarımı";
+    if (mapping.action && row[mapping.action]) {
+      actVer = String(row[mapping.action]).trim();
+    }
+    
+    existing.push({
+      id: "exc_" + Date.now() + "_" + Math.floor(Math.random()*10000),
+      voucher: voucher,
+      hotelId: currentHotelId || "h1",
+      hotelName: "Grand Miramor",
+      agencyType: agType,
+      agencyNameOverride: rawAgency || "Bilinmiyor",
+      checkIn: ci,
+      checkOut: co,
+      nights: nights,
+      saleDate: saleDate,
+      actionVersion: actVer,
+      roomType: "standart",
+      roomConfig: roomCfg,
+      currency: "EUR",
+      subtotal: price,
+      grandTotal: price,
+      guestCount: 2,
+      guests: [{age:30}, {age:30}],
+      savedBy: "Excel",
+      savedAt: new Date().toISOString()
+    });
+    addedCount++;
+  });
+  
+  if (addedCount > 0) {
+    saveReservationsToStorage(existing);
+    showReservationBook();
+    alert(`Mükemmel! ${addedCount} yeni rezervasyon sisteme eklendi.\n(${skippedCount} adet zaten kayıtlı olan rezervasyon atlandı.)`);
+  } else {
+    alert(`Listede eklenecek yeni rezervasyon bulunamadı. (${skippedCount} adet kayıt zaten sistemde mevcut.)`);
+  }
+}
+
+function deleteExcelImports() {
+  if (confirm("DİKKAT: Excel'den yüklediğiniz TÜM rezervasyonlar silinecek ve Excel sütun eşleştirme ayarlarınız sıfırlanacaktır.\n\nOnaylıyor musunuz?")) {
+    let recs = getReservations();
+    const originalLength = recs.length;
+    recs = recs.filter(r => r.savedBy !== "Excel");
+    const deletedCount = originalLength - recs.length;
+    
+    saveReservationsToStorage(recs);
+    localStorage.removeItem('gmh_excel_map');
+    renderReservationBook();
+    
+    alert(`İşlem başarılı. ${deletedCount} adet Excel kaydı silindi ve eşleştirme ayarları sıfırlandı.`);
+  }
 }
 
 function closeReservationBook() {
@@ -2801,7 +3108,7 @@ function renderReservationBook() {
         dateStr = r.checkOut || '';
       }
     } else {
-      dateStr = r.savedAt ? r.savedAt.split('T')[0] : '';
+      dateStr = r.savedAt ? String(r.savedAt).split('T')[0] : '';
     }
 
     if (filterFrom && dateStr < filterFrom) return false;
@@ -2878,7 +3185,7 @@ function renderReservationBook() {
     return `<tr>
       <td><strong>${r.voucher}</strong></td>
       <td>${r.hotelName || '-'}</td>
-      <td><span class="book-badge ${badge}">${r.agencyName || r.agencyType}</span></td>
+      <td><span class="book-badge ${badge}">${String(r.agencyNameOverride || r.agencyName || r.agencyType).toUpperCase()}</span></td>
       <td>${ciDate}</td>
       <td>${coDate}</td>
       <td>${r.nights}</td>
@@ -2906,16 +3213,17 @@ function exportReservationsCSV() {
   if (recs.length === 0) { showToast('Kaydedilmiş rezervasyon yok.', true); return; }
   const headers = ['Voucher','Otel','Acenta Tipi','Acenta Adı','C/IN','C/OUT','Gece','Kişi','Oda Tipi','Aksiyon','Ara Toplam (€)','İndirim (€)','Genel Toplam (€)','PPG (€)','Satış Tarihi','Kaydeden'];
   const rows = recs.map(r => [
-    r.voucher, r.hotelName, r.agencyType, r.agencyName,
+    r.voucher, r.hotelName, r.agencyType, r.agencyNameOverride || r.agencyName,
     r.checkIn, r.checkOut, r.nights, r.guestCount, r.roomConfig, r.actionVersion,
     (r.subtotal||0).toFixed(2), (r.totalDiscount||0).toFixed(2), (r.grandTotal||0).toFixed(2), (r.ppn||0).toFixed(2),
     r.savedAt ? new Date(r.savedAt).toLocaleString('tr-TR') : '', r.savedBy
   ].map(v => `"${String(v||'').replace(/"/g,'""')}"`));
-  const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\r\n');
+  const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(';')).join('\r\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'rezervasyonlar_' + new Date().toISOString().split('T')[0] + '.csv';
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  a.href = url; a.download = 'rezervasyon_yeni_' + timestamp + '.csv';
   a.click(); URL.revokeObjectURL(url);
 }
 
