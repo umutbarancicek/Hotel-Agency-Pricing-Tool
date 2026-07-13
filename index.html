@@ -2997,9 +2997,11 @@ function processExcelImport(mapping) {
       saleDate: saleDate,
       actionVersion: "Excel Aktarımı",
       roomType: "standart",
+      roomConfig: "-",
       currency: "EUR",
       totalPrice: price,
-      guests: [{age:30}],
+      guestCount: 2,
+      guests: [{age:30}, {age:30}],
       savedBy: "Excel",
       savedAt: Date.now()
     });
