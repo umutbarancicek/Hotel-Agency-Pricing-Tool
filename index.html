@@ -1207,8 +1207,20 @@ body::before {
       <select id="mapAction" class="form-input"></select>
     </div>
     <div class="form-group" style="margin-bottom:10px;">
-      <label class="form-label">Tutar Hangi Sütunda? (Opsiyonel)</label>
+      <label class="form-label">Toplam Tutar Hangi Sütunda? (Opsiyonel)</label>
       <select id="mapPrice" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Kur Adı (TL/EURO) Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapCurrency" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Toplam Kişi Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapGuests" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Satış/Alış Tarihi Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapSaleDate" class="form-input"></select>
     </div>
 
     <div class="modal-actions" style="margin-top:20px;">
@@ -2900,8 +2912,29 @@ function openExcelMapModal(headers) {
   const opts = '<option value="">-- Lütfen Seçiniz --</option>' + 
                headers.map(h => `<option value="${escapeHTML(h)}">${escapeHTML(h)}</option>`).join('');
                
-  ['mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice'].forEach(id => {
+  ['mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice', 'mapCurrency', 'mapGuests', 'mapSaleDate'].forEach(id => {
     document.getElementById(id).innerHTML = opts;
+  });
+  
+  // RMOS otomatik eşleştirme
+  const rmosMappings = {
+    'mapVoucher':  ['Voucher','VOUCHER','Rez.No','REZ.NO'],
+    'mapAgency':   ['Acenta','ACENTA','Acenta Adı'],
+    'mapCheckIn':  ['Giriş Tarihi','GİRİŞ TARİHİ','C/IN','Check-In'],
+    'mapCheckOut': ['Çıkış Tarihi','ÇIKIŞ TARİHİ','C/OUT','Check-Out'],
+    'mapPrice':    ['Toplam Tutar','TOPLAM TUTAR','Tutar'],
+    'mapCurrency': ['Kur Adı','KUR ADI','Para Birimi','PARA BİRİMİ'],
+    'mapGuests':   ['Toplam Kişi','TOPLAM KİŞİ','Kişi Sayısı'],
+    'mapSaleDate': ['Alış Tarihi','ALIŞ TARİHİ','Satış Tarihi','Kayıt Tarihi'],
+    'mapRoomConfig': ['Oda Tipi','ODA TİPİ','Oda'],
+    'mapAction':   ['Aksiyon','ACTION']
+  };
+  Object.entries(rmosMappings).forEach(([selectId, candidates]) => {
+    const sel = document.getElementById(selectId);
+    for (const candidate of candidates) {
+      const found = headers.find(h => h.trim() === candidate);
+      if (found) { sel.value = found; break; }
+    }
   });
   
   document.getElementById('excelMapModal').classList.add('active');
@@ -2928,7 +2961,10 @@ function startExcelImport() {
     checkOut: document.getElementById('mapCheckOut').value,
     roomConfig: document.getElementById('mapRoomConfig').value,
     action: document.getElementById('mapAction').value,
-    price: document.getElementById('mapPrice').value
+    price: document.getElementById('mapPrice').value,
+    currency: document.getElementById('mapCurrency').value,
+    guests: document.getElementById('mapGuests').value,
+    saleDate: document.getElementById('mapSaleDate').value
   };
   
   localStorage.setItem('gmh_excel_map', JSON.stringify(mapping));
@@ -2986,9 +3022,24 @@ function processExcelImport(mapping) {
       if(nights <= 0) nights = 1;
     } catch(e) {}
     
+    // Fiyat: Türkçe format "30.000,00" -> 30000.00
     let price = 0;
     if (mapping.price && row[mapping.price]) {
-      price = parseFloat(String(row[mapping.price]).replace(',','.')) || 0;
+      let rawPrice = String(row[mapping.price]).trim();
+      // TR sayı formatı: binlik ayraç nokta, ondalık virgül -> "30.000,00"
+      rawPrice = rawPrice.replace(/\./g, '').replace(',', '.');
+      price = parseFloat(rawPrice) || 0;
+    }
+    
+    // Kur: TL ise not düş ama EUR olarak sakla (kur bilgisi ayrı tutulur)
+    let currency = 'EUR';
+    let isTL = false;
+    if (mapping.currency && row[mapping.currency]) {
+      const kurAdi = String(row[mapping.currency]).trim().toUpperCase();
+      if (kurAdi === 'TL' || kurAdi === 'TRY') {
+        currency = 'TL';
+        isTL = true;
+      }
     }
     
     let rawAgency = "";
@@ -3025,11 +3076,12 @@ function processExcelImport(mapping) {
       actionVersion: actVer,
       roomType: "standart",
       roomConfig: roomCfg,
-      currency: "EUR",
+      currency: currency,
       subtotal: price,
       grandTotal: price,
-      guestCount: 2,
-      guests: [{age:30}, {age:30}],
+      guestCount: (mapping.guests && row[mapping.guests] ? (parseInt(row[mapping.guests]) || 2) : 2),
+      guests: Array.from({length: (mapping.guests && row[mapping.guests] ? (parseInt(row[mapping.guests]) || 2) : 2)}, () => ({age:30})),
+      saleDate: (mapping.saleDate && row[mapping.saleDate] ? parseExcelDate(String(row[mapping.saleDate])) : saleDate),
       savedBy: "Excel",
       savedAt: new Date().toISOString()
     });
@@ -3181,7 +3233,8 @@ function renderReservationBook() {
     const coDate  = r.checkOut ? r.checkOut.split('-').reverse().join('.') : '-';
     const savedDate = r.savedAt ? new Date(r.savedAt).toLocaleDateString('tr-TR', {day:'2-digit',month:'2-digit',year:'numeric', hour:'2-digit', minute:'2-digit'}) : '-';
     const badge = agencyBadgeMap[r.agencyType] || 'digerleri';
-    const totalStr = (Math.floor((r.grandTotal||0)*100)/100).toFixed(2) + ' €';
+    const currSymbol = (r.currency === 'TL' || r.currency === 'TRY') ? '₺' : '€';
+    const totalStr = (Math.floor((r.grandTotal||0)*100)/100).toFixed(2) + ' ' + currSymbol;
     return `<tr>
       <td><strong>${r.voucher}</strong></td>
       <td>${r.hotelName || '-'}</td>
