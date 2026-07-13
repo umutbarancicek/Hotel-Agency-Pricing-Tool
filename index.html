@@ -859,6 +859,7 @@ body::before {
   <div class="book-header">
     <div class="book-title">📋 Rezervasyon Defteri</div>
     <div class="book-actions">
+      <button class="btn-book-action" style="background:#2563eb; color:white; border-color:#1d4ed8;" onclick="syncWithRMOS()" id="btnRmosSync">🔄 RMOS Senkronize Et</button>
       <button class="btn-book-action" onclick="exportReservationsCSV()">📥 CSV İndir</button>
       <button class="btn-book-action close" onclick="closeReservationBook()">✖ Kapat</button>
     </div>
@@ -2723,6 +2724,49 @@ function confirmSave() {
 // ================================================================
 // REZERVASYON DEFTERİ
 // ================================================================
+
+function closeReservationBook() {
+  document.getElementById('reservationBookScreen').style.display = 'none';
+}
+
+async function syncWithRMOS() {
+  const btn = document.getElementById('btnRmosSync');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Yükleniyor...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('http://localhost:3000/api/sync-reservations');
+    const data = await res.json();
+    if (data.success && data.data && data.data.length > 0) {
+      let existing = getReservations();
+      let addedCount = 0;
+      data.data.forEach(r => {
+        // Aynı voucher veya ID var mı kontrol et
+        const exists = existing.find(ex => ex.id === r.id || ex.voucher === r.voucher);
+        if (!exists) {
+          existing.push(r);
+          addedCount++;
+        }
+      });
+      if (addedCount > 0) {
+        saveReservationsToStorage(existing);
+        showReservationBook(); // Listeyi yenile
+        alert(addedCount + ' yeni rezervasyon RMOS\\'tan başarıyla çekildi!');
+      } else {
+        alert('RMOS\\'tan gelen veriler zaten defterinizde kayıtlı. Yeni kayıt bulunamadı.');
+      }
+    } else {
+      alert('RMOS bağlantısında sorun oluştu veya veri boş döndü.');
+    }
+  } catch (err) {
+    console.error('RMOS Sync Error:', err);
+    alert('RMOS köprü sunucusuna (Backend) ulaşılamıyor. Lütfen server.js\\'in çalıştığından emin olun.');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
 
 function showReservationBook() {
   const allRecs = getReservations();
