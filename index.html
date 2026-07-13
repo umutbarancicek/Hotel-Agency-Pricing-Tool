@@ -386,6 +386,10 @@ body::before {
 }
 .book-table thead tr { background: #141922; }
 .book-table th { padding: 11px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #8899aa; border-bottom: 1px solid #1e2433; white-space: nowrap; }
+.book-table th.sortable { cursor: pointer; user-select: none; transition: color 0.2s; }
+.book-table th.sortable:hover { color: #fcd34d; }
+.book-table th .sort-icon { display: inline-block; margin-left: 4px; font-size: 9px; opacity: 0.4; }
+.book-table th.sort-asc .sort-icon, .book-table th.sort-desc .sort-icon { opacity: 1; color: #fcd34d; }
 .book-table td { padding: 11px 12px; color: #e2e8f0; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; white-space: nowrap; }
 .book-table tr:hover td { background: rgba(255,255,255,0.03); }
 .book-table tr:last-child td { border-bottom: none; }
@@ -824,7 +828,18 @@ body::before {
     <div id="voucherAgencyWrap" style="display:none;">
       <label style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;display:block;margin-bottom:5px;">Acenta Adı</label>
       <input type="text" id="voucherAgencyName" class="voucher-input" placeholder="ACENTA ADI"
-        maxlength="50" onkeydown="if(event.key==='Enter') confirmSave()">
+        maxlength="50" list="agencyDatalist" oninput="this.value = this.value.toUpperCase()" onkeydown="if(event.key==='Enter') confirmSave()">
+      <datalist id="agencyDatalist"></datalist>
+      <div style="margin-top:8px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" id="voucherSaveAgencyCb" style="width:14px; height:14px; accent-color:#fcd34d; cursor:pointer;">
+          <label for="voucherSaveAgencyCb" style="font-size:11px; color:var(--text-secondary); cursor:pointer; user-select:none;">Acentayı Kaydet</label>
+        </div>
+        <a href="#" onclick="toggleManageCustomAgencies(event)" style="font-size:10px; color:var(--gold-400); text-decoration:underline;">Kayıtlı İsimleri Yönet</a>
+      </div>
+      <div id="manageCustomAgenciesWrap" style="display:none; margin-top:8px; background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:6px; padding:8px; max-height:120px; overflow-y:auto;">
+        <div id="manageCustomAgenciesList"></div>
+      </div>
     </div>
 
     <div id="voucherError" style="color:#ef4444;font-size:12px;margin-bottom:10px;display:none;"></div>
@@ -851,6 +866,14 @@ body::before {
 
   <!-- Filters -->
   <div class="book-filters">
+    <div class="book-filter-group">
+      <label>Tarih Tipi</label>
+      <select id="filterDateType" onchange="renderReservationBook()">
+        <option value="savedAt">Satış Tarihi</option>
+        <option value="checkIn">C/IN Tarihi</option>
+        <option value="checkOut">C/OUT Tarihi</option>
+      </select>
+    </div>
     <div class="book-filter-group">
       <label>Başlangıç Tarihi</label>
       <input type="date" id="filterDateFrom" onchange="renderReservationBook()">
@@ -879,6 +902,18 @@ body::before {
       <label>Voucher Ara</label>
       <input type="text" id="filterVoucher" placeholder="Voucher no..." oninput="renderReservationBook()">
     </div>
+    <div class="book-filter-group">
+      <label>Kaydeden</label>
+      <select id="filterSavedBy" onchange="renderReservationBook()">
+        <option value="">Tümü</option>
+      </select>
+    </div>
+    <div class="book-filter-group">
+      <label>Aksiyon</label>
+      <select id="filterAction" onchange="renderReservationBook()">
+        <option value="">Tümü</option>
+      </select>
+    </div>
   </div>
 
   <!-- Stats -->
@@ -906,18 +941,18 @@ body::before {
     <table class="book-table">
       <thead>
         <tr>
-          <th>Voucher</th>
-          <th>Otel</th>
-          <th>Acenta</th>
-          <th>C/IN</th>
-          <th>C/OUT</th>
-          <th>Gece</th>
-          <th>Kişi</th>
+          <th class="sortable" onclick="setSort('voucher')">Voucher<span class="sort-icon">↕</span></th>
+          <th class="sortable" onclick="setSort('hotelName')">Otel<span class="sort-icon">↕</span></th>
+          <th class="sortable" onclick="setSort('agencyName')">Acenta<span class="sort-icon">↕</span></th>
+          <th class="sortable" onclick="setSort('checkIn')">C/IN<span class="sort-icon">↕</span></th>
+          <th class="sortable" onclick="setSort('checkOut')">C/OUT<span class="sort-icon">↕</span></th>
+          <th class="sortable" onclick="setSort('nights')">Gece<span class="sort-icon">↕</span></th>
+          <th class="sortable" onclick="setSort('guestCount')">Kişi<span class="sort-icon">↕</span></th>
           <th>Oda Tipi</th>
           <th>Aksiyon</th>
-          <th>Toplam</th>
-          <th>Satış Tarihi</th>
-          <th>Kaydeden</th>
+          <th class="sortable" onclick="setSort('grandTotal')">Toplam<span class="sort-icon">↕</span></th>
+          <th class="sortable" onclick="setSort('savedAt')">Satış Tarihi<span class="sort-icon">↕</span></th>
+          <th class="sortable" onclick="setSort('savedBy')">Kaydeden<span class="sort-icon">↕</span></th>
           <th></th>
         </tr>
       </thead>
@@ -1020,7 +1055,7 @@ body::before {
           <div class="agency-sub-select" id="agencySubSelect" style="display:none;">
             <label class="form-label" for="agencySelect">Acenta Seçin</label>
             <select id="agencySelect" class="form-select">
-              <option value="__general__">Genel Kontrat (İndirimsiz)</option>
+              <option value="__general__">Seçimsiz (Genel Kontrat Fiyatları)</option>
             </select>
           </div>
         </div>
@@ -1244,6 +1279,7 @@ function selectHotel(hotelId) {
   session.selectedHotel = hotelId;
   currentHotelId = hotelId;
   localStorage.setItem('gmh_session', JSON.stringify(session));
+  document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('hotelSelectScreen').classList.add('hidden');
   document.getElementById('mainApp').style.display = 'block';
   document.getElementById('topBarUsername').textContent = session.username;
@@ -1948,10 +1984,13 @@ function renderResults(data) {
     // Diğerleri - seçili acenta adını al
     const sel = document.getElementById('agencySelect');
     if (sel && sel.value !== '__general__') {
+      if (sel.value === 'rocket_tour') return 'Rocket Tour';
+      const f = agencies.find(a => a.id === sel.value);
+      if (f) return f.name;
       const opt = sel.options[sel.selectedIndex];
-      return opt ? opt.text : 'Diğerleri';
+      return opt ? opt.text.replace(/ \([+-]%\d+\)$/, '').replace(/🚀 /, '') : 'Diğerleri';
     }
-    return 'Genel Kontrat';
+    return ''; // Boş bırak, böylece voucher modalında ne girilirse o alınır
   })();
 
   // Guest summary
@@ -2259,8 +2298,8 @@ function renderAgencyList() {
     container.innerHTML = html;
   }
   const cv = select.value;
-  select.innerHTML = '<option value="__general__">Genel Kontrat (İndirimsiz)</option>' +
-                     '<option value="rocket_tour">🚀 Rocket Tour (-%2)</option>';
+  select.innerHTML = '<option value="__general__">Seçimsiz (Genel Kontrat Fiyatları)</option>' +
+                     '<option value="rocket_tour">Rocket Tour (-%2)</option>';
   for (const a of agencies) {
     const o = document.createElement('option');
     o.value = a.id;
@@ -2268,6 +2307,67 @@ function renderAgencyList() {
     select.appendChild(o);
   }
   if (cv) select.value = cv;
+}
+
+function renderAgencyDatalist() {
+  const dl = document.getElementById('agencyDatalist');
+  if (!dl) return;
+  const defaults = ['ODEON', 'SUNMAR', 'MOTUS', 'JOINUP', 'KALANIT'];
+  const customs = JSON.parse(localStorage.getItem('gmh_custom_agency_names') || '[]');
+  const allNames = [...new Set([...defaults, ...customs])].sort();
+  dl.innerHTML = allNames.map(n => `<option value="${n}">`).join('');
+}
+
+function toggleManageCustomAgencies(e) {
+  if(e) e.preventDefault();
+  const wrap = document.getElementById('manageCustomAgenciesWrap');
+  if (wrap.style.display === 'none') {
+    wrap.style.display = 'block';
+    renderManageCustomAgencies();
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function renderManageCustomAgencies() {
+  const container = document.getElementById('manageCustomAgenciesList');
+  if(!container) return;
+  let customs = JSON.parse(localStorage.getItem('gmh_custom_agency_names') || '[]');
+  if (customs.length === 0) {
+    container.innerHTML = '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Özel kaydedilmiş acenta yok.</div>';
+    return;
+  }
+  container.innerHTML = customs.map((c, i) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; background:var(--surface); padding:4px 8px; border-radius:4px;">
+      <span style="font-size:11px; font-weight:600; color:var(--text-primary);">${escapeHTML(c)}</span>
+      <div style="display:flex; gap:4px;">
+        <button class="btn-icon" style="padding:2px 4px; font-size:10px;" onclick="editCustomAgency(${i})" title="Düzenle">✏️</button>
+        <button class="btn-icon delete" style="padding:2px 4px; font-size:10px;" onclick="deleteCustomAgency(${i})" title="Sil">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteCustomAgency(i) {
+  if(!confirm('Bu kayıtlı acenta adını silmek istediğinize emin misiniz?')) return;
+  let customs = JSON.parse(localStorage.getItem('gmh_custom_agency_names') || '[]');
+  customs.splice(i, 1);
+  localStorage.setItem('gmh_custom_agency_names', JSON.stringify(customs));
+  renderManageCustomAgencies();
+  renderAgencyDatalist();
+}
+
+function editCustomAgency(i) {
+  let customs = JSON.parse(localStorage.getItem('gmh_custom_agency_names') || '[]');
+  const oldName = customs[i];
+  const newName = prompt('Acenta adını düzenleyin:', oldName);
+  if (newName !== null && newName.trim() !== '') {
+    customs[i] = newName.trim().toUpperCase();
+    localStorage.setItem('gmh_custom_agency_names', JSON.stringify(customs));
+    renderManageCustomAgencies();
+    renderAgencyDatalist();
+    document.getElementById('voucherAgencyName').value = customs[i];
+  }
 }
 
 function openAgencyModal(editId) {
@@ -2468,6 +2568,7 @@ function init() {
   updateCheckOutFromNights();
   renderGuestAges();
   renderAgencyList();
+  renderAgencyDatalist();
   updateConditionsBanner('08.07.2026');
   renderRateCard();
   document.getElementById('checkIn').addEventListener('input', updateCheckOutFromNights);
@@ -2488,26 +2589,6 @@ function init() {
     }
   });
   document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-}
-function init() {
-  const today = new Date();
-  const todayStr = dateToStr(today);
-  document.getElementById('checkIn').value = todayStr;
-  document.getElementById('saleDate').value = todayStr;
-  updateCheckOutFromNights();
-  renderGuestAges();
-  renderAgencyList();
-  updateConditionsBanner('08.07.2026');
-  renderRateCard();
-  document.getElementById('checkIn').addEventListener('input', updateCheckOutFromNights);
-  document.getElementById('checkIn').addEventListener('change', updateCheckOutFromNights);
-  document.getElementById('nightsInput').addEventListener('input', updateCheckOutFromNights);
-  document.getElementById('nightsInput').addEventListener('change', updateCheckOutFromNights);
-  document.getElementById('checkOut').addEventListener('input', updateNightsFromDates);
-  document.getElementById('checkOut').addEventListener('change', updateNightsFromDates);
-  document.getElementById('agencySelect').addEventListener('change', () => { for (let i = 0; i < guestCount; i++) updateBadge(i); });
-  document.getElementById('agencyModal').addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) closeAgencyModal(); });
-  document.getElementById('adminModal').addEventListener('click', e => { if (e.target.classList.contains('modal-overlay')) closeAdminPanel(); });
 }
 document.addEventListener('DOMContentLoaded', () => {
   init();
@@ -2541,10 +2622,12 @@ function saveReservation() {
     const sel = document.getElementById('agencySelect');
     if (agencyInp && sel && sel.value !== '__general__') {
       const opt = sel.options[sel.selectedIndex];
-      agencyInp.value = opt ? opt.text : '';
+      agencyInp.value = opt ? opt.text.toUpperCase() : '';
     } else if (agencyInp) {
-      agencyInp.value = '';
+      agencyInp.value = ''; // Kullanıcı kendisi girmeli
     }
+    const cb = document.getElementById('voucherSaveAgencyCb');
+    if(cb) cb.checked = false;
   } else {
     agencyWrap.style.display = 'none';
   }
@@ -2574,12 +2657,23 @@ function confirmSave() {
 
   let agencyNameOverride = '';
   if (currentAgencyType === 'digerleri' && agencyWrap.style.display !== 'none') {
-    agencyNameOverride = agencyInp ? agencyInp.value.trim() : '';
+    agencyNameOverride = agencyInp ? agencyInp.value.trim().toUpperCase() : '';
     if (!agencyNameOverride) {
-      errEl.textContent = 'Acenta adı boş olamaz.';
+      errEl.textContent = 'Lütfen acenta adını girin (Örn: Jolly, ETS vb.). Belirtmek istemiyorsanız "-" koyabilirsiniz.';
       errEl.style.display = '';
       agencyInp.focus();
       return;
+    }
+
+    // Acentayı kaydet checkbox işaretli mi?
+    const cb = document.getElementById('voucherSaveAgencyCb');
+    if (cb && cb.checked && agencyNameOverride && agencyNameOverride !== '-') {
+      let customs = JSON.parse(localStorage.getItem('gmh_custom_agency_names') || '[]');
+      if (!customs.includes(agencyNameOverride)) {
+        customs.push(agencyNameOverride);
+        localStorage.setItem('gmh_custom_agency_names', JSON.stringify(customs));
+        renderAgencyDatalist();
+      }
     }
   }
 
@@ -2592,7 +2686,8 @@ function confirmSave() {
   const roomLabel = d.roomConfig ? (d.roomConfig.label || d.roomConfigKey || '') : (d.roomConfigKey || '');
 
   // Acenta adını belirle
-  const agencyDisplay = agencyNameOverride || d._agencyDisplayName || currentAgencyType;
+  let agencyDisplay = agencyNameOverride || d._agencyDisplayName || 'Belirtilmedi';
+  if (agencyDisplay === 'digerleri') agencyDisplay = 'Belirtilmedi';
 
   const rec = {
     id: Date.now().toString(),
@@ -2630,12 +2725,29 @@ function confirmSave() {
 // ================================================================
 
 function showReservationBook() {
+  const allRecs = getReservations();
+  
   // Otel filtre seçeneklerini doldur
   const hotelSel = document.getElementById('filterHotel');
   if (hotelSel) {
-    const hotels = [...new Set(getReservations().map(r => r.hotelName).filter(Boolean))];
     hotelSel.innerHTML = '<option value="">Tümü</option>' +
       HOTELS.map(h => `<option value="${h.id}">${h.name}</option>`).join('');
+  }
+
+  // Kaydeden filtre seçeneklerini dinamik doldur
+  const savedBySel = document.getElementById('filterSavedBy');
+  if (savedBySel) {
+    const savedBys = [...new Set(allRecs.map(r => r.savedBy).filter(Boolean))].sort();
+    savedBySel.innerHTML = '<option value="">Tümü</option>' +
+      savedBys.map(s => `<option value="${s}">${s}</option>`).join('');
+  }
+
+  // Aksiyon filtre seçeneklerini dinamik doldur
+  const actionSel = document.getElementById('filterAction');
+  if (actionSel) {
+    const actions = [...new Set(allRecs.map(r => r.actionVersion).filter(Boolean))].sort();
+    actionSel.innerHTML = '<option value="">Tümü</option>' +
+      actions.map(a => `<option value="${a}">${a}</option>`).join('');
   }
   document.getElementById('reservationBookScreen').style.display = 'block';
   renderReservationBook();
@@ -2645,21 +2757,95 @@ function closeReservationBook() {
   document.getElementById('reservationBookScreen').style.display = 'none';
 }
 
+let currentSortCol = 'savedAt';
+let currentSortDesc = true;
+
+function setSort(col) {
+  if (currentSortCol === col) {
+    currentSortDesc = !currentSortDesc;
+  } else {
+    currentSortCol = col;
+    currentSortDesc = false; // yeni sütunda artan ile başla (tarihler hariç)
+    if (col === 'savedAt' || col === 'checkIn') currentSortDesc = true;
+  }
+  renderReservationBook();
+}
+
 function renderReservationBook() {
   const allRecs = getReservations();
+  const filterDateType= document.getElementById('filterDateType')?.value || 'savedAt';
   const filterFrom   = document.getElementById('filterDateFrom')?.value || '';
   const filterTo     = document.getElementById('filterDateTo')?.value   || '';
   const filterHotel  = document.getElementById('filterHotel')?.value    || '';
   const filterType   = document.getElementById('filterAgencyType')?.value || '';
   const filterVoucher= (document.getElementById('filterVoucher')?.value || '').toUpperCase();
+  const filterSavedBy= document.getElementById('filterSavedBy')?.value || '';
+  const filterAction = document.getElementById('filterAction')?.value || '';
 
   const filtered = allRecs.filter(r => {
-    if (filterFrom && r.savedAt.split('T')[0] < filterFrom) return false;
-    if (filterTo   && r.savedAt.split('T')[0] > filterTo)   return false;
+    let dateStr = '';
+    if (filterDateType === 'checkIn') {
+      // r.checkIn is "DD.MM.YYYY", convert to "YYYY-MM-DD" for comparison
+      if (r.checkIn && r.checkIn.includes('.')) {
+        const p = r.checkIn.split('.');
+        dateStr = `${p[2]}-${p[1]}-${p[0]}`;
+      } else {
+        dateStr = r.checkIn || '';
+      }
+    } else if (filterDateType === 'checkOut') {
+      // r.checkOut is "DD.MM.YYYY"
+      if (r.checkOut && r.checkOut.includes('.')) {
+        const p = r.checkOut.split('.');
+        dateStr = `${p[2]}-${p[1]}-${p[0]}`;
+      } else {
+        dateStr = r.checkOut || '';
+      }
+    } else {
+      dateStr = r.savedAt ? r.savedAt.split('T')[0] : '';
+    }
+
+    if (filterFrom && dateStr < filterFrom) return false;
+    if (filterTo   && dateStr > filterTo)   return false;
     if (filterHotel && r.hotelId !== filterHotel) return false;
     if (filterType  && r.agencyType !== filterType) return false;
-    if (filterVoucher && !r.voucher.includes(filterVoucher)) return false;
+    if (filterVoucher && !r.voucher.toUpperCase().includes(filterVoucher)) return false;
+    if (filterSavedBy && r.savedBy !== filterSavedBy) return false;
+    if (filterAction && r.actionVersion !== filterAction) return false;
     return true;
+  });
+
+  // Sıralama
+  filtered.sort((a, b) => {
+    let valA = a[currentSortCol];
+    let valB = b[currentSortCol];
+    
+    if (valA === undefined || valA === null) valA = '';
+    if (valB === undefined || valB === null) valB = '';
+
+    if (typeof valA === 'string') valA = valA.toLowerCase();
+    if (typeof valB === 'string') valB = valB.toLowerCase();
+
+    // Tarih formatlarını (DD.MM.YYYY) sıralamaya uygun hale getir
+    if (currentSortCol === 'checkIn' || currentSortCol === 'checkOut') {
+      if (valA.includes('.')) { const p = valA.split('.'); valA = `${p[2]}-${p[1]}-${p[0]}`; }
+      if (valB.includes('.')) { const p = valB.split('.'); valB = `${p[2]}-${p[1]}-${p[0]}`; }
+    }
+
+    if (valA < valB) return currentSortDesc ? 1 : -1;
+    if (valA > valB) return currentSortDesc ? -1 : 1;
+    return 0;
+  });
+
+  // Başlık sınıflarını ve oklarını güncelle
+  document.querySelectorAll('.book-table th.sortable').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    const icon = th.querySelector('.sort-icon');
+    if (icon) icon.textContent = '↕';
+    
+    if (th.getAttribute('onclick').includes(`'${currentSortCol}'`)) {
+      th.classList.add(currentSortDesc ? 'sort-desc' : 'sort-asc');
+      if (icon) icon.textContent = currentSortDesc ? '▼' : '▲';
+    }
   });
 
   // Stats
