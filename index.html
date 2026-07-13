@@ -1273,6 +1273,7 @@ function selectHotel(hotelId) {
   session.selectedHotel = hotelId;
   currentHotelId = hotelId;
   localStorage.setItem('gmh_session', JSON.stringify(session));
+  document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('hotelSelectScreen').classList.add('hidden');
   document.getElementById('mainApp').style.display = 'block';
   document.getElementById('topBarUsername').textContent = session.username;
@@ -2300,6 +2301,15 @@ function renderAgencyList() {
     select.appendChild(o);
   }
   if (cv) select.value = cv;
+}
+
+function renderAgencyDatalist() {
+  const dl = document.getElementById('agencyDatalist');
+  if (!dl) return;
+  const defaults = ['ODEON', 'SUNMAR', 'MOTUS', 'JOINUP', 'KALANIT'];
+  const customs = JSON.parse(localStorage.getItem('gmh_custom_agency_names') || '[]');
+  const allNames = [...new Set([...defaults, ...customs])].sort();
+  dl.innerHTML = allNames.map(n => `<option value="${n}">`).join('');
 }
 
 function openAgencyModal(editId) {
