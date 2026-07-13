@@ -863,6 +863,7 @@ body::before {
       <input type="file" id="excelUploadInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
       <button class="btn-book-action" style="background:#10b981; color:white; border-color:#059669;" onclick="document.getElementById('excelUploadInput').click()">📥 Excel Yükle</button>
       <button class="btn-book-action" style="background:rgba(239,68,68,0.1); color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="deleteExcelImports()">🧹 Excel'i Temizle</button>
+      <button class="btn-book-action" style="background:#f59e0b; color:white; border-color:#d97706;" onclick="resetExcelMapping()">⚙️ Excel Kurallarını Düzenle</button>
       <button class="btn-book-action" style="background:#2563eb; color:white; border-color:#1d4ed8;" onclick="syncWithRMOS()" id="btnRmosSync">🔄 RMOS Senkronize Et</button>
       <button class="btn-book-action" onclick="renderReservationBook()">🔄 Yenile</button>
       <button class="btn-book-action" onclick="exportReservationsCSV()">📥 CSV İndir</button>
@@ -2919,7 +2920,8 @@ function handleExcelUpload(e) {
       const savedMapStr = localStorage.getItem('gmh_excel_map');
       if (savedMapStr) {
         const savedMap = JSON.parse(savedMapStr);
-        if (headers.includes(savedMap.voucher) && headers.includes(savedMap.checkIn) && savedMap.currency) {
+        // Eski kural setinde rezNo anahtarı yoksa modalı zorla açalım
+        if (headers.includes(savedMap.voucher) && headers.includes(savedMap.checkIn) && savedMap.currency && savedMap.hasOwnProperty('rezNo')) {
           processExcelImport(savedMap, uploadedFileName);
           e.target.value = '';
           return;
@@ -2935,6 +2937,11 @@ function handleExcelUpload(e) {
     }
   };
   reader.readAsBinaryString(file);
+}
+
+function resetExcelMapping() {
+  localStorage.removeItem('gmh_excel_map');
+  alert("Excel eşleştirme kuralı sıfırlandı. Lütfen 'Excel Yükle' butonuna tıklayarak Excel dosyanızı tekrar seçin, sistem sizden kuralları baştan girmenizi isteyecektir.");
 }
 
 function openExcelMapModal(headers) {
