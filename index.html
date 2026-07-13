@@ -1020,7 +1020,7 @@ body::before {
           <div class="agency-sub-select" id="agencySubSelect" style="display:none;">
             <label class="form-label" for="agencySelect">Acenta Seçin</label>
             <select id="agencySelect" class="form-select">
-              <option value="__general__">Genel Kontrat (İndirimsiz)</option>
+              <option value="__general__">Seçimsiz (Genel Kontrat Fiyatları)</option>
             </select>
           </div>
         </div>
@@ -1951,7 +1951,7 @@ function renderResults(data) {
       const opt = sel.options[sel.selectedIndex];
       return opt ? opt.text : 'Diğerleri';
     }
-    return 'Genel Kontrat';
+    return ''; // Boş bırak, böylece voucher modalında ne girilirse o alınır
   })();
 
   // Guest summary
@@ -2543,7 +2543,7 @@ function saveReservation() {
       const opt = sel.options[sel.selectedIndex];
       agencyInp.value = opt ? opt.text : '';
     } else if (agencyInp) {
-      agencyInp.value = '';
+      agencyInp.value = ''; // Kullanıcı kendisi girmeli
     }
   } else {
     agencyWrap.style.display = 'none';
@@ -2576,7 +2576,7 @@ function confirmSave() {
   if (currentAgencyType === 'digerleri' && agencyWrap.style.display !== 'none') {
     agencyNameOverride = agencyInp ? agencyInp.value.trim() : '';
     if (!agencyNameOverride) {
-      errEl.textContent = 'Acenta adı boş olamaz.';
+      errEl.textContent = 'Lütfen acenta adını girin (Örn: Jolly, ETS vb.). Belirtmek istemiyorsanız "-" koyabilirsiniz.';
       errEl.style.display = '';
       agencyInp.focus();
       return;
@@ -2592,7 +2592,8 @@ function confirmSave() {
   const roomLabel = d.roomConfig ? (d.roomConfig.label || d.roomConfigKey || '') : (d.roomConfigKey || '');
 
   // Acenta adını belirle
-  const agencyDisplay = agencyNameOverride || d._agencyDisplayName || currentAgencyType;
+  let agencyDisplay = agencyNameOverride || d._agencyDisplayName || 'Belirtilmedi';
+  if (agencyDisplay === 'digerleri') agencyDisplay = 'Belirtilmedi';
 
   const rec = {
     id: Date.now().toString(),
