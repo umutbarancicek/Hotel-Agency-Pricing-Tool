@@ -862,7 +862,9 @@ body::before {
     <div class="book-actions">
       <input type="file" id="excelUploadInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
       <button class="btn-book-action" style="background:#10b981; color:white; border-color:#059669;" onclick="document.getElementById('excelUploadInput').click()">📥 Excel Yükle</button>
+      <button class="btn-book-action" style="background:rgba(239,68,68,0.1); color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="deleteExcelImports()">🧹 Excel'i Temizle</button>
       <button class="btn-book-action" style="background:#2563eb; color:white; border-color:#1d4ed8;" onclick="syncWithRMOS()" id="btnRmosSync">🔄 RMOS Senkronize Et</button>
+      <button class="btn-book-action" onclick="renderReservationBook()">🔄 Yenile</button>
       <button class="btn-book-action" onclick="exportReservationsCSV()">📥 CSV İndir</button>
       <button class="btn-book-action close" onclick="closeReservationBook()">✖ Kapat</button>
     </div>
@@ -3014,6 +3016,21 @@ function processExcelImport(mapping) {
     alert(`Mükemmel! ${addedCount} yeni rezervasyon sisteme eklendi.\n(${skippedCount} adet zaten kayıtlı olan rezervasyon atlandı.)`);
   } else {
     alert(`Listede eklenecek yeni rezervasyon bulunamadı. (${skippedCount} adet kayıt zaten sistemde mevcut.)`);
+  }
+}
+
+function deleteExcelImports() {
+  if (confirm("DİKKAT: Excel'den yüklediğiniz TÜM rezervasyonlar silinecek ve Excel sütun eşleştirme ayarlarınız sıfırlanacaktır.\n\nOnaylıyor musunuz?")) {
+    let recs = getReservations();
+    const originalLength = recs.length;
+    recs = recs.filter(r => r.savedBy !== "Excel");
+    const deletedCount = originalLength - recs.length;
+    
+    saveReservationsToStorage(recs);
+    localStorage.removeItem('gmh_excel_map');
+    renderReservationBook();
+    
+    alert(`İşlem başarılı. ${deletedCount} adet Excel kaydı silindi ve eşleştirme ayarları sıfırlandı.`);
   }
 }
 
