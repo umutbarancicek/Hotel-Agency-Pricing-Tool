@@ -1199,6 +1199,14 @@ body::before {
       <select id="mapCheckOut" class="form-input"></select>
     </div>
     <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Oda Tipi Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapRoomConfig" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label">Aksiyon Hangi Sütunda? (Opsiyonel)</label>
+      <select id="mapAction" class="form-input"></select>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
       <label class="form-label">Tutar Hangi Sütunda? (Opsiyonel)</label>
       <select id="mapPrice" class="form-input"></select>
     </div>
@@ -2892,7 +2900,7 @@ function openExcelMapModal(headers) {
   const opts = '<option value="">-- Lütfen Seçiniz --</option>' + 
                headers.map(h => `<option value="${escapeHTML(h)}">${escapeHTML(h)}</option>`).join('');
                
-  ['mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapPrice'].forEach(id => {
+  ['mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice'].forEach(id => {
     document.getElementById(id).innerHTML = opts;
   });
   
@@ -2918,6 +2926,8 @@ function startExcelImport() {
     agency: document.getElementById('mapAgency').value,
     checkIn: mapCheckIn,
     checkOut: document.getElementById('mapCheckOut').value,
+    roomConfig: document.getElementById('mapRoomConfig').value,
+    action: document.getElementById('mapAction').value,
     price: document.getElementById('mapPrice').value
   };
   
@@ -2981,9 +2991,24 @@ function processExcelImport(mapping) {
       price = parseFloat(String(row[mapping.price]).replace(',','.')) || 0;
     }
     
-    let agName = "";
+    let rawAgency = "";
     if (mapping.agency && row[mapping.agency]) {
-      agName = String(row[mapping.agency]).trim().toUpperCase();
+      rawAgency = String(row[mapping.agency]).trim().toUpperCase();
+    }
+    
+    let agType = "digerleri";
+    if (rawAgency.includes('ANEX')) agType = "anex";
+    else if (rawAgency.includes('FIT')) agType = "fit";
+    else if (rawAgency.includes('TRAVEYO') || rawAgency.includes('ITAKA') || rawAgency.includes('CEDOK')) agType = "traveyo";
+    
+    let roomCfg = "-";
+    if (mapping.roomConfig && row[mapping.roomConfig]) {
+      roomCfg = String(row[mapping.roomConfig]).trim();
+    }
+    
+    let actVer = "Excel Aktarımı";
+    if (mapping.action && row[mapping.action]) {
+      actVer = String(row[mapping.action]).trim();
     }
     
     existing.push({
@@ -2991,15 +3016,15 @@ function processExcelImport(mapping) {
       voucher: voucher,
       hotelId: currentHotelId || "h1",
       hotelName: "Grand Miramor",
-      agencyType: "digerleri",
-      agencyNameOverride: agName,
+      agencyType: agType,
+      agencyNameOverride: rawAgency || "Bilinmiyor",
       checkIn: ci,
       checkOut: co,
       nights: nights,
       saleDate: saleDate,
-      actionVersion: "Excel Aktarımı",
+      actionVersion: actVer,
       roomType: "standart",
-      roomConfig: "-",
+      roomConfig: roomCfg,
       currency: "EUR",
       subtotal: price,
       grandTotal: price,
