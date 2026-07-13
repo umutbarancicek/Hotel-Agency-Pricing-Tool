@@ -1180,12 +1180,33 @@ body::before {
 </div>
 
 <!-- EXCEL MAP MODAL -->
+<div class="modal-overlay" id="excelTemplateSelectModal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-title">Hangi Excel Şablonunu Düzenlemek İstiyorsunuz?</div>
+    <div style="font-size:12px; margin-bottom:15px; color:var(--text-secondary); line-height:1.4;">
+      Sistemde kayıtlı olan şablonlarınız aşağıda listelenmiştir. Düzenlemek veya silmek istediğiniz şablonu seçin.
+    </div>
+    <div id="templateSelectList" style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto; margin-bottom:20px;">
+      <!-- Templates will be injected here -->
+    </div>
+    <div class="modal-actions" style="justify-content: flex-end;">
+      <button class="btn-cancel" onclick="closeExcelTemplateSelectModal()">Kapat</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="excelMapModal">
   <div class="modal" style="max-width:500px;">
     <div class="modal-title">Excel Sütunlarını Eşleştir</div>
     <div style="font-size:12px; margin-bottom:15px; color:var(--text-secondary); line-height:1.4;">
-      Sistem yüklediğiniz Excel'deki başlıkları tespit etti. Lütfen sadece ihtiyacımız olan 4 bilgiyi aşağıdaki listeden seçin. Diğer tüm gereksiz veriler otomatik silinecektir. (Bunu sadece 1 kez yapacaksınız!)
+      Lütfen bu Excel formatına bir isim verin ve ihtiyacımız olan bilgilerin hangi sütunda olduğunu seçin. (Diğer gereksiz veriler silinecektir.)
     </div>
+    
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label" style="color:var(--accent);">Şablon Adı (Örn: Booking, Agata vb.)</label>
+      <input type="text" id="mapTemplateName" class="form-input" placeholder="Bu kuralları hatırlamak için bir isim verin" required>
+    </div>
+
     
     <div class="form-group" style="margin-bottom:10px;">
       <label class="form-label">Rezervasyon No Hangi Sütunda? (Opsiyonel)</label>
@@ -2917,18 +2938,43 @@ function handleExcelUpload(e) {
       tempExcelData = json;
       tempExcelFileName = uploadedFileName;
       
-      const savedMapStr = localStorage.getItem('gmh_excel_map');
-      if (savedMapStr) {
-        const savedMap = JSON.parse(savedMapStr);
-        // Eski kural setinde rezNo anahtarı yoksa modalı zorla açalım
-        if (headers.includes(savedMap.voucher) && headers.includes(savedMap.checkIn) && savedMap.currency && savedMap.hasOwnProperty('rezNo')) {
-          processExcelImport(savedMap, uploadedFileName);
-          e.target.value = '';
-          return;
+      // Mevcut şablonları çekelim ve eğer eski tekil yapı varsa taşıyalım
+      let templates = [];
+      const templatesStr = localStorage.getItem('gmh_excel_templates');
+      if (templatesStr) {
+        templates = JSON.parse(templatesStr);
+      } else {
+        // Eski yapıdan (gmh_excel_map) taşıma yapmayı dene
+        const oldMapStr = localStorage.getItem('gmh_excel_map');
+        if (oldMapStr) {
+          const oldMap = JSON.parse(oldMapStr);
+          templates.push({
+            id: 'template_legacy',
+            name: 'Eski Şablon',
+            headers: headers,
+            mapping: oldMap
+          });
+          localStorage.setItem('gmh_excel_templates', JSON.stringify(templates));
+          localStorage.removeItem('gmh_excel_map');
         }
       }
+
+      // Yüklenen Excel'in başlıklarıyla uyuşan şablon var mı?
+      // Tüm zorunlu mapping (voucher ve checkIn) headler'da mevcutsa o şablonu uygun kabul et.
+      // Eğer tekil eşleşme varsa onu kullan, çoklu varsa veya yoksa modalı aç.
+      const matchingTemplates = templates.filter(t => {
+        return headers.includes(t.mapping.voucher) && headers.includes(t.mapping.checkIn);
+      });
+
+      if (matchingTemplates.length === 1) {
+        const selectedTpl = matchingTemplates[0];
+        // rezNo kontrolü: rezNo eşleştirilmişse ve Excel'de de varsa, veya hiç eşleştirilmemişse (ama şablonda varsa vs.)
+        processExcelImport(selectedTpl.mapping, uploadedFileName);
+        e.target.value = '';
+        return;
+      }
       
-      openExcelMapModal(headers);
+      openExcelMapModal(headers, null);
     } catch(err) {
       console.error(err);
       alert("Excel dosyası okunurken hata oluştu!");
@@ -2940,11 +2986,62 @@ function handleExcelUpload(e) {
 }
 
 function resetExcelMapping() {
-  localStorage.removeItem('gmh_excel_map');
-  alert("Excel eşleştirme kuralı sıfırlandı. Lütfen 'Excel Yükle' butonuna tıklayarak Excel dosyanızı tekrar seçin, sistem sizden kuralları baştan girmenizi isteyecektir.");
+  const templatesStr = localStorage.getItem('gmh_excel_templates');
+  let templates = [];
+  if (templatesStr) templates = JSON.parse(templatesStr);
+  
+  if (templates.length === 0) {
+    alert("Kayıtlı hiçbir Excel şablonunuz bulunmuyor.");
+    return;
+  }
+  
+  const listEl = document.getElementById('templateSelectList');
+  listEl.innerHTML = '';
+  
+  templates.forEach(t => {
+    const div = document.createElement('div');
+    div.style = "display:flex; justify-content:space-between; align-items:center; background:var(--bg-primary); padding:10px 15px; border:1px solid var(--border-subtle); border-radius:6px;";
+    div.innerHTML = `
+      <div style="font-weight:600;">${escapeHTML(t.name)}</div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-save" style="padding:4px 10px; font-size:12px; height:auto;" onclick="editExcelTemplate('${t.id}')">Düzenle</button>
+        <button class="btn-cancel" style="padding:4px 10px; font-size:12px; height:auto; background:rgba(239,68,68,0.1); color:#ef4444;" onclick="deleteExcelTemplate('${t.id}')">Sil</button>
+      </div>
+    `;
+    listEl.appendChild(div);
+  });
+  
+  document.getElementById('excelTemplateSelectModal').classList.add('active');
 }
 
-function openExcelMapModal(headers) {
+function closeExcelTemplateSelectModal() {
+  document.getElementById('excelTemplateSelectModal').classList.remove('active');
+}
+
+function editExcelTemplate(id) {
+  const templates = JSON.parse(localStorage.getItem('gmh_excel_templates') || '[]');
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
+  
+  closeExcelTemplateSelectModal();
+  openExcelMapModal(t.headers, t);
+}
+
+function deleteExcelTemplate(id) {
+  if (!confirm("Bu şablonu silmek istediğinize emin misiniz?")) return;
+  let templates = JSON.parse(localStorage.getItem('gmh_excel_templates') || '[]');
+  templates = templates.filter(x => x.id !== id);
+  localStorage.setItem('gmh_excel_templates', JSON.stringify(templates));
+  resetExcelMapping(); // Modalı yenile
+}
+
+function openExcelMapModal(headers, existingTemplate = null) {
+  // Save current working headers and template ID for saving later
+  window.currentExcelHeaders = headers;
+  window.currentExcelTemplateId = existingTemplate ? existingTemplate.id : null;
+  
+  document.getElementById('mapTemplateName').value = existingTemplate ? existingTemplate.name : '';
+
   const opts = '<option value="">-- Lütfen Seçiniz --</option>' + 
                headers.map(h => `<option value="${escapeHTML(h)}">${escapeHTML(h)}</option>`).join('');
                
@@ -2970,9 +3067,20 @@ function openExcelMapModal(headers) {
     const sel = document.getElementById(mf.id);
     const candidates = mf.keywords.map(k => k.toLowerCase());
     sel.value = '';
-    for (const candidate of candidates) {
-      const found = headers.find(h => h.trim().toLowerCase().includes(candidate));
-      if (found) { sel.value = found; break; }
+    
+    if (existingTemplate && existingTemplate.mapping[mf.id.replace('map', '')]) {
+       // mapping objesinde örneğin 'voucher', 'checkIn' gibi isimler tutuluyor.
+       // form ID'si 'mapVoucher'. replace 'map' ve ilk harfi küçülterek doğru keyi bulalım
+       const key = mf.id.replace('map', '');
+       const lowerKey = key.charAt(0).toLowerCase() + key.slice(1);
+       if (existingTemplate.mapping[lowerKey]) {
+          sel.value = existingTemplate.mapping[lowerKey];
+       }
+    } else if (!existingTemplate) {
+      for (const candidate of candidates) {
+        const found = headers.find(h => h.trim().toLowerCase().includes(candidate));
+        if (found) { sel.value = found; break; }
+      }
     }
   });
   
@@ -2982,11 +3090,19 @@ function openExcelMapModal(headers) {
 function closeExcelMapModal() {
   document.getElementById('excelMapModal').classList.remove('active');
   tempExcelData = null;
+  window.currentExcelHeaders = null;
+  window.currentExcelTemplateId = null;
 }
 
 function startExcelImport() {
+  const tplName = document.getElementById('mapTemplateName').value.trim();
   const mapVoucher = document.getElementById('mapVoucher').value;
   const mapCheckIn = document.getElementById('mapCheckIn').value;
+  
+  if (!tplName) {
+    alert("Lütfen bu şablona bir isim verin.");
+    return;
+  }
   
   if (!mapVoucher || !mapCheckIn) {
     alert("Lütfen en az 'Voucher Numarası' ve 'Giriş Tarihi' sütunlarını eşleştirin!");
@@ -3007,8 +3123,33 @@ function startExcelImport() {
     saleDate: document.getElementById('mapSaleDate').value
   };
   
-  localStorage.setItem('gmh_excel_map', JSON.stringify(mapping));
-  processExcelImport(mapping, tempExcelFileName);
+  let templates = JSON.parse(localStorage.getItem('gmh_excel_templates') || '[]');
+  
+  if (window.currentExcelTemplateId) {
+    // Mevcut bir şablonu güncelliyoruz
+    const idx = templates.findIndex(t => t.id === window.currentExcelTemplateId);
+    if (idx !== -1) {
+      templates[idx].name = tplName;
+      templates[idx].mapping = mapping;
+      // Headers aynı kalır, güncellemeye gerek yok.
+    }
+  } else {
+    // Yeni şablon oluşturuyoruz
+    templates.push({
+      id: 'template_' + Date.now(),
+      name: tplName,
+      headers: window.currentExcelHeaders || [],
+      mapping: mapping
+    });
+  }
+  
+  localStorage.setItem('gmh_excel_templates', JSON.stringify(templates));
+  
+  if (tempExcelData) {
+     processExcelImport(mapping, tempExcelFileName);
+  } else {
+     alert("Şablon başarıyla kaydedildi!");
+  }
   closeExcelMapModal();
 }
 
