@@ -3196,10 +3196,17 @@ function processExcelImport(mapping, fileName) {
     // Eğer ikisi de yoksa bu satırı atla
     if (!voucher && !rezNo) return;
     
-    // Voucher boşsa ama rezNo varsa, ekranda boş görünmemesi adına voucher yerine rezNo veya "Bilinmiyor" yazabiliriz
-    // Ya da sadece boş bırakıp rezNo üzerinden takibini yaparız. Burada voucher'a rezNo atayalım ki UI bozulmasın.
+    // Voucher boşsa ama rezNo varsa, acenta adını ve rezNo'yu birleştir (örn: GRUP-60097)
     if (!voucher) {
-       voucher = rezNo;
+       let acentaAdi = '';
+       if (mapping.agency && row[mapping.agency]) {
+           acentaAdi = String(row[mapping.agency]).trim();
+       }
+       if (acentaAdi) {
+           voucher = `${acentaAdi}-${rezNo}`;
+       } else {
+           voucher = `AcentaYok-${rezNo}`;
+       }
     }
     
     // Aynı voucher numarası (veya Rez.No varsa ona göre) kontrol et
