@@ -186,6 +186,10 @@ body::before {
   background: rgba(168,85,247,0.1); color: var(--purple-400);
   box-shadow: inset 0 0 0 1px var(--purple-400);
 }
+.agency-toggle-btn.active.odeon-motus-active {
+  background: rgba(234,179,8,0.1); color: #eab308;
+  box-shadow: inset 0 0 0 1px #eab308;
+}
 .agency-toggle-btn.active.traveyo-active {
   background: rgba(34,197,94,0.1); color: var(--green-400);
   box-shadow: inset 0 0 0 1px var(--green-400);
@@ -196,6 +200,7 @@ body::before {
 }
 .agency-info-note.pegas { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); color: var(--blue-400); }
 .agency-info-note.fit { background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.15); color: var(--purple-400); }
+.agency-info-note.odeon-motus { background: rgba(234,179,8,0.06); border: 1px solid rgba(234,179,8,0.15); color: #eab308; }
 .agency-info-note.traveyo { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); color: var(--green-400); }
 .agency-sub-select { margin-top: 10px; animation: slideIn 0.3s ease; }
 
@@ -395,7 +400,8 @@ body::before {
 .book-table tr:last-child td { border-bottom: none; }
 .book-badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
 .book-badge.anex { background: rgba(59,130,246,0.15); color: #60a5fa; }
-.book-badge.fit { background: rgba(168,85,247,0.15); color: #c084fc; }
+.book-badge.fit { background: rgba(168,85,247,0.15); color: var(--purple-400); }
+.book-badge.odeon-motus { background: rgba(234,179,8,0.15); color: #eab308; }
 .book-badge.traveyo { background: rgba(34,197,94,0.15); color: #4ade80; }
 .book-badge.digerleri { background: rgba(100,116,139,0.15); color: #94a3b8; }
 .book-total-eur { font-weight: 700; color: var(--gold-300); }
@@ -863,6 +869,7 @@ body::before {
       <input type="file" id="excelUploadInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
       <button class="btn-book-action" style="background:#10b981; color:white; border-color:#059669;" onclick="document.getElementById('excelUploadInput').click()">📥 Excel Yükle</button>
       <button class="btn-book-action" style="background:rgba(239,68,68,0.1); color:#ef4444; border-color:rgba(239,68,68,0.3);" onclick="deleteExcelImports()">🧹 Excel'i Temizle</button>
+      <button class="btn-book-action" style="background:#f59e0b; color:white; border-color:#d97706;" onclick="resetExcelMapping()">⚙️ Excel Kurallarını Düzenle</button>
       <button class="btn-book-action" style="background:#2563eb; color:white; border-color:#1d4ed8;" onclick="syncWithRMOS()" id="btnRmosSync">🔄 RMOS Senkronize Et</button>
       <button class="btn-book-action" onclick="renderReservationBook()">🔄 Yenile</button>
       <button class="btn-book-action" onclick="exportReservationsCSV()">📥 CSV İndir</button>
@@ -1041,7 +1048,8 @@ body::before {
         <div class="card-title"><span class="icon">📋</span> Aksiyon Listesi Sürümü</div>
         <div class="form-group">
           <select id="actionListSelect" class="form-select" onchange="changeActionListVersion()">
-            <option value="08.07.2026">08.07.2026 Aksiyonu (Güncel)</option>
+            <option value="30.07.2026">30.07.2026 Aksiyonu (Güncel)</option>
+            <option value="08.07.2026">08.07.2026 Aksiyonu</option>
             <option value="03.07.2026">03.07.2026 Aksiyonu</option>
             <option value="01.07.2026">01.07.2026 Aksiyonu</option>
             <option value="19.06.2026">19.06.2026 Aksiyonu (Eski)</option>
@@ -1056,11 +1064,13 @@ body::before {
           <div class="agency-toggle">
             <button type="button" class="agency-toggle-btn" id="btnAnex" onclick="selectAgencyType('anex')">✈️ Anex</button>
             <button type="button" class="agency-toggle-btn" id="btnFit" onclick="selectAgencyType('fit')">🏖️ Fit</button>
+            <button type="button" class="agency-toggle-btn" id="btnOdeonMotus" onclick="selectAgencyType('odeon_motus')">☀️ Odeon & Motus</button>
             <button type="button" class="agency-toggle-btn" id="btnTraveyo" onclick="selectAgencyType('traveyo')">🌍 Traveyo</button>
             <button type="button" class="agency-toggle-btn active" id="btnDigerleri" onclick="selectAgencyType('digerleri')">🏢 Diğerleri</button>
           </div>
           <div class="agency-info-note pegas" id="anexNote" style="display:none;">Anex acentası: döneme ait ilave indirime <strong>+%5 ek indirim</strong> uygulanır (toplam ilave + 5).</div>
           <div class="agency-info-note fit" id="fitNote" style="display:none;">Fit acentasına özel <strong>%3 indirim</strong> tüm tarihlerde bileşik uygulanır.</div>
+          <div class="agency-info-note odeon-motus" id="odeonMotusNote" style="display:none;"><strong>Odeon & Motus</strong>: Döneme ait ilave indirime <strong>+%3 kickback indirimi</strong> eklenir (toplam ilave + 3).</div>
           <div class="agency-info-note traveyo" id="traveyoNote" style="display:none;"><strong>Itaka / Cedok</strong> — Sabit 53€ PP | SNG ×1.5 | 0-12 yaş ücretsiz | İndirim yok</div>
           <div class="agency-sub-select" id="agencySubSelect" style="display:none;">
             <label class="form-label" for="agencySelect">Acenta Seçin</label>
@@ -1179,12 +1189,33 @@ body::before {
 </div>
 
 <!-- EXCEL MAP MODAL -->
+<div class="modal-overlay" id="excelTemplateSelectModal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-title">Hangi Excel Şablonunu Düzenlemek İstiyorsunuz?</div>
+    <div style="font-size:12px; margin-bottom:15px; color:var(--text-secondary); line-height:1.4;">
+      Sistemde kayıtlı olan şablonlarınız aşağıda listelenmiştir. Düzenlemek veya silmek istediğiniz şablonu seçin.
+    </div>
+    <div id="templateSelectList" style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto; margin-bottom:20px;">
+      <!-- Templates will be injected here -->
+    </div>
+    <div class="modal-actions" style="justify-content: flex-end;">
+      <button class="btn-cancel" onclick="closeExcelTemplateSelectModal()">Kapat</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="excelMapModal">
   <div class="modal" style="max-width:500px;">
     <div class="modal-title">Excel Sütunlarını Eşleştir</div>
     <div style="font-size:12px; margin-bottom:15px; color:var(--text-secondary); line-height:1.4;">
-      Sistem yüklediğiniz Excel'deki başlıkları tespit etti. Lütfen sadece ihtiyacımız olan 4 bilgiyi aşağıdaki listeden seçin. Diğer tüm gereksiz veriler otomatik silinecektir. (Bunu sadece 1 kez yapacaksınız!)
+      Lütfen bu Excel formatına bir isim verin ve ihtiyacımız olan bilgilerin hangi sütunda olduğunu seçin. (Diğer gereksiz veriler silinecektir.)
     </div>
+    
+    <div class="form-group" style="margin-bottom:10px;">
+      <label class="form-label" style="color:var(--accent);">Şablon Adı (Örn: Booking, Agata vb.)</label>
+      <input type="text" id="mapTemplateName" class="form-input" placeholder="Bu kuralları hatırlamak için bir isim verin" required>
+    </div>
+
     
     <div class="form-group" style="margin-bottom:10px;">
       <label class="form-label">Rezervasyon No Hangi Sütunda? (Opsiyonel)</label>
@@ -1471,7 +1502,6 @@ const PERIODS_01_07 = [
   { id:15, start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
 ];
 
-// 03.07.26 Aksiyonu — 01.07-22.07 STOP SALE (Giriş yok)
 const PERIODS_03_07 = [
   { id:1,  start:'2026-07-23', end:'2026-07-31', pp:60,  option:10, basis:'stay', ilave:5  },
   { id:2,  start:'2026-08-01', end:'2026-08-24', pp:66,  option:7,  basis:'stay', ilave:10 },
@@ -1483,7 +1513,6 @@ const PERIODS_03_07 = [
   { id:8,  start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
 ];
 
-// 08.07.26 Aksiyonu — 23.07-31.08 birleşik dönem, ilave:%5
 const PERIODS_08_07 = [
   { id:1,  start:'2026-07-23', end:'2026-08-31', pp:66,  option:7,  basis:'stay', ilave:5  },
   { id:2,  start:'2026-09-01', end:'2026-09-30', pp:62,  option:7,  basis:'stay', ilave:5  },
@@ -1492,7 +1521,15 @@ const PERIODS_08_07 = [
   { id:5,  start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
 ];
 
-let PERIODS = PERIODS_08_07;
+const PERIODS_30_07 = [
+  { id:1,  start:'2026-07-30', end:'2026-08-31', pp:66,  option:7,  basis:'stay', ilave:5  },
+  { id:2,  start:'2026-09-01', end:'2026-09-30', pp:62,  option:7,  basis:'stay', ilave:5  },
+  { id:3,  start:'2026-10-01', end:'2026-10-15', pp:45,  option:3,  basis:'stay', ilave:5  },
+  { id:4,  start:'2026-10-16', end:'2026-10-31', pp:35,  option:1,  basis:'stay', ilave:5  },
+  { id:5,  start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
+];
+
+let PERIODS = PERIODS_30_07;
 
 // ================================================================
 // DÖNEM VERİLERİ — DİĞER OTELLER (19.06.2026 Aksiyonu)
@@ -1576,12 +1613,13 @@ const PERIODS_STELLA = [
 const HOTEL_CONFIGS = {
   'grand_miramor': {
     name: 'Grand Miramor Hotel', location: 'Kiriş • Antalya • 4+', concept: 'Ultra All Inclusive',
-    hasAnex: true, hasFit: true, hasTraveyo: true,
+    hasAnex: true, hasFit: true, hasOdeonMotus: true, hasTraveyo: true,
     actionVersions: [
-      { value: '08.07.2026', label: '08.07.2026 Aksiyonu (Güncel)', periods: null /* set after */ },
-      { value: '03.07.2026', label: '03.07.2026 Aksiyonu', periods: null },
-      { value: '01.07.2026', label: '01.07.2026 Aksiyonu', periods: null },
-      { value: '19.06.2026', label: '19.06.2026 Aksiyonu (Eski)', periods: null },
+      { value: '30.07.2026', label: '30.07.2026 Aksiyonu (Güncel)', periods: PERIODS_30_07 },
+      { value: '08.07.2026', label: '08.07.2026 Aksiyonu', periods: PERIODS_08_07 },
+      { value: '03.07.2026', label: '03.07.2026 Aksiyonu', periods: PERIODS_03_07 },
+      { value: '01.07.2026', label: '01.07.2026 Aksiyonu', periods: PERIODS_01_07 },
+      { value: '19.06.2026', label: '19.06.2026 Aksiyonu (Eski)', periods: PERIODS_19_06 },
     ]
   },
   'miramor_garden': {
@@ -1625,14 +1663,6 @@ function loadHotelData(hotelId) {
   const cfg = HOTEL_CONFIGS[hotelId];
   if (!cfg) return;
 
-  // Grand Miramor periods referanslarını burada bağla
-  if (hotelId === 'grand_miramor') {
-    cfg.actionVersions[0].periods = PERIODS_08_07;
-    cfg.actionVersions[1].periods = PERIODS_03_07;
-    cfg.actionVersions[2].periods = PERIODS_01_07;
-    cfg.actionVersions[3].periods = PERIODS_19_06;
-  }
-
   // Header güncelle
   const h1 = document.querySelector('.header h1');
   if (h1) h1.textContent = cfg.name;
@@ -1653,11 +1683,13 @@ function loadHotelData(hotelId) {
   PERIODS = cfg.actionVersions[0].periods;
   updateConditionsBanner(cfg.actionVersions[0].value);
 
-  // Anex / Fit butonlarını göster/gizle
-  const btnAnex    = document.getElementById('btnAnex');
-  const btnFit     = document.getElementById('btnFit');
-  const anexNote   = document.getElementById('anexNote');
-  const fitNote    = document.getElementById('fitNote');
+  // Anex / Fit / OdeonMotus butonlarını göster/gizle
+  const btnAnex        = document.getElementById('btnAnex');
+  const btnFit         = document.getElementById('btnFit');
+  const btnOdeonMotus  = document.getElementById('btnOdeonMotus');
+  const anexNote       = document.getElementById('anexNote');
+  const fitNote        = document.getElementById('fitNote');
+  const odeonMotusNote = document.getElementById('odeonMotusNote');
 
   if (cfg.hasAnex) {
     if (btnAnex) btnAnex.style.display = '';
@@ -1672,6 +1704,13 @@ function loadHotelData(hotelId) {
     if (btnFit) btnFit.style.display = 'none';
     if (fitNote) fitNote.style.display = 'none';
     if (currentAgencyType === 'fit') { selectAgencyType('digerleri'); }
+  }
+  if (cfg.hasOdeonMotus) {
+    if (btnOdeonMotus) btnOdeonMotus.style.display = '';
+  } else {
+    if (btnOdeonMotus) btnOdeonMotus.style.display = 'none';
+    if (odeonMotusNote) odeonMotusNote.style.display = 'none';
+    if (currentAgencyType === 'odeon_motus') { selectAgencyType('digerleri'); }
   }
   const btnTraveyo  = document.getElementById('btnTraveyo');
   const traveyoNote = document.getElementById('traveyoNote');
@@ -1696,7 +1735,7 @@ const CHILD_BIG_MAX = 11.99;   // 7-11.99
 // TRAVEYO (Itaka/Cedok) special contract
 const TRAVEYO_PP = 53;
 const TRAVEYO_SNG_MULT = 1.5;
-const TRAVEYO_FREE_AGE = 12.99; // 0-12 free
+const TRAVEYO_FREE_AGE = 12.99; // 0-12 yaş dahil ücretsiz
 const TRAVEYO_START = '2026-06-13';
 const TRAVEYO_END = '2026-10-31';
 
@@ -1742,7 +1781,8 @@ const ROOM_CONFIGS = {
 function parseDate(str) { const [y,m,d] = str.split('-').map(Number); return new Date(y, m-1, d); }
 function formatDate(d) { return d.getDate().toString().padStart(2,'0') + '.' + (d.getMonth()+1).toString().padStart(2,'0'); }
 function formatDateFull(d) { return formatDate(d) + '.' + d.getFullYear(); }
-function formatEUR(n) { return (Math.floor(n * 100) / 100).toFixed(2) + ' €'; }
+function truncateToTwo(n) { return Math.trunc(n * 100) / 100; }
+function formatEUR(n) { return truncateToTwo(n).toFixed(2) + ' €'; }
 function daysBetween(a,b) { return Math.round((b - a) / 86400000); }
 function dateToStr(d) {
   return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
@@ -1843,14 +1883,15 @@ function calculate() {
   }
 
   // Agency type
-  const isAnex    = currentAgencyType === 'anex';
-  const isFit     = currentAgencyType === 'fit';
-  const isTraveyo = currentAgencyType === 'traveyo';
+  const isAnex       = currentAgencyType === 'anex';
+  const isFit        = currentAgencyType === 'fit';
+  const isOdeonMotus = currentAgencyType === 'odeon_motus';
+  const isTraveyo    = currentAgencyType === 'traveyo';
   let agency = null, freeAgeLimit = DEFAULT_FREE_AGE, agencyDiscountPct = 0;
 
   if (isTraveyo) {
     freeAgeLimit = TRAVEYO_FREE_AGE; // 0-12 yaş dahil ücretsiz
-  } else if (!isAnex && !isFit && agencyId !== '__general__') {
+  } else if (!isAnex && !isFit && !isOdeonMotus && agencyId !== '__general__') {
     if (agencyId !== 'rocket_tour') {
       agency = agencies.find(a => a.id === agencyId);
       if (agency) {
@@ -1860,7 +1901,7 @@ function calculate() {
     }
   }
 
-  const isRocket = !isAnex && !isFit && !isTraveyo && (agencyId === 'rocket_tour' || (agency && agency.name && agency.name.toLowerCase().includes('rocket')));
+  const isRocket = !isAnex && !isFit && !isOdeonMotus && !isTraveyo && (agencyId === 'rocket_tour' || (agency && agency.name && agency.name.toLowerCase().includes('rocket')));
   if (isRocket) {
     agencyDiscountPct = 0;
   }
@@ -1900,6 +1941,7 @@ function calculate() {
   let ilaveNightCount = 0;
   let ilaveDiscountAmount = 0;
   let fitDiscountAmount = 0;
+  let odeonKickbackAmount = 0;
   let totalDiscountAmount = 0;
   const activeIlavePcts = [];
 
@@ -1924,33 +1966,34 @@ function calculate() {
       : getMultiplier(roomConfigKey, nightDate);
     if (multiplier === null) { showError('Oda tipi çarpanı bulunamadı.'); return; }
 
-    const nightRate = +(pp * multiplier).toFixed(2);
+    const nightRate = truncateToTwo(pp * multiplier);
 
     const nightIlavePct = isTraveyo ? 0 : (period ? (period.ilave || 0) : 0);
     let nightDiscount = 0;
     let nightIlaveDiscount = 0;
     let nightFitDiscount = 0;
+    let nightOdeonKickback = 0;
     let nightDiscountPct = 0;
 
     if (isTraveyo) {
-      // Traveyo: İndirim yok, sabit fiyat
       nightDiscountPct = 0;
       nightDiscount = 0;
     } else if (isAnex) {
-      // Anex: ilave + 5 toplam (toplamlı)
       nightDiscountPct = nightIlavePct + 5;
       nightDiscount = (nightRate * nightDiscountPct / 100);
       nightIlaveDiscount = (nightRate * nightIlavePct / 100);
-    } else if (isFit) {
-      // Step 1: Apply ilave discount (15% or 10%)
+    } else if (isOdeonMotus) {
       nightIlaveDiscount = (nightRate * nightIlavePct / 100);
-      // Step 2: Apply 3% discount on the remaining rate
+      nightOdeonKickback = (nightRate * 3 / 100);
+      nightDiscount = nightIlaveDiscount + nightOdeonKickback;
+      nightDiscountPct = +(nightIlavePct + 3 - (0.03 * nightIlavePct)).toFixed(4);
+    } else if (isFit) {
+      nightIlaveDiscount = (nightRate * nightIlavePct / 100);
       const remainingRate = nightRate - nightIlaveDiscount;
       nightFitDiscount = (remainingRate * 3 / 100);
       nightDiscount = nightIlaveDiscount + nightFitDiscount;
       nightDiscountPct = +(nightIlavePct + 3 - (0.03 * nightIlavePct)).toFixed(4);
     } else if (isRocket) {
-      // Rocket: additive nightIlavePct + 2
       nightDiscountPct = nightIlavePct + 2;
       nightDiscount = (nightRate * nightDiscountPct / 100);
       if (nightIlavePct > 0) {
@@ -1975,6 +2018,9 @@ function calculate() {
     if (isFit) {
       fitDiscountAmount += nightFitDiscount;
     }
+    if (isOdeonMotus) {
+      odeonKickbackAmount += nightOdeonKickback;
+    }
     if (nightDiscount > 0) {
       totalDiscountAmount += nightDiscount;
     }
@@ -1992,27 +2038,26 @@ function calculate() {
 
     subtotal += nightRate;
     if (period) optionDays.add(period.option);
-    if (isTraveyo) optionDays.add(0); // Traveyo için opsiyon gösterilmez
+    if (isTraveyo) optionDays.add(0);
   }
 
-  subtotal = +subtotal.toFixed(2);
-  ilaveSubtotal = +ilaveSubtotal.toFixed(2);
-  ilaveDiscountAmount = +ilaveDiscountAmount.toFixed(2);
-  fitDiscountAmount = +fitDiscountAmount.toFixed(2);
-  totalDiscountAmount = +totalDiscountAmount.toFixed(2);
+  subtotal = truncateToTwo(subtotal);
+  ilaveSubtotal = truncateToTwo(ilaveSubtotal);
+  ilaveDiscountAmount = truncateToTwo(ilaveDiscountAmount);
+  fitDiscountAmount = truncateToTwo(fitDiscountAmount);
+  odeonKickbackAmount = truncateToTwo(odeonKickbackAmount);
+  totalDiscountAmount = truncateToTwo(totalDiscountAmount);
 
-  // Net after combined discount
-  const afterDiscount = +(subtotal - totalDiscountAmount).toFixed(2);
+  const afterDiscount = truncateToTwo(subtotal - totalDiscountAmount);
 
-  // Agency discount/surcharge (applied after combined discount)
-  const agencyAmount = +(afterDiscount * Math.abs(agencyDiscountPct) / 100).toFixed(2);
+  const agencyAmount = truncateToTwo(afterDiscount * Math.abs(agencyDiscountPct) / 100);
   const isDiscount = agencyDiscountPct > 0;
   let grandTotal = afterDiscount;
-  if (isDiscount) grandTotal = +(afterDiscount - agencyAmount).toFixed(2);
-  else if (agencyDiscountPct < 0) grandTotal = +(afterDiscount + agencyAmount).toFixed(2);
+  if (isDiscount) grandTotal = truncateToTwo(afterDiscount - agencyAmount);
+  else if (agencyDiscountPct < 0) grandTotal = truncateToTwo(afterDiscount + agencyAmount);
 
   const totalPax = adults.length + childrenSmall.length + childrenBig.length + infants.length;
-  const ppn = +(grandTotal / nights / totalPax).toFixed(2);
+  const ppn = truncateToTwo(grandTotal / nights / totalPax);
   const maxOption = optionDays.size > 0 ? Math.max(...optionDays) : 0;
 
   renderResults({
@@ -2022,9 +2067,9 @@ function calculate() {
     nightlyBreakdown, isCINBased,
     roomConfig: roomConfig,
     subtotal, ilaveNightCount, ilaveSubtotal,
-    ilaveDiscountAmount, fitDiscountAmount, activeIlavePcts,
+    ilaveDiscountAmount, fitDiscountAmount, odeonKickbackAmount, activeIlavePcts,
     usedIlave: ilaveNightCount > 0,
-    isFit, isAnex, isTraveyo, isRocket,
+    isFit, isAnex, isOdeonMotus, isTraveyo, isRocket,
     totalDiscountAmount,
     agency, agencyDiscountPct, agencyAmount, isDiscount,
     grandTotal, ppn, maxOption, freeAgeLimit,
@@ -2038,11 +2083,9 @@ function renderResults(data) {
   const container = document.getElementById('resultsContent');
   document.getElementById('btnPrint').style.display = 'inline-flex';
 
-  // Kaydet butonu göster
   const btnSave = document.getElementById('btnSaveReservation');
   if (btnSave) btnSave.style.display = '';
 
-  // Son hesaplamayı sakla
   lastCalcData = data;
   lastCalcData._hotelId = currentHotelId;
   lastCalcData._hotelName = (HOTEL_CONFIGS[currentHotelId] || {}).name || currentHotelId;
@@ -2050,20 +2093,16 @@ function renderResults(data) {
   lastCalcData._agencyDisplayName = (() => {
     if (currentAgencyType === 'anex') return 'Anex';
     if (currentAgencyType === 'fit') return 'Fit';
+    if (currentAgencyType === 'odeon_motus') return 'Odeon & Motus';
     if (currentAgencyType === 'traveyo') return 'Traveyo (Itaka/Cedok)';
-    // Diğerleri - seçili acenta adını al
     const sel = document.getElementById('agencySelect');
     if (sel && sel.value !== '__general__') {
-      if (sel.value === 'rocket_tour') return 'Rocket Tour';
       const f = agencies.find(a => a.id === sel.value);
-      if (f) return f.name;
-      const opt = sel.options[sel.selectedIndex];
-      return opt ? opt.text.replace(/ \([+-]%\d+\)$/, '').replace(/🚀 /, '') : 'Diğerleri';
+      return f ? f.name : 'Diğerleri';
     }
-    return ''; // Boş bırak, böylece voucher modalında ne girilirse o alınır
+    return 'Diğerleri';
   })();
 
-  // Guest summary
   let guestHTML = '<div class="guest-summary">';
   data.adults.forEach(a => { guestHTML += `<span class="guest-chip adult">👤 Yetişkin (${a} yaş)</span>`; });
   data.childrenSmall.forEach(a => { guestHTML += `<span class="guest-chip child-small">🧒 Çocuk (${a} yaş) — 3-6.99 Ücretsiz</span>`; });
@@ -2071,7 +2110,6 @@ function renderResults(data) {
   data.infants.forEach(a => { guestHTML += `<span class="guest-chip infant">👶 Bebek (${a} yaş) — Ücretsiz</span>`; });
   guestHTML += '</div>';
 
-  // Night table
   let nightHTML = `<table class="night-table"><thead><tr>
     <th>Tarih</th><th>Dönem</th><th>PP</th><th>Çarpan</th><th>Gecelik</th>
   </tr></thead><tbody>`;
@@ -2091,22 +2129,15 @@ function renderResults(data) {
   }
   nightHTML += '</tbody></table>';
 
-  // Totals
   let totalsHTML = '<div class="totals-section">';
   totalsHTML += `<div class="total-row"><span class="label">Ara Toplam (${data.nights} gece)</span><span class="value">${formatEUR(data.subtotal)}</span></div>`;
 
-  // Group breakdown by period and rate
   const periodGroups = {};
   for (const n of data.nightlyBreakdown) {
     const pId = n.period ? n.period.id : 'traveyo';
     const key = `${pId}_${n.rate}`;
     if (!periodGroups[key]) {
-      periodGroups[key] = {
-        period: n.period,
-        nights: 0,
-        rate: n.rate,
-        total: 0
-      };
+      periodGroups[key] = { period: n.period, nights: 0, rate: n.rate, total: 0 };
     }
     periodGroups[key].nights++;
     periodGroups[key].total += n.rate;
@@ -2123,41 +2154,26 @@ function renderResults(data) {
     }
   }
 
-  // Compute dynamic ilave label
   let ilaveLabel = '';
   if (data.activeIlavePcts && data.activeIlavePcts.length === 1) {
     const pct = data.activeIlavePcts[0];
-    if (data.isAnex) {
-      ilaveLabel = `✈️ Anex İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
-    } else if (data.isRocket) {
-      ilaveLabel = `🚀 Rocket İlave %${pct} + %2 = <strong>%${pct + 2} İndirim</strong>`;
-    } else {
-      ilaveLabel = `İlave %${pct} İndirim`;
-    }
-  } else if (data.activeIlavePcts && data.activeIlavePcts.length > 1) {
-    if (data.isAnex) {
-      ilaveLabel = `✈️ Anex İlave İndirimi (+%5)`;
-    } else if (data.isRocket) {
-      ilaveLabel = `🚀 Rocket İlave + %2 İndirimi`;
-    } else {
-      ilaveLabel = `İlave İndirimi`;
-    }
+    if (data.isAnex) ilaveLabel = `✈️ Anex İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
+    else if (data.isOdeonMotus) ilaveLabel = `☀️ Odeon & Motus İlave %${pct} + %3 = <strong>%${pct + 3} İndirim</strong>`;
+    else if (data.isRocket) ilaveLabel = `🚀 Rocket İlave %${pct} + %2 = <strong>%${pct + 2} İndirim</strong>`;
+    else ilaveLabel = `İlave %${pct} İndirim`;
   }
 
-  // Combined discount line(s)
   if (data.usedIlave) {
-    if (data.isAnex) {
-      totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
-    } else if (data.isRocket) {
+    if (data.isAnex || data.isOdeonMotus || data.isRocket) {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
     } else {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
-      if (data.isFit) {
-        totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.fitDiscountAmount)}</span></div>`;
-      }
+      if (data.isFit) totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.fitDiscountAmount)}</span></div>`;
     }
   } else if (data.isFit) {
     totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+  } else if (data.isOdeonMotus) {
+    totalsHTML += `<div class="total-row discount"><span class="label">☀️ Odeon & Motus %3 Kickback İndirimi (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   } else if (data.isRocket) {
     totalsHTML += `<div class="total-row discount"><span class="label">🚀 Rocket %2 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   }
@@ -2172,7 +2188,6 @@ function renderResults(data) {
   totalsHTML += `<div class="total-row per-person"><span class="label">Kişi başı / gece (ort.)</span><span class="value">${formatEUR(data.ppn)}</span></div>`;
   totalsHTML += '</div>';
 
-  // Notes
   let notesHTML = '';
   if (data.isTraveyo) {
     notesHTML += `<div class="info-note green">🌍 <strong>Traveyo (Itaka/Cedok) Kontratı:</strong> Sabit ${TRAVEYO_PP}€ PP | SNG ×${TRAVEYO_SNG_MULT} | 0-12 yaş ücretsiz | İndirim yok.</div>`;
@@ -2227,17 +2242,20 @@ function selectAgencyType(type) {
   currentAgencyType = type;
   const btnA = document.getElementById('btnAnex');
   const btnF = document.getElementById('btnFit');
+  const btnO = document.getElementById('btnOdeonMotus');
   const btnT = document.getElementById('btnTraveyo');
   const btnD = document.getElementById('btnDigerleri');
-  const anexNote    = document.getElementById('anexNote');
-  const fitNote     = document.getElementById('fitNote');
-  const traveyoNote = document.getElementById('traveyoNote');
-  const subSelect   = document.getElementById('agencySubSelect');
+  const anexNote       = document.getElementById('anexNote');
+  const fitNote        = document.getElementById('fitNote');
+  const odeonMotusNote = document.getElementById('odeonMotusNote');
+  const traveyoNote    = document.getElementById('traveyoNote');
+  const subSelect      = document.getElementById('agencySubSelect');
 
   // Reset all
-  [btnA, btnF, btnT, btnD].filter(Boolean).forEach(b => b.classList.remove('active', 'pegas-active', 'fit-active', 'traveyo-active'));
+  [btnA, btnF, btnO, btnT, btnD].filter(Boolean).forEach(b => b.classList.remove('active', 'pegas-active', 'fit-active', 'odeon-motus-active', 'traveyo-active'));
   if (anexNote) anexNote.style.display = 'none';
   if (fitNote) fitNote.style.display = 'none';
+  if (odeonMotusNote) odeonMotusNote.style.display = 'none';
   if (traveyoNote) traveyoNote.style.display = 'none';
   subSelect.style.display = 'none';
 
@@ -2247,6 +2265,9 @@ function selectAgencyType(type) {
   } else if (type === 'fit') {
     if (btnF) { btnF.classList.add('active', 'fit-active'); }
     if (fitNote) fitNote.style.display = '';
+  } else if (type === 'odeon_motus') {
+    if (btnO) { btnO.classList.add('active', 'odeon-motus-active'); }
+    if (odeonMotusNote) odeonMotusNote.style.display = '';
   } else if (type === 'traveyo') {
     if (btnT) { btnT.classList.add('active', 'traveyo-active'); }
     if (traveyoNote) traveyoNote.style.display = '';
@@ -2566,7 +2587,7 @@ function renderRateCard() {
     bHTML += `<td>${row.label}</td>`;
     for (const p of PERIODS) {
       const val = row.fn(p.pp, p);
-      bHTML += `<td>${val.toFixed(2)}€</td>`;
+      bHTML += `<td>${truncateToTwo(val).toFixed(2)}€</td>`;
     }
     // Option only on first meaningful row
     if (row.label === 'PP IN DBL') {
@@ -2916,17 +2937,43 @@ function handleExcelUpload(e) {
       tempExcelData = json;
       tempExcelFileName = uploadedFileName;
       
-      const savedMapStr = localStorage.getItem('gmh_excel_map');
-      if (savedMapStr) {
-        const savedMap = JSON.parse(savedMapStr);
-        if (headers.includes(savedMap.voucher) && headers.includes(savedMap.checkIn) && savedMap.currency) {
-          processExcelImport(savedMap, uploadedFileName);
-          e.target.value = '';
-          return;
+      // Mevcut şablonları çekelim ve eğer eski tekil yapı varsa taşıyalım
+      let templates = [];
+      const templatesStr = localStorage.getItem('gmh_excel_templates');
+      if (templatesStr) {
+        templates = JSON.parse(templatesStr);
+      } else {
+        // Eski yapıdan (gmh_excel_map) taşıma yapmayı dene
+        const oldMapStr = localStorage.getItem('gmh_excel_map');
+        if (oldMapStr) {
+          const oldMap = JSON.parse(oldMapStr);
+          templates.push({
+            id: 'template_legacy',
+            name: 'Eski Şablon',
+            headers: headers,
+            mapping: oldMap
+          });
+          localStorage.setItem('gmh_excel_templates', JSON.stringify(templates));
+          localStorage.removeItem('gmh_excel_map');
         }
       }
+
+      // Yüklenen Excel'in başlıklarıyla uyuşan şablon var mı?
+      // Tüm zorunlu mapping (voucher ve checkIn) headler'da mevcutsa o şablonu uygun kabul et.
+      // Eğer tekil eşleşme varsa onu kullan, çoklu varsa veya yoksa modalı aç.
+      const matchingTemplates = templates.filter(t => {
+        return headers.includes(t.mapping.voucher) && headers.includes(t.mapping.checkIn);
+      });
+
+      if (matchingTemplates.length === 1) {
+        const selectedTpl = matchingTemplates[0];
+        // rezNo kontrolü: rezNo eşleştirilmişse ve Excel'de de varsa, veya hiç eşleştirilmemişse (ama şablonda varsa vs.)
+        processExcelImport(selectedTpl.mapping, uploadedFileName);
+        e.target.value = '';
+        return;
+      }
       
-      openExcelMapModal(headers);
+      openExcelMapModal(headers, null);
     } catch(err) {
       console.error(err);
       alert("Excel dosyası okunurken hata oluştu!");
@@ -2937,7 +2984,63 @@ function handleExcelUpload(e) {
   reader.readAsBinaryString(file);
 }
 
-function openExcelMapModal(headers) {
+function resetExcelMapping() {
+  const templatesStr = localStorage.getItem('gmh_excel_templates');
+  let templates = [];
+  if (templatesStr) templates = JSON.parse(templatesStr);
+  
+  if (templates.length === 0) {
+    alert("Kayıtlı hiçbir Excel şablonunuz bulunmuyor.");
+    return;
+  }
+  
+  const listEl = document.getElementById('templateSelectList');
+  listEl.innerHTML = '';
+  
+  templates.forEach(t => {
+    const div = document.createElement('div');
+    div.style = "display:flex; justify-content:space-between; align-items:center; background:var(--bg-primary); padding:10px 15px; border:1px solid var(--border-subtle); border-radius:6px;";
+    div.innerHTML = `
+      <div style="font-weight:600;">${escapeHTML(t.name)}</div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-save" style="padding:4px 10px; font-size:12px; height:auto;" onclick="editExcelTemplate('${t.id}')">Düzenle</button>
+        <button class="btn-cancel" style="padding:4px 10px; font-size:12px; height:auto; background:rgba(239,68,68,0.1); color:#ef4444;" onclick="deleteExcelTemplate('${t.id}')">Sil</button>
+      </div>
+    `;
+    listEl.appendChild(div);
+  });
+  
+  document.getElementById('excelTemplateSelectModal').classList.add('active');
+}
+
+function closeExcelTemplateSelectModal() {
+  document.getElementById('excelTemplateSelectModal').classList.remove('active');
+}
+
+function editExcelTemplate(id) {
+  const templates = JSON.parse(localStorage.getItem('gmh_excel_templates') || '[]');
+  const t = templates.find(x => x.id === id);
+  if (!t) return;
+  
+  closeExcelTemplateSelectModal();
+  openExcelMapModal(t.headers, t);
+}
+
+function deleteExcelTemplate(id) {
+  if (!confirm("Bu şablonu silmek istediğinize emin misiniz?")) return;
+  let templates = JSON.parse(localStorage.getItem('gmh_excel_templates') || '[]');
+  templates = templates.filter(x => x.id !== id);
+  localStorage.setItem('gmh_excel_templates', JSON.stringify(templates));
+  resetExcelMapping(); // Modalı yenile
+}
+
+function openExcelMapModal(headers, existingTemplate = null) {
+  // Save current working headers and template ID for saving later
+  window.currentExcelHeaders = headers;
+  window.currentExcelTemplateId = existingTemplate ? existingTemplate.id : null;
+  
+  document.getElementById('mapTemplateName').value = existingTemplate ? existingTemplate.name : '';
+
   const opts = '<option value="">-- Lütfen Seçiniz --</option>' + 
                headers.map(h => `<option value="${escapeHTML(h)}">${escapeHTML(h)}</option>`).join('');
                
@@ -2945,14 +3048,14 @@ function openExcelMapModal(headers) {
     { id: 'mapRezNo', keywords: ['rez no', 'rezervasyon', 'rezervasyon no'] },
     { id: 'mapVoucher', keywords: ['voucher', 'vouch', 'kod'] },
     { id: 'mapAgency', keywords: ['acenta', 'agency', 'acente', 'operatör'] },
-    { id: 'mapCheckIn', keywords: ['giriş', 'c/in', 'check-in', 'check in', 'gelis'] },
-    { id: 'mapCheckOut', keywords: ['çıkış', 'c/out', 'check-out', 'check out', 'gidis'] },
-    { id: 'mapRoomConfig', keywords: ['oda', 'oda tipi', 'room'] },
+    { id: 'mapCheckIn', keywords: ['giriş tarihi', 'c/in', 'check-in', 'check in', 'gelis', 'giriş'] },
+    { id: 'mapCheckOut', keywords: ['çıkış tarihi', 'c/out', 'check-out', 'check out', 'gidis', 'çıkış'] },
+    { id: 'mapRoomConfig', keywords: ['oda tipi', 'oda', 'room'] },
     { id: 'mapAction', keywords: ['aksiyon', 'action', 'indirim'] },
-    { id: 'mapPrice', keywords: ['tutar', 'toplam', 'price', 'fiyat'] },
+    { id: 'mapPrice', keywords: ['toplam tutar', 'toplam fiyat', 'tutar', 'toplam', 'price', 'fiyat'] },
     { id: 'mapCurrency', keywords: ['kur', 'para', 'currency', 'birim'] },
-    { id: 'mapGuests', keywords: ['kişi', 'pax', 'guest', 'yetişkin', 'toplam kişi'] },
-    { id: 'mapSaleDate', keywords: ['satış', 'satış tarihi', 'alış', 'sale'] }
+    { id: 'mapGuests', keywords: ['toplam kişi', 'kişi', 'pax', 'guest', 'yetişkin'] },
+    { id: 'mapSaleDate', keywords: ['satış tarihi', 'alış tarihi', 'satış', 'alış', 'sale'] }
   ];
 
   ['mapRezNo', 'mapVoucher', 'mapAgency', 'mapCheckIn', 'mapCheckOut', 'mapRoomConfig', 'mapAction', 'mapPrice', 'mapCurrency', 'mapGuests', 'mapSaleDate'].forEach(id => {
@@ -2963,9 +3066,20 @@ function openExcelMapModal(headers) {
     const sel = document.getElementById(mf.id);
     const candidates = mf.keywords.map(k => k.toLowerCase());
     sel.value = '';
-    for (const candidate of candidates) {
-      const found = headers.find(h => h.trim().toLowerCase().includes(candidate));
-      if (found) { sel.value = found; break; }
+    
+    if (existingTemplate && existingTemplate.mapping[mf.id.replace('map', '')]) {
+       // mapping objesinde örneğin 'voucher', 'checkIn' gibi isimler tutuluyor.
+       // form ID'si 'mapVoucher'. replace 'map' ve ilk harfi küçülterek doğru keyi bulalım
+       const key = mf.id.replace('map', '');
+       const lowerKey = key.charAt(0).toLowerCase() + key.slice(1);
+       if (existingTemplate.mapping[lowerKey]) {
+          sel.value = existingTemplate.mapping[lowerKey];
+       }
+    } else if (!existingTemplate) {
+      for (const candidate of candidates) {
+        const found = headers.find(h => h.trim().toLowerCase().includes(candidate));
+        if (found) { sel.value = found; break; }
+      }
     }
   });
   
@@ -2975,11 +3089,19 @@ function openExcelMapModal(headers) {
 function closeExcelMapModal() {
   document.getElementById('excelMapModal').classList.remove('active');
   tempExcelData = null;
+  window.currentExcelHeaders = null;
+  window.currentExcelTemplateId = null;
 }
 
 function startExcelImport() {
+  const tplName = document.getElementById('mapTemplateName').value.trim();
   const mapVoucher = document.getElementById('mapVoucher').value;
   const mapCheckIn = document.getElementById('mapCheckIn').value;
+  
+  if (!tplName) {
+    alert("Lütfen bu şablona bir isim verin.");
+    return;
+  }
   
   if (!mapVoucher || !mapCheckIn) {
     alert("Lütfen en az 'Voucher Numarası' ve 'Giriş Tarihi' sütunlarını eşleştirin!");
@@ -3000,8 +3122,33 @@ function startExcelImport() {
     saleDate: document.getElementById('mapSaleDate').value
   };
   
-  localStorage.setItem('gmh_excel_map', JSON.stringify(mapping));
-  processExcelImport(mapping, tempExcelFileName);
+  let templates = JSON.parse(localStorage.getItem('gmh_excel_templates') || '[]');
+  
+  if (window.currentExcelTemplateId) {
+    // Mevcut bir şablonu güncelliyoruz
+    const idx = templates.findIndex(t => t.id === window.currentExcelTemplateId);
+    if (idx !== -1) {
+      templates[idx].name = tplName;
+      templates[idx].mapping = mapping;
+      // Headers aynı kalır, güncellemeye gerek yok.
+    }
+  } else {
+    // Yeni şablon oluşturuyoruz
+    templates.push({
+      id: 'template_' + Date.now(),
+      name: tplName,
+      headers: window.currentExcelHeaders || [],
+      mapping: mapping
+    });
+  }
+  
+  localStorage.setItem('gmh_excel_templates', JSON.stringify(templates));
+  
+  if (tempExcelData) {
+     processExcelImport(mapping, tempExcelFileName);
+  } else {
+     alert("Şablon başarıyla kaydedildi!");
+  }
   closeExcelMapModal();
 }
 
@@ -3037,13 +3184,28 @@ function processExcelImport(mapping, fileName) {
   }
 
   tempExcelData.forEach(row => {
-    const rawVch = row[mapping.voucher];
-    if (!rawVch) return;
-    const voucher = String(rawVch).trim();
-    
     let rezNo = null;
     if (mapping.rezNo && row[mapping.rezNo]) {
       rezNo = String(row[mapping.rezNo]).trim();
+    }
+    
+    const rawVch = row[mapping.voucher];
+    let voucher = rawVch ? String(rawVch).trim() : '';
+    
+    // Eğer ikisi de yoksa bu satırı atla
+    if (!voucher && !rezNo) return;
+    
+    // Voucher boşsa ama rezNo varsa, acenta adını ve rezNo'yu birleştir (örn: GRUP-60097)
+    if (!voucher) {
+       let acentaAdi = '';
+       if (mapping.agency && row[mapping.agency]) {
+           acentaAdi = String(row[mapping.agency]).trim();
+       }
+       if (acentaAdi) {
+           voucher = `${acentaAdi}-${rezNo}`;
+       } else {
+           voucher = `AcentaYok-${rezNo}`;
+       }
     }
     
     // Aynı voucher numarası (veya Rez.No varsa ona göre) kontrol et
@@ -3097,6 +3259,7 @@ function processExcelImport(mapping, fileName) {
         }
       }
       price = parseFloat(numericStr) || 0;
+      price = truncateToTwo(price);
     }
     
     // Kur
@@ -3339,7 +3502,7 @@ function renderReservationBook() {
   } else {
     amtEl.innerHTML = entries.map(([cur, amt]) => {
       const sym = currSymbols[cur] || cur;
-      return `<span style="font-size:20px;font-weight:700;color:#fcd34d;background:rgba(252,211,77,0.08);border:1px solid rgba(252,211,77,0.2);border-radius:8px;padding:3px 10px;white-space:nowrap;">${(Math.floor(amt*100)/100).toLocaleString('tr-TR', {minimumFractionDigits:2})} ${sym}</span>`;
+      return `<span style="font-size:20px;font-weight:700;color:#fcd34d;background:rgba(252,211,77,0.08);border:1px solid rgba(252,211,77,0.2);border-radius:8px;padding:3px 10px;white-space:nowrap;">${truncateToTwo(amt).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2})} ${sym}</span>`;
     }).join('');
   }
 
@@ -3353,7 +3516,7 @@ function renderReservationBook() {
   }
   empty.style.display = 'none';
 
-  const agencyBadgeMap = { anex:'anex', fit:'fit', traveyo:'traveyo', digerleri:'digerleri' };
+  const agencyBadgeMap = { anex:'anex', fit:'fit', odeon_motus:'odeon-motus', traveyo:'traveyo', digerleri:'digerleri' };
 
   tbody.innerHTML = filtered.map(r => {
     const ciDate  = r.checkIn  ? r.checkIn.split('-').reverse().join('.')  : '-';
@@ -3364,7 +3527,7 @@ function renderReservationBook() {
     // Kur ve sembol bulma
     const curCode = r.currency || 'EUR';
     const sym = currSymbols[curCode] || curCode;
-    const totalStr = (Math.floor((r.grandTotal||0)*100)/100).toLocaleString('tr-TR', {minimumFractionDigits:2});
+    const totalStr = truncateToTwo(r.grandTotal||0).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
 
     return `<tr>
       <td><small style="color:#94a3b8;">${r.rezNo ? '#' + r.rezNo : '-'}</small></td>
@@ -3401,7 +3564,7 @@ function exportReservationsCSV() {
   const rows = recs.map(r => [
     r.voucher, r.hotelName, r.agencyType, r.agencyNameOverride || r.agencyName,
     r.checkIn, r.checkOut, r.nights, r.guestCount, r.roomConfig, r.actionVersion,
-    (r.subtotal||0).toFixed(2), (r.totalDiscount||0).toFixed(2), (r.grandTotal||0).toFixed(2), (r.ppn||0).toFixed(2),
+    truncateToTwo(r.subtotal||0).toFixed(2), truncateToTwo(r.totalDiscount||0).toFixed(2), truncateToTwo(r.grandTotal||0).toFixed(2), truncateToTwo(r.ppn||0).toFixed(2),
     r.savedAt ? new Date(r.savedAt).toLocaleString('tr-TR') : '', r.savedBy
   ].map(v => `"${String(v||'').replace(/"/g,'""')}"`));
   const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(';')).join('\r\n');
