@@ -2164,12 +2164,18 @@ function renderResults(data) {
   }
 
   if (data.usedIlave) {
-    if (data.isAnex || data.isOdeonMotus || data.isRocket) {
+    if (data.isAnex) {
+      // ilave + 5 birlikte göster
+      totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+    } else if (data.isOdeonMotus || data.isRocket) {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
     } else {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
       if (data.isFit) totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.fitDiscountAmount)}</span></div>`;
     }
+  } else if (data.isAnex) {
+    // ilave:0 ama Anex +5% var — yine de göster
+    totalsHTML += `<div class="total-row discount"><span class="label">✈️ Anex <strong>%5 İndirim</strong> (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   } else if (data.isFit) {
     totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   } else if (data.isOdeonMotus) {
