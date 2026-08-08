@@ -2629,14 +2629,31 @@ function renderRateCard() {
 }
 
 function changeActionListVersion() {
-  const version = document.getElementById('actionListSelect').value;
+  const selectEl = document.getElementById('actionListSelect');
+  if (!selectEl) return;
+  const version = selectEl.value.trim();
+  
+  let ver = null;
   const cfg = HOTEL_CONFIGS[currentHotelId];
   if (cfg) {
-    const ver = cfg.actionVersions.find(v => v.value === version);
-    if (ver && ver.periods) {
-      PERIODS = ver.periods;
+    ver = cfg.actionVersions.find(v => v.value.trim() === version);
+  }
+  
+  if (!ver) {
+    // Fallback: Tüm otellerin aksiyon sürümlerinde ara (herhangi bir senkronizasyon kaybında kurtarmak için)
+    for (const hId in HOTEL_CONFIGS) {
+      const v = HOTEL_CONFIGS[hId].actionVersions.find(a => a.value.trim() === version);
+      if (v) {
+        ver = v;
+        break;
+      }
     }
   }
+  
+  if (ver && ver.periods) {
+    PERIODS = ver.periods;
+  }
+  
   updateConditionsBanner(version);
   renderRateCard();
   calculate();
