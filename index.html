@@ -1048,7 +1048,8 @@ body::before {
         <div class="card-title"><span class="icon">📋</span> Aksiyon Listesi Sürümü</div>
         <div class="form-group">
           <select id="actionListSelect" class="form-select" onchange="changeActionListVersion()">
-            <option value="30.07.2026">30.07.2026 Aksiyonu (Güncel)</option>
+            <option value="06.08.2026">06.08.2026 Aksiyonu (Güncel)</option>
+            <option value="30.07.2026">30.07.2026 Aksiyonu</option>
             <option value="08.07.2026">08.07.2026 Aksiyonu</option>
             <option value="03.07.2026">03.07.2026 Aksiyonu</option>
             <option value="01.07.2026">01.07.2026 Aksiyonu</option>
@@ -1529,7 +1530,15 @@ const PERIODS_30_07 = [
   { id:5,  start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:10 },
 ];
 
-let PERIODS = PERIODS_30_07;
+const PERIODS_06_08 = [
+  { id:1,  start:'2026-08-06', end:'2026-09-16', pp:66,  option:7,  basis:'stay', ilave:0  },
+  { id:2,  start:'2026-09-17', end:'2026-09-30', pp:62,  option:7,  basis:'stay', ilave:0  },
+  { id:3,  start:'2026-10-01', end:'2026-10-15', pp:45,  option:3,  basis:'stay', ilave:0  },
+  { id:4,  start:'2026-10-16', end:'2026-10-31', pp:40,  option:3,  basis:'stay', ilave:5  },
+  { id:5,  start:'2026-11-01', end:'2026-11-15', pp:30,  option:1,  basis:'stay', ilave:5  },
+];
+
+let PERIODS = PERIODS_06_08;
 
 // ================================================================
 // DÖNEM VERİLERİ — DİĞER OTELLER (19.06.2026 Aksiyonu)
@@ -1615,7 +1624,8 @@ const HOTEL_CONFIGS = {
     name: 'Grand Miramor Hotel', location: 'Kiriş • Antalya • 4+', concept: 'Ultra All Inclusive',
     hasAnex: true, hasFit: true, hasOdeonMotus: true, hasTraveyo: true,
     actionVersions: [
-      { value: '30.07.2026', label: '30.07.2026 Aksiyonu (Güncel)', periods: PERIODS_30_07 },
+      { value: '06.08.2026', label: '06.08.2026 Aksiyonu (Güncel)', periods: PERIODS_06_08 },
+      { value: '30.07.2026', label: '30.07.2026 Aksiyonu', periods: PERIODS_30_07 },
       { value: '08.07.2026', label: '08.07.2026 Aksiyonu', periods: PERIODS_08_07 },
       { value: '03.07.2026', label: '03.07.2026 Aksiyonu', periods: PERIODS_03_07 },
       { value: '01.07.2026', label: '01.07.2026 Aksiyonu', periods: PERIODS_01_07 },
@@ -2620,14 +2630,12 @@ function renderRateCard() {
 
 function changeActionListVersion() {
   const version = document.getElementById('actionListSelect').value;
-  if (version === '08.07.2026') {
-    PERIODS = PERIODS_08_07;
-  } else if (version === '03.07.2026') {
-    PERIODS = PERIODS_03_07;
-  } else if (version === '01.07.2026') {
-    PERIODS = PERIODS_01_07;
-  } else {
-    PERIODS = PERIODS_19_06;
+  const cfg = HOTEL_CONFIGS[currentHotelId];
+  if (cfg) {
+    const ver = cfg.actionVersions.find(v => v.value === version);
+    if (ver && ver.periods) {
+      PERIODS = ver.periods;
+    }
   }
   updateConditionsBanner(version);
   renderRateCard();
