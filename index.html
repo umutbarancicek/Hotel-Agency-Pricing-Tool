@@ -1048,7 +1048,8 @@ body::before {
         <div class="card-title"><span class="icon">📋</span> Aksiyon Listesi Sürümü</div>
         <div class="form-group">
           <select id="actionListSelect" class="form-select" onchange="changeActionListVersion()">
-            <option value="12.09.2026">12.09.2026 Aksiyonu (Güncel)</option>
+            <option value="16.09.2026">16.09.2026 Aksiyonu (Güncel)</option>
+            <option value="12.09.2026">12.09.2026 Aksiyonu</option>
             <option value="06.08.2026">06.08.2026 Aksiyonu</option>
             <option value="30.07.2026">30.07.2026 Aksiyonu</option>
             <option value="08.07.2026">08.07.2026 Aksiyonu</option>
@@ -1066,13 +1067,15 @@ body::before {
           <div class="agency-toggle">
             <button type="button" class="agency-toggle-btn" id="btnAnex" onclick="selectAgencyType('anex')">✈️ Anex</button>
             <button type="button" class="agency-toggle-btn" id="btnFit" onclick="selectAgencyType('fit')">🏖️ Fit</button>
-            <button type="button" class="agency-toggle-btn" id="btnOdeonMotus" onclick="selectAgencyType('odeon_motus')">☀️ Odeon & Motus</button>
+            <button type="button" class="agency-toggle-btn" id="btnOdeonMotus" onclick="selectAgencyType('odeon_motus')">☀️ Odeon &amp; Motus</button>
+            <button type="button" class="agency-toggle-btn" id="btnFunSun" onclick="selectAgencyType('funsun')">🌞 FunSun</button>
             <button type="button" class="agency-toggle-btn" id="btnTraveyo" onclick="selectAgencyType('traveyo')">🌍 Traveyo</button>
             <button type="button" class="agency-toggle-btn active" id="btnDigerleri" onclick="selectAgencyType('digerleri')">🏢 Diğerleri</button>
           </div>
           <div class="agency-info-note pegas" id="anexNote" style="display:none;">Anex acentası: döneme ait ilave indirime <strong>+%5 ek indirim</strong> uygulanır (toplam ilave + 5).</div>
           <div class="agency-info-note fit" id="fitNote" style="display:none;">Fit acentasına özel <strong>%3 indirim</strong> tüm tarihlerde bileşik uygulanır.</div>
-          <div class="agency-info-note odeon-motus" id="odeonMotusNote" style="display:none;"><strong>Odeon & Motus</strong>: Döneme ait ilave indirime <strong>+%3 kickback indirimi</strong> eklenir (toplam ilave + 3).</div>
+          <div class="agency-info-note odeon-motus" id="odeonMotusNote" style="display:none;"><strong>Odeon &amp; Motus</strong>: Döneme ait ilave indirime <strong>+%5 kickback indirimi</strong> eklenir (toplam ilave + 5).</div>
+          <div class="agency-info-note odeon-motus" id="funSunNote" style="display:none;"><strong>FunSun</strong>: Döneme ait ilave indirime <strong>+%5 kickback indirimi</strong> eklenir (toplam ilave + 5).</div>
           <div class="agency-info-note traveyo" id="traveyoNote" style="display:none;"><strong>Itaka / Cedok</strong> — Sabit 53€ PP | SNG ×1.5 | 0-12 yaş ücretsiz | İndirim yok</div>
           <div class="agency-sub-select" id="agencySubSelect" style="display:none;">
             <label class="form-label" for="agencySelect">Acenta Seçin</label>
@@ -1546,7 +1549,12 @@ const PERIODS_12_09 = [
   { id:4,  start:'2026-10-10', end:'2026-10-31', pp:40,  option:3,  basis:'stay', ilave:0  },
 ];
 
-let PERIODS = PERIODS_12_09;
+const PERIODS_16_09 = [
+  { id:1,  start:'2026-09-16', end:'2026-10-09', pp:56,  option:7,  basis:'stay', ilave:0  },
+  { id:2,  start:'2026-10-10', end:'2026-10-31', pp:40,  option:3,  basis:'stay', ilave:0  },
+];
+
+let PERIODS = PERIODS_16_09;
 
 // ================================================================
 // DÖNEM VERİLERİ — DİĞER OTELLER (19.06.2026 Aksiyonu)
@@ -1632,7 +1640,8 @@ const HOTEL_CONFIGS = {
     name: 'Grand Miramor Hotel', location: 'Kiriş • Antalya • 4+', concept: 'Ultra All Inclusive',
     hasAnex: true, hasFit: true, hasOdeonMotus: true, hasTraveyo: true,
     actionVersions: [
-      { value: '12.09.2026', label: '12.09.2026 Aksiyonu (Güncel)', periods: PERIODS_12_09, sngPeakEnd: new Date('2026-10-09') },
+      { value: '16.09.2026', label: '16.09.2026 Aksiyonu (Güncel)', periods: PERIODS_16_09, sngPeakEnd: new Date('2026-10-09') },
+      { value: '12.09.2026', label: '12.09.2026 Aksiyonu', periods: PERIODS_12_09, sngPeakEnd: new Date('2026-10-09') },
       { value: '06.08.2026', label: '06.08.2026 Aksiyonu', periods: PERIODS_06_08, sngPeakEnd: new Date('2026-09-30') },
       { value: '30.07.2026', label: '30.07.2026 Aksiyonu', periods: PERIODS_30_07, sngPeakEnd: new Date('2026-09-30') },
       { value: '08.07.2026', label: '08.07.2026 Aksiyonu', periods: PERIODS_08_07, sngPeakEnd: new Date('2026-09-30') },
@@ -1731,6 +1740,15 @@ function loadHotelData(hotelId) {
     if (btnOdeonMotus) btnOdeonMotus.style.display = 'none';
     if (odeonMotusNote) odeonMotusNote.style.display = 'none';
     if (currentAgencyType === 'odeon_motus') { selectAgencyType('digerleri'); }
+  }
+  const btnFunSun  = document.getElementById('btnFunSun');
+  const funSunNote = document.getElementById('funSunNote');
+  if (cfg.hasOdeonMotus) {
+    if (btnFunSun) btnFunSun.style.display = '';
+  } else {
+    if (btnFunSun) btnFunSun.style.display = 'none';
+    if (funSunNote) funSunNote.style.display = 'none';
+    if (currentAgencyType === 'funsun') { selectAgencyType('digerleri'); }
   }
   const btnTraveyo  = document.getElementById('btnTraveyo');
   const traveyoNote = document.getElementById('traveyoNote');
@@ -1915,13 +1933,14 @@ function calculate() {
   const isAnex       = currentAgencyType === 'anex';
   const isFit        = currentAgencyType === 'fit';
   const isOdeonMotus = currentAgencyType === 'odeon_motus';
+  const isFunSun     = currentAgencyType === 'funsun';
   const isTraveyo    = currentAgencyType === 'traveyo';
   let agency = null, freeAgeLimit = DEFAULT_FREE_AGE, agencyDiscountPct = 0;
 
   if (isTraveyo) {
     freeAgeLimit = TRAVEYO_FREE_AGE; // 0-12 yaş dahil ücretsiz
-  } else if (!isAnex && !isFit && !isOdeonMotus && agencyId !== '__general__') {
-    if (agencyId !== 'rocket_tour') {
+  } else if (!isAnex && !isFit && !isOdeonMotus && !isFunSun && agencyId !== '__general__') {
+    if (agencyId !== 'rocket_tour' && agencyId !== 'hotelbeds') {
       agency = agencies.find(a => a.id === agencyId);
       if (agency) {
         freeAgeLimit = agency.childFreeAge ?? DEFAULT_FREE_AGE;
@@ -1930,7 +1949,7 @@ function calculate() {
     }
   }
 
-  const isRocket = !isAnex && !isFit && !isOdeonMotus && !isTraveyo && (agencyId === 'rocket_tour' || (agency && agency.name && agency.name.toLowerCase().includes('rocket')));
+  const isRocket = !isAnex && !isFit && !isOdeonMotus && !isFunSun && !isTraveyo && (agencyId === 'rocket_tour' || agencyId === 'hotelbeds' || (agency && agency.name && agency.name.toLowerCase().includes('rocket')));
   if (isRocket) {
     agencyDiscountPct = 0;
   }
@@ -2013,9 +2032,14 @@ function calculate() {
       nightIlaveDiscount = (nightRate * nightIlavePct / 100);
     } else if (isOdeonMotus) {
       nightIlaveDiscount = (nightRate * nightIlavePct / 100);
-      nightOdeonKickback = (nightRate * 3 / 100);
+      nightOdeonKickback = (nightRate * 5 / 100);
       nightDiscount = nightIlaveDiscount + nightOdeonKickback;
-      nightDiscountPct = +(nightIlavePct + 3 - (0.03 * nightIlavePct)).toFixed(4);
+      nightDiscountPct = +(nightIlavePct + 5 - (0.05 * nightIlavePct)).toFixed(4);
+    } else if (isFunSun) {
+      nightIlaveDiscount = (nightRate * nightIlavePct / 100);
+      nightOdeonKickback = (nightRate * 5 / 100);
+      nightDiscount = nightIlaveDiscount + nightOdeonKickback;
+      nightDiscountPct = +(nightIlavePct + 5 - (0.05 * nightIlavePct)).toFixed(4);
     } else if (isFit) {
       nightIlaveDiscount = (nightRate * nightIlavePct / 100);
       const remainingRate = nightRate - nightIlaveDiscount;
@@ -2047,7 +2071,7 @@ function calculate() {
     if (isFit) {
       fitDiscountAmount += nightFitDiscount;
     }
-    if (isOdeonMotus) {
+    if (isOdeonMotus || isFunSun) {
       odeonKickbackAmount += nightOdeonKickback;
     }
     if (nightDiscount > 0) {
@@ -2098,7 +2122,7 @@ function calculate() {
     subtotal, ilaveNightCount, ilaveSubtotal,
     ilaveDiscountAmount, fitDiscountAmount, odeonKickbackAmount, activeIlavePcts,
     usedIlave: ilaveNightCount > 0,
-    isFit, isAnex, isOdeonMotus, isTraveyo, isRocket,
+    isFit, isAnex, isOdeonMotus, isFunSun, isTraveyo, isRocket,
     totalDiscountAmount,
     agency, agencyDiscountPct, agencyAmount, isDiscount,
     grandTotal, ppn, maxOption, freeAgeLimit,
@@ -2123,6 +2147,7 @@ function renderResults(data) {
     if (currentAgencyType === 'anex') return 'Anex';
     if (currentAgencyType === 'fit') return 'Fit';
     if (currentAgencyType === 'odeon_motus') return 'Odeon & Motus';
+    if (currentAgencyType === 'funsun') return 'FunSun';
     if (currentAgencyType === 'traveyo') return 'Traveyo (Itaka/Cedok)';
     const sel = document.getElementById('agencySelect');
     if (sel && sel.value !== '__general__') {
@@ -2187,7 +2212,8 @@ function renderResults(data) {
   if (data.activeIlavePcts && data.activeIlavePcts.length === 1) {
     const pct = data.activeIlavePcts[0];
     if (data.isAnex) ilaveLabel = `✈️ Anex İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
-    else if (data.isOdeonMotus) ilaveLabel = `☀️ Odeon & Motus İlave %${pct} + %3 = <strong>%${pct + 3} İndirim</strong>`;
+    else if (data.isOdeonMotus) ilaveLabel = `☀️ Odeon & Motus İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
+    else if (data.isFunSun) ilaveLabel = `🌞 FunSun İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
     else if (data.isRocket) ilaveLabel = `🚀 Rocket İlave %${pct} + %2 = <strong>%${pct + 2} İndirim</strong>`;
     else ilaveLabel = `İlave %${pct} İndirim`;
   }
@@ -2196,7 +2222,7 @@ function renderResults(data) {
     if (data.isAnex) {
       // ilave + 5 birlikte göster
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
-    } else if (data.isOdeonMotus || data.isRocket) {
+    } else if (data.isOdeonMotus || data.isFunSun || data.isRocket) {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
     } else {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
@@ -2208,7 +2234,9 @@ function renderResults(data) {
   } else if (data.isFit) {
     totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   } else if (data.isOdeonMotus) {
-    totalsHTML += `<div class="total-row discount"><span class="label">☀️ Odeon & Motus %3 Kickback İndirimi (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+    totalsHTML += `<div class="total-row discount"><span class="label">☀️ Odeon & Motus %5 Kickback İndirimi (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+  } else if (data.isFunSun) {
+    totalsHTML += `<div class="total-row discount"><span class="label">🌞 FunSun %5 Kickback İndirimi (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   } else if (data.isRocket) {
     totalsHTML += `<div class="total-row discount"><span class="label">🚀 Rocket %2 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   }
@@ -2235,8 +2263,14 @@ function renderResults(data) {
   if (data.isAnex) {
     notesHTML += `<div class="info-note blue">✈️ <strong>Anex Acentası</strong> — Döneme ait ilave indirimine +%5 ek indirim uygulanır (toplam: ilave + 5).</div>`;
   }
+  if (data.isOdeonMotus) {
+    notesHTML += `<div class="info-note blue">☀️ <strong>Odeon & Motus</strong> — Tüm tarihlerde +%5 kickback indirim (ilave dönemle toplanır).</div>`;
+  }
+  if (data.isFunSun) {
+    notesHTML += `<div class="info-note blue">🌞 <strong>FunSun</strong> — Tüm tarihlerde +%5 kickback indirim (ilave dönemle toplanır).</div>`;
+  }
   if (data.isRocket) {
-    notesHTML += `<div class="info-note blue">🚀 <strong>Rocket Tour</strong> — Tüm tarihlerde +%2 indirim (ilave dönemle toplanır).</div>`;
+    notesHTML += `<div class="info-note blue">🚀 <strong>Rocket Tour / Hotelbeds</strong> — Tüm tarihlerde +%2 indirim (ilave dönemle toplanır).</div>`;
   }
   if (data.isFit) {
     notesHTML += `<div class="info-note purple">🏖️ <strong>Fit Acentası</strong> — Tüm tarihlerde %3 indirim (ilave dönem indirimi uygulandıktan sonra kalan tutara uygulanır).</div>`;
@@ -2278,19 +2312,22 @@ function selectAgencyType(type) {
   const btnA = document.getElementById('btnAnex');
   const btnF = document.getElementById('btnFit');
   const btnO = document.getElementById('btnOdeonMotus');
+  const btnFS = document.getElementById('btnFunSun');
   const btnT = document.getElementById('btnTraveyo');
   const btnD = document.getElementById('btnDigerleri');
   const anexNote       = document.getElementById('anexNote');
   const fitNote        = document.getElementById('fitNote');
   const odeonMotusNote = document.getElementById('odeonMotusNote');
+  const funSunNote     = document.getElementById('funSunNote');
   const traveyoNote    = document.getElementById('traveyoNote');
   const subSelect      = document.getElementById('agencySubSelect');
 
   // Reset all
-  [btnA, btnF, btnO, btnT, btnD].filter(Boolean).forEach(b => b.classList.remove('active', 'pegas-active', 'fit-active', 'odeon-motus-active', 'traveyo-active'));
+  [btnA, btnF, btnO, btnFS, btnT, btnD].filter(Boolean).forEach(b => b.classList.remove('active', 'pegas-active', 'fit-active', 'odeon-motus-active', 'traveyo-active'));
   if (anexNote) anexNote.style.display = 'none';
   if (fitNote) fitNote.style.display = 'none';
   if (odeonMotusNote) odeonMotusNote.style.display = 'none';
+  if (funSunNote) funSunNote.style.display = 'none';
   if (traveyoNote) traveyoNote.style.display = 'none';
   subSelect.style.display = 'none';
 
@@ -2303,6 +2340,9 @@ function selectAgencyType(type) {
   } else if (type === 'odeon_motus') {
     if (btnO) { btnO.classList.add('active', 'odeon-motus-active'); }
     if (odeonMotusNote) odeonMotusNote.style.display = '';
+  } else if (type === 'funsun') {
+    if (btnFS) { btnFS.classList.add('active', 'odeon-motus-active'); }
+    if (funSunNote) funSunNote.style.display = '';
   } else if (type === 'traveyo') {
     if (btnT) { btnT.classList.add('active', 'traveyo-active'); }
     if (traveyoNote) traveyoNote.style.display = '';
@@ -2425,7 +2465,8 @@ function renderAgencyList() {
   }
   const cv = select.value;
   select.innerHTML = '<option value="__general__">Seçimsiz (Genel Kontrat Fiyatları)</option>' +
-                     '<option value="rocket_tour">Rocket Tour (-%2)</option>';
+                     '<option value="rocket_tour">Rocket Tour (-%2)</option>' +
+                     '<option value="hotelbeds">Hotelbeds (-%2)</option>';
   for (const a of agencies) {
     const o = document.createElement('option');
     o.value = a.id;
@@ -2683,7 +2724,11 @@ function updateConditionsBanner(version) {
   }
   const listItems = document.querySelectorAll('.conditions-list li');
   if (listItems.length >= 6) {
-    if (version === '12.09.2026') {
+    if (version === '16.09.2026') {
+      listItems[4].innerHTML = 'Fiyatlar <strong>konaklama bazlıdır</strong>.';
+      listItems[5].innerHTML = '<strong>16.09 – 09.10</strong> dönemi 56€ PP; <strong>10.10 – 31.10</strong> dönemi 40€ PP. Dönemlerde ilave indirim yoktur.';
+      if (listItems[6]) listItems[6].innerHTML = '<strong>16.09 – 09.10.2026</strong> arası SNG oda çarpanı <strong>1,7</strong>\'dir (10.10 sonrası 1,5).';
+    } else if (version === '12.09.2026') {
       listItems[4].innerHTML = '<strong>12.09 – 14.09 ve 15.09 – 20.09</strong> C/IN bazlı; <strong>21.09 dahil ileri tarihler</strong> konaklama bazlıdır.';
       listItems[5].innerHTML = '<strong>12.09 – 14.09</strong> arası İLAVE <strong>%10 İNDİRİM</strong> uygulanır; diğer dönemlerde ilave indirim yoktur.';
       if (listItems[6]) listItems[6].innerHTML = '<strong>11.05 – 09.10.2026</strong> arası SNG oda çarpanı <strong>1,7</strong>\'dir (10.10 sonrası 1,5).';
@@ -2719,7 +2764,7 @@ function init() {
   renderGuestAges();
   renderAgencyList();
   renderAgencyDatalist();
-  updateConditionsBanner('12.09.2026');
+  updateConditionsBanner('16.09.2026');
   renderRateCard();
   document.getElementById('checkIn').addEventListener('input', updateCheckOutFromNights);
   document.getElementById('checkIn').addEventListener('change', updateCheckOutFromNights);
@@ -3575,7 +3620,7 @@ function renderReservationBook() {
   }
   empty.style.display = 'none';
 
-  const agencyBadgeMap = { anex:'anex', fit:'fit', odeon_motus:'odeon-motus', traveyo:'traveyo', digerleri:'digerleri' };
+  const agencyBadgeMap = { anex:'anex', fit:'fit', odeon_motus:'odeon-motus', funsun:'odeon-motus', traveyo:'traveyo', digerleri:'digerleri' };
 
   tbody.innerHTML = filtered.map(r => {
     const ciDate  = r.checkIn  ? r.checkIn.split('-').reverse().join('.')  : '-';
