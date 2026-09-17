@@ -1067,15 +1067,13 @@ body::before {
           <div class="agency-toggle">
             <button type="button" class="agency-toggle-btn" id="btnAnex" onclick="selectAgencyType('anex')">✈️ Anex</button>
             <button type="button" class="agency-toggle-btn" id="btnFit" onclick="selectAgencyType('fit')">🏖️ Fit</button>
-            <button type="button" class="agency-toggle-btn" id="btnOdeonMotus" onclick="selectAgencyType('odeon_motus')">☀️ Odeon &amp; Motus</button>
-            <button type="button" class="agency-toggle-btn" id="btnFunSun" onclick="selectAgencyType('funsun')">🌞 FunSun</button>
+            <button type="button" class="agency-toggle-btn" id="btnOdeonMotus" onclick="selectAgencyType('odeon_motus')">☀️ Odeon / Motus / FunSun</button>
             <button type="button" class="agency-toggle-btn" id="btnTraveyo" onclick="selectAgencyType('traveyo')">🌍 Traveyo</button>
             <button type="button" class="agency-toggle-btn active" id="btnDigerleri" onclick="selectAgencyType('digerleri')">🏢 Diğerleri</button>
           </div>
           <div class="agency-info-note pegas" id="anexNote" style="display:none;">Anex acentası: döneme ait ilave indirime <strong>+%5 ek indirim</strong> uygulanır (toplam ilave + 5).</div>
           <div class="agency-info-note fit" id="fitNote" style="display:none;">Fit acentasına özel <strong>%3 indirim</strong> tüm tarihlerde bileşik uygulanır.</div>
-          <div class="agency-info-note odeon-motus" id="odeonMotusNote" style="display:none;"><strong>Odeon &amp; Motus</strong>: Döneme ait ilave indirime <strong>+%5 kickback indirimi</strong> eklenir (toplam ilave + 5).</div>
-          <div class="agency-info-note odeon-motus" id="funSunNote" style="display:none;"><strong>FunSun</strong>: Döneme ait ilave indirime <strong>+%5 kickback indirimi</strong> eklenir (toplam ilave + 5).</div>
+          <div class="agency-info-note odeon-motus" id="odeonMotusNote" style="display:none;"><strong>Odeon / Motus / FunSun</strong>: Döneme ait ilave indirime <strong>+%5 kickback indirimi</strong> eklenir (toplam ilave + 5).</div>
           <div class="agency-info-note traveyo" id="traveyoNote" style="display:none;"><strong>Itaka / Cedok</strong> — Sabit 53€ PP | SNG ×1.5 | 0-12 yaş ücretsiz | İndirim yok</div>
           <div class="agency-sub-select" id="agencySubSelect" style="display:none;">
             <label class="form-label" for="agencySelect">Acenta Seçin</label>
@@ -1739,16 +1737,7 @@ function loadHotelData(hotelId) {
   } else {
     if (btnOdeonMotus) btnOdeonMotus.style.display = 'none';
     if (odeonMotusNote) odeonMotusNote.style.display = 'none';
-    if (currentAgencyType === 'odeon_motus') { selectAgencyType('digerleri'); }
-  }
-  const btnFunSun  = document.getElementById('btnFunSun');
-  const funSunNote = document.getElementById('funSunNote');
-  if (cfg.hasOdeonMotus) {
-    if (btnFunSun) btnFunSun.style.display = '';
-  } else {
-    if (btnFunSun) btnFunSun.style.display = 'none';
-    if (funSunNote) funSunNote.style.display = 'none';
-    if (currentAgencyType === 'funsun') { selectAgencyType('digerleri'); }
+    if (currentAgencyType === 'odeon_motus' || currentAgencyType === 'funsun') { selectAgencyType('digerleri'); }
   }
   const btnTraveyo  = document.getElementById('btnTraveyo');
   const traveyoNote = document.getElementById('traveyoNote');
@@ -1932,14 +1921,13 @@ function calculate() {
   // Agency type
   const isAnex       = currentAgencyType === 'anex';
   const isFit        = currentAgencyType === 'fit';
-  const isOdeonMotus = currentAgencyType === 'odeon_motus';
-  const isFunSun     = currentAgencyType === 'funsun';
+  const isOdeonMotus = currentAgencyType === 'odeon_motus' || currentAgencyType === 'funsun';
   const isTraveyo    = currentAgencyType === 'traveyo';
   let agency = null, freeAgeLimit = DEFAULT_FREE_AGE, agencyDiscountPct = 0;
 
   if (isTraveyo) {
     freeAgeLimit = TRAVEYO_FREE_AGE; // 0-12 yaş dahil ücretsiz
-  } else if (!isAnex && !isFit && !isOdeonMotus && !isFunSun && agencyId !== '__general__') {
+  } else if (!isAnex && !isFit && !isOdeonMotus && agencyId !== '__general__') {
     if (agencyId !== 'rocket_tour' && agencyId !== 'hotelbeds') {
       agency = agencies.find(a => a.id === agencyId);
       if (agency) {
@@ -1949,7 +1937,7 @@ function calculate() {
     }
   }
 
-  const isRocket = !isAnex && !isFit && !isOdeonMotus && !isFunSun && !isTraveyo && (agencyId === 'rocket_tour' || agencyId === 'hotelbeds' || (agency && agency.name && agency.name.toLowerCase().includes('rocket')));
+  const isRocket = !isAnex && !isFit && !isOdeonMotus && !isTraveyo && (agencyId === 'rocket_tour' || agencyId === 'hotelbeds' || (agency && agency.name && agency.name.toLowerCase().includes('rocket')));
   if (isRocket) {
     agencyDiscountPct = 0;
   }
@@ -2035,11 +2023,6 @@ function calculate() {
       nightOdeonKickback = (nightRate * 5 / 100);
       nightDiscount = nightIlaveDiscount + nightOdeonKickback;
       nightDiscountPct = +(nightIlavePct + 5 - (0.05 * nightIlavePct)).toFixed(4);
-    } else if (isFunSun) {
-      nightIlaveDiscount = (nightRate * nightIlavePct / 100);
-      nightOdeonKickback = (nightRate * 5 / 100);
-      nightDiscount = nightIlaveDiscount + nightOdeonKickback;
-      nightDiscountPct = +(nightIlavePct + 5 - (0.05 * nightIlavePct)).toFixed(4);
     } else if (isFit) {
       nightIlaveDiscount = (nightRate * nightIlavePct / 100);
       const remainingRate = nightRate - nightIlaveDiscount;
@@ -2071,7 +2054,7 @@ function calculate() {
     if (isFit) {
       fitDiscountAmount += nightFitDiscount;
     }
-    if (isOdeonMotus || isFunSun) {
+    if (isOdeonMotus) {
       odeonKickbackAmount += nightOdeonKickback;
     }
     if (nightDiscount > 0) {
@@ -2122,7 +2105,7 @@ function calculate() {
     subtotal, ilaveNightCount, ilaveSubtotal,
     ilaveDiscountAmount, fitDiscountAmount, odeonKickbackAmount, activeIlavePcts,
     usedIlave: ilaveNightCount > 0,
-    isFit, isAnex, isOdeonMotus, isFunSun, isTraveyo, isRocket,
+    isFit, isAnex, isOdeonMotus, isTraveyo, isRocket,
     totalDiscountAmount,
     agency, agencyDiscountPct, agencyAmount, isDiscount,
     grandTotal, ppn, maxOption, freeAgeLimit,
@@ -2146,8 +2129,7 @@ function renderResults(data) {
   lastCalcData._agencyDisplayName = (() => {
     if (currentAgencyType === 'anex') return 'Anex';
     if (currentAgencyType === 'fit') return 'Fit';
-    if (currentAgencyType === 'odeon_motus') return 'Odeon & Motus';
-    if (currentAgencyType === 'funsun') return 'FunSun';
+    if (currentAgencyType === 'odeon_motus' || currentAgencyType === 'funsun') return 'Odeon / Motus / FunSun';
     if (currentAgencyType === 'traveyo') return 'Traveyo (Itaka/Cedok)';
     const sel = document.getElementById('agencySelect');
     if (sel && sel.value !== '__general__') {
@@ -2212,8 +2194,7 @@ function renderResults(data) {
   if (data.activeIlavePcts && data.activeIlavePcts.length === 1) {
     const pct = data.activeIlavePcts[0];
     if (data.isAnex) ilaveLabel = `✈️ Anex İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
-    else if (data.isOdeonMotus) ilaveLabel = `☀️ Odeon & Motus İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
-    else if (data.isFunSun) ilaveLabel = `🌞 FunSun İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
+    else if (data.isOdeonMotus) ilaveLabel = `☀️ Odeon / Motus / FunSun İlave %${pct} + %5 = <strong>%${pct + 5} İndirim</strong>`;
     else if (data.isRocket) ilaveLabel = `🚀 Rocket İlave %${pct} + %2 = <strong>%${pct + 2} İndirim</strong>`;
     else ilaveLabel = `İlave %${pct} İndirim`;
   }
@@ -2222,7 +2203,7 @@ function renderResults(data) {
     if (data.isAnex) {
       // ilave + 5 birlikte göster
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
-    } else if (data.isOdeonMotus || data.isFunSun || data.isRocket) {
+    } else if (data.isOdeonMotus || data.isRocket) {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
     } else {
       totalsHTML += `<div class="total-row discount"><span class="label">${ilaveLabel} (${data.ilaveNightCount} gece)</span><span class="value">− ${formatEUR(data.ilaveDiscountAmount)}</span></div>`;
@@ -2234,9 +2215,7 @@ function renderResults(data) {
   } else if (data.isFit) {
     totalsHTML += `<div class="total-row discount"><span class="label">🏖️ Fit %3 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   } else if (data.isOdeonMotus) {
-    totalsHTML += `<div class="total-row discount"><span class="label">☀️ Odeon & Motus %5 Kickback İndirimi (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
-  } else if (data.isFunSun) {
-    totalsHTML += `<div class="total-row discount"><span class="label">🌞 FunSun %5 Kickback İndirimi (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
+    totalsHTML += `<div class="total-row discount"><span class="label">☀️ Odeon / Motus / FunSun %5 Kickback İndirimi (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   } else if (data.isRocket) {
     totalsHTML += `<div class="total-row discount"><span class="label">🚀 Rocket %2 İndirim (${data.nights} gece)</span><span class="value">− ${formatEUR(data.totalDiscountAmount)}</span></div>`;
   }
@@ -2264,10 +2243,7 @@ function renderResults(data) {
     notesHTML += `<div class="info-note blue">✈️ <strong>Anex Acentası</strong> — Döneme ait ilave indirimine +%5 ek indirim uygulanır (toplam: ilave + 5).</div>`;
   }
   if (data.isOdeonMotus) {
-    notesHTML += `<div class="info-note blue">☀️ <strong>Odeon & Motus</strong> — Tüm tarihlerde +%5 kickback indirim (ilave dönemle toplanır).</div>`;
-  }
-  if (data.isFunSun) {
-    notesHTML += `<div class="info-note blue">🌞 <strong>FunSun</strong> — Tüm tarihlerde +%5 kickback indirim (ilave dönemle toplanır).</div>`;
+    notesHTML += `<div class="info-note blue">☀️ <strong>Odeon / Motus / FunSun</strong> — Tüm tarihlerde +%5 kickback indirim (ilave dönemle toplanır).</div>`;
   }
   if (data.isRocket) {
     notesHTML += `<div class="info-note blue">🚀 <strong>Rocket Tour / Hotelbeds</strong> — Tüm tarihlerde +%2 indirim (ilave dönemle toplanır).</div>`;
@@ -2312,22 +2288,19 @@ function selectAgencyType(type) {
   const btnA = document.getElementById('btnAnex');
   const btnF = document.getElementById('btnFit');
   const btnO = document.getElementById('btnOdeonMotus');
-  const btnFS = document.getElementById('btnFunSun');
   const btnT = document.getElementById('btnTraveyo');
   const btnD = document.getElementById('btnDigerleri');
   const anexNote       = document.getElementById('anexNote');
   const fitNote        = document.getElementById('fitNote');
   const odeonMotusNote = document.getElementById('odeonMotusNote');
-  const funSunNote     = document.getElementById('funSunNote');
   const traveyoNote    = document.getElementById('traveyoNote');
   const subSelect      = document.getElementById('agencySubSelect');
 
   // Reset all
-  [btnA, btnF, btnO, btnFS, btnT, btnD].filter(Boolean).forEach(b => b.classList.remove('active', 'pegas-active', 'fit-active', 'odeon-motus-active', 'traveyo-active'));
+  [btnA, btnF, btnO, btnT, btnD].filter(Boolean).forEach(b => b.classList.remove('active', 'pegas-active', 'fit-active', 'odeon-motus-active', 'traveyo-active'));
   if (anexNote) anexNote.style.display = 'none';
   if (fitNote) fitNote.style.display = 'none';
   if (odeonMotusNote) odeonMotusNote.style.display = 'none';
-  if (funSunNote) funSunNote.style.display = 'none';
   if (traveyoNote) traveyoNote.style.display = 'none';
   subSelect.style.display = 'none';
 
@@ -2337,12 +2310,9 @@ function selectAgencyType(type) {
   } else if (type === 'fit') {
     if (btnF) { btnF.classList.add('active', 'fit-active'); }
     if (fitNote) fitNote.style.display = '';
-  } else if (type === 'odeon_motus') {
+  } else if (type === 'odeon_motus' || type === 'funsun') {
     if (btnO) { btnO.classList.add('active', 'odeon-motus-active'); }
     if (odeonMotusNote) odeonMotusNote.style.display = '';
-  } else if (type === 'funsun') {
-    if (btnFS) { btnFS.classList.add('active', 'odeon-motus-active'); }
-    if (funSunNote) funSunNote.style.display = '';
   } else if (type === 'traveyo') {
     if (btnT) { btnT.classList.add('active', 'traveyo-active'); }
     if (traveyoNote) traveyoNote.style.display = '';
